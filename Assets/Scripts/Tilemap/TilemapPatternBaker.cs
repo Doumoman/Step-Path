@@ -15,6 +15,7 @@ public static class TilemapPatternBaker
             EditorUtility.DisplayDialog("Pattern Baker", "Grid를 선택하세요.", "OK");
             return;
         }
+
         var grid = go.GetComponentInChildren<Grid>();
         if (!grid)
         {
@@ -27,24 +28,21 @@ public static class TilemapPatternBaker
         if (string.IsNullOrEmpty(path)) return;
 
         var asset = ScriptableObject.CreateInstance<TilemapPatternAsset>();
-
         var tilemaps = grid.GetComponentsInChildren<Tilemap>(true);
-        var totalBounds = new BoundsInt();
-        bool first = true;
+
+        bool hasAnyCell = false;
+        Vector3Int min = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+        Vector3Int max = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
         foreach (var tm in tilemaps)
         {
-            // 비어있는 타일 스킵
-            var bounds = tm.cellBounds;
-            var all = bounds.allPositionsWithin;
-            foreach (var p in all)
+            var bounds = tm.cellBounds; // 타일맵 자체의 작업범위
+            foreach (var p in bounds.allPositionsWithin)
             {
                 var tile = tm.GetTile(p);
                 if (!tile) continue;
 
-                if (first) { totalBounds = bounds; first = false; }
-                else totalBounds.Encapsulate(new BoundsInt(p, Vector3Int.one));
-
+                // 셀 기록
                 var cell = new TilemapPatternAsset.Cell
                 {
                     layer = tm.gameObject.name,
@@ -54,14 +52,41 @@ public static class TilemapPatternBaker
                     color = tm.GetColor(p)
                 };
                 asset.cells.Add(cell);
+
+                // min/max 갱신
+                if (!hasAnyCell) { min = max = p; hasAnyCell = true; }
+                else
+                {
+                    if (p.x < min.x) min.x = p.x;
+                    if (p.y < min.y) min.y = p.y;
+                    if (p.z < min.z) min.z = p.z;
+                    if (p.x > max.x) max.x = p.x;
+                    if (p.y > max.y) max.y = p.y;
+                    if (p.z > max.z) max.z = p.z;
+                }
             }
         }
 
-        asset.size = totalBounds.size;
+        if (!hasAnyCell)
+        {
+            EditorUtility.DisplayDialog("Pattern Baker", "그리드 내에 타일이 없습니다.", "OK");
+            return;
+        }
+
+        // origin/size 저장
+        asset.origin = min;
+        // size = (max - min + 1)
+        asset.size = new Vector3Int(max.x - min.x + 1, max.y - min.y + 1, max.z - min.z + 1);
+
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
         Selection.activeObject = asset;
-        EditorUtility.DisplayDialog("Pattern Baker", $"저장 완료: {asset.cells.Count} cells", "OK");
+
+        EditorUtility.DisplayDialog(
+            "Pattern Baker",
+            $"저장 완료\nCells: {asset.cells.Count}\nOrigin: {asset.origin}\nSize: {asset.size}",
+            "OK"
+        );
     }
 }
 #endif

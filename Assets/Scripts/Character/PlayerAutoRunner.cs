@@ -1,38 +1,44 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Pixel2DRunner), typeof(Collider2D))]
+[RequireComponent(typeof(Collider2D))]
 public class PlayerAutoRunner : MonoBehaviour
 {
-    enum State { Run, Climb }
+    enum State { Run, Align, Climb }
 
-    [Header("Auto Move")]
-    public float runSpeedPixelsPerSec = 32f;   // 초당 픽셀
-    public float climbSpeedPixelsPerSec = 24f;
+    [Header("Pixel Move")]
     public int pixelsPerUnit = 16;
+    public float runSpeedPixelsPerSec = 32f;
+    public float climbSpeedPixelsPerSec = 24f;
 
-    [Header("Collision & Sense")]
-    public LayerMask groundMask;   // Ground 레이어
-    public LayerMask ladderMask;   // Ladder 레이어
+    [Header("Layers")]
+    public LayerMask groundMask;   // 바닥만
+    public int ladderLayer;        // Ladder 레이어 번호 (LayerMask 말고 index)
+
+    [Header("Sizes")]
     public Vector2 bodySize = new(0.5f, 0.9f);
     public float groundCheckDepth = 0.05f;
-    public float frontCheckDistance = 0.35f;  // 전방 사다리 탐지/낭떠러지 감지
-    public float ladderWidthAllowance = 0.3f; // 사다리 폭 여유
-    public float ladderTopExtra = 0.2f;       // 사다리 상단 탈출 보정
 
-    Pixel2DRunner mover;
-    Collider2D col;
+    [Header("Ladder")]
+    [Tooltip("사다리 중앙 X와 정렬 허용 오차(셀 단위)")]
+    public float ladderAlignEpsCells = 0.2f;
+    [Tooltip("꼭대기에서 살짝 더 올려주기(월드)")]
+    public float ladderTopExtra = 0.2f;
 
+    // 내부
     State state = State.Run;
-    int dir = 1;                 // +1: 오른쪽, -1: 왼쪽
-    bool gravity = true;         // CLIMB 시 false
+    int dir = 1;
     float unitPerPixel;
+    Vector2 accum;
+
+    Collider2D curLadder;          // 현재 겹친 사다리
+    int ladderContactCount = 0;    // 트리거 중첩 안정화
+    float targetLadderCenterX;     // 정렬 목표 X
+    int climbGraceFrames = 0;
+    const int CLIMB_GRACE_N = 3;
 
     void Awake()
     {
-        mover = GetComponent<Pixel2DRunner>();
-        col = GetComponent<Collider2D>();
-        mover.pixelsPerUnit = pixelsPerUnit;
-        unitPerPixel = 1f / pixelsPerUnit;
+        unitPerPixel = 1f / Mathf.Max(1, pixelsPerUnit);
     }
 
     void Update()
@@ -40,99 +46,122 @@ public class PlayerAutoRunner : MonoBehaviour
         switch (state)
         {
             case State.Run: TickRun(); break;
+            case State.Align: TickAlign(); break;
             case State.Climb: TickClimb(); break;
         }
     }
 
+    // -------- States --------
     void TickRun()
     {
-        // 발밑 지면 체크(없으면 낭떠러지 → 방향 반전)
-        if (!IsGrounded())
+        // 사다리와 트리거로 겹치면 정렬 상태 진입
+        if (ladderContactCount > 0 && curLadder)
         {
-            // 한 칸 전방의 바닥이 없으면 뒤집기
-            if (!HasGroundAhead())
-                dir *= -1;
+            targetLadderCenterX = curLadder.bounds.center.x;
+            // 사다리 방향 바라보도록
+            dir = (targetLadderCenterX - transform.position.x) >= 0 ? 1 : -1;
+            state = State.Align;
+            return;
         }
 
-        // 전방 사다리 있으면 → Climb 전환
-        if (HasLadderAhead(out Vector2 ladderPos))
-        {
-            // 사다리 중앙으로 X 정렬
-            float dx = ladderPos.x - transform.position.x;
-            float stepX = Mathf.Sign(dx) * Mathf.Min(Mathf.Abs(dx), runSpeedPixelsPerSec * Time.deltaTime / pixelsPerUnit);
-            mover.Move(new Vector2(stepX, 0));
+        // 바닥 없으면 반전 (간단한 왕복)
+        if (!IsGrounded()) dir *= -1;
 
-            // 충분히 정렬되면 오르기 시작
-            if (Mathf.Abs(dx) <= ladderWidthAllowance * 0.5f)
-            {
-                gravity = false;
-                state = State.Climb;
-                return;
-            }
-            return; // 정렬 중일 땐 수평만
+        float vx = runSpeedPixelsPerSec * unitPerPixel * Time.deltaTime;
+        MovePixelSnapped(new Vector2(dir * vx, 0f));
+    }
+
+    void TickAlign()
+    {
+        if (curLadder == null || ladderContactCount <= 0)
+        {
+            state = State.Run;
+            return;
         }
 
-        // 평상시 수평 이동 (픽셀 이동)
-        float vxUnitPerSec = runSpeedPixelsPerSec / pixelsPerUnit;
-        mover.Move(new Vector2(dir * vxUnitPerSec * Time.deltaTime, 0));
+        float dx = targetLadderCenterX - transform.position.x;
+        float step = Mathf.Sign(dx) * Mathf.Min(Mathf.Abs(dx), runSpeedPixelsPerSec * unitPerPixel * Time.deltaTime);
+        MovePixelSnapped(new Vector2(step, 0));
 
-        // 벽/막힘 감지 시 방향 반전 (추후에 삭제할 예정?)
-        if (IsBlockedHorizontally(dir))
-            dir *= -1;
+        float eps = ladderAlignEpsCells * unitPerPixel;
+        if (Mathf.Abs(dx) <= eps)
+        {
+            climbGraceFrames = CLIMB_GRACE_N;
+            state = State.Climb;
+        }
     }
 
     void TickClimb()
     {
-        // 위로 픽셀 이동
-        float vyUnitPerSec = climbSpeedPixelsPerSec / pixelsPerUnit;
-        mover.Move(new Vector2(0, vyUnitPerSec * Time.deltaTime));
+        // 사다리 위로만 이동
+        float vy = climbSpeedPixelsPerSec * unitPerPixel * Time.deltaTime;
+        MovePixelSnapped(new Vector2(0, vy));
 
-        // 사다리 영역을 여전히 밟고 있는지 체크
-        bool inLadder = Physics2D.OverlapBox(transform.position, new Vector2(bodySize.x, bodySize.y), 0f, ladderMask);
-        if (!inLadder)
+        // 사다리에서 벗어났다면(꼭대기 도달)
+        if (ladderContactCount <= 0 || curLadder == null)
         {
-            // 사다리 꼭대기를 벗어났다고 판단 → 살짝 더 올라가 주고 RUN 전환
-            mover.Move(new Vector2(0, ladderTopExtra));
-            gravity = true;
-            // 꼭대기 올라오면 방향 반전(와리가리)
-            dir *= -1;
+            if (climbGraceFrames-- > 0) return; // 잠깐은 허용
+            MovePixelSnapped(new Vector2(0, ladderTopExtra));
+            dir *= -1; // 와리가리 전환
             state = State.Run;
         }
     }
 
+    // -------- Pixel-snap move --------
+    void MovePixelSnapped(Vector2 worldDelta)
+    {
+        accum += worldDelta;
+        float step = unitPerPixel;
+
+        int px = 0, py = 0;
+        if (Mathf.Abs(accum.x) >= step)
+        {
+            px = Mathf.FloorToInt(Mathf.Abs(accum.x) / step) * (int)Mathf.Sign(accum.x);
+            accum.x -= px * step;
+        }
+        if (Mathf.Abs(accum.y) >= step)
+        {
+            py = Mathf.FloorToInt(Mathf.Abs(accum.y) / step) * (int)Mathf.Sign(accum.y);
+            accum.y -= py * step;
+        }
+
+        if (px != 0 || py != 0)
+        {
+            transform.position += new Vector3(px * step, py * step, 0);
+            var p = transform.position;
+            p.x = Mathf.Round(p.x / step) * step;
+            p.y = Mathf.Round(p.y / step) * step;
+            transform.position = p;
+        }
+    }
+
+    // -------- Helpers --------
     bool IsGrounded()
     {
         var p = (Vector2)transform.position + Vector2.down * (bodySize.y * 0.5f);
         var hit = Physics2D.BoxCast(p, new Vector2(bodySize.x * 0.9f, groundCheckDepth), 0f, Vector2.down, 0f, groundMask);
-        return hit.collider != null;
+        return hit.collider != null && !hit.collider.isTrigger;
     }
 
-    bool HasGroundAhead()
+    // -------- Trigger ladder only --------
+    void OnTriggerEnter2D(Collider2D other)
     {
-        Vector2 origin = (Vector2)transform.position + new Vector2(dir * frontCheckDistance, 0);
-        var hit = Physics2D.Raycast(origin, Vector2.down, bodySize.y + 0.2f, groundMask);
-        return hit.collider != null;
-    }
-
-    bool HasLadderAhead(out Vector2 ladderCenter)
-    {
-        ladderCenter = Vector2.zero;
-        // 전방에 사다리 있는지 박스 오버랩으로 조사
-        Vector2 boxSize = new Vector2(ladderWidthAllowance, bodySize.y * 1.2f);
-        Vector2 center = (Vector2)transform.position + new Vector2(dir * frontCheckDistance, 0);
-        var hit = Physics2D.OverlapBox(center, boxSize, 0f, ladderMask);
-        if (hit != null)
+        if (other.gameObject.layer == ladderLayer)
         {
-            ladderCenter = hit.bounds.center;
-            return true;
+            curLadder = other;
+            ladderContactCount++;
         }
-        return false;
     }
-
-    bool IsBlockedHorizontally(int direction)
+    void OnTriggerExit2D(Collider2D other)
     {
-        Vector2 origin = (Vector2)transform.position;
-        var hit = Physics2D.BoxCast(origin, bodySize, 0f, new Vector2(direction, 0), unitPerPixel, groundMask);
-        return hit.collider != null;
+        if (other == curLadder)
+        {
+            ladderContactCount = Mathf.Max(0, ladderContactCount - 1);
+            if (ladderContactCount == 0) curLadder = null;
+        }
+        else if (other.gameObject.layer == ladderLayer)
+        {
+            ladderContactCount = Mathf.Max(0, ladderContactCount - 1);
+        }
     }
 }
