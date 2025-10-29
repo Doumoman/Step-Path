@@ -126,12 +126,6 @@ public class TilemapPatternSpawner : MonoBehaviour
             }
             else if (ladderLayerNames.Contains(go.name))
             {
-                // 사다리는 Trigger로만 사용
-                tmc.usedByComposite = false;
-                tmc.isTrigger = true;
-
-                var comp = go.GetComponent<CompositeCollider2D>();
-                if (comp) DestroyImmediate(comp);
             }
             else
             {
