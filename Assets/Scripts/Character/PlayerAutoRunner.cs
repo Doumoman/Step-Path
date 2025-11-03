@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 [RequireComponent(typeof(Collider2D))]
 public class PlayerAutoRunner : MonoBehaviour
 {
-    enum State { Run, Align, Climb }
+    enum State { Run, Align, Climb, Jump }
 
     [Header("Pixel")]
     public int pixelsPerUnit = 16;
@@ -34,6 +34,24 @@ public class PlayerAutoRunner : MonoBehaviour
     [Header("Ladder")]
     public float ladderTopExtra = 0.05f;
 
+    [Header("Mushroom Jump")]                // ★ NEW
+    public LayerMask mushroomMask;           // Mushroom 레이어 선택
+    public float mushroomProbe = 0.12f;      // 전방 감지 두께(월드단위)
+    public int mushroomCooldownFrames = 8;   // 재트리거 방지
+    public float jumpPeakHeightPixels = 64f; // 정점까지 높이(px)
+    [Range(0.5f, 3f)]
+    public float jumpHorizSpeedScale = 1.25f;// 가로속도 배율(= runSpeed * scale)
+    [Tooltip("버섯 감지 후 점프까지 지연(초)")]
+    public float mushroomJumpDelaySec = 0.25f;
+
+    [Tooltip("발사 시 반드시 지면에 있어야 하는지")]
+    public bool requireGroundedAtLaunch = true;
+
+    float pendingJumpTimer = -1f;   // < 0: 미예약, >=0: 카운트다운 중
+    int pendingJumpDir = 1;
+    int mushroomCD;                          // 점프 트리거 쿨다운
+    float jumpHorizSpeedPixelsPerSec;        // 점프 중 가로속도(px/s)
+
     State state = State.Run;
     int dir = 1;
     float unitPerPixel;
@@ -59,12 +77,26 @@ public class PlayerAutoRunner : MonoBehaviour
     void Update()
     {
         if (reverseCD > 0) reverseCD--;
+        if (mushroomCD > 0) mushroomCD--;
+        if (pendingJumpTimer >= 0f)
+        {
+            pendingJumpTimer -= Time.deltaTime;
 
+            // 발사 조건: 시간이 끝났고, (Run 상태이고) 그리고 필요 시 지면
+            if (pendingJumpTimer <= 0f &&
+                state == State.Run &&
+                (!requireGroundedAtLaunch || onGround))
+            {
+                StartMushroomJump(pendingJumpDir);  // ← 아래 4)에서 수정한 함수
+                pendingJumpTimer = -1f;
+            }
+        }
         switch (state)
         {
             case State.Run: TickRun(); break;
             case State.Align: TickAlign(); break;
             case State.Climb: TickClimb(); break;
+            case State.Jump: TickJump(); break;
         }
     }
 
@@ -79,13 +111,26 @@ public class PlayerAutoRunner : MonoBehaviour
             reverseCD = reverseCooldownFrames;
         }
 
-        // 사다리 진입?
+        // 사다리 진입
         if (IsOnLadderCell(out curLadderCell, out targetLadderCenterX))
         {
             onGround = false;
             state = State.Align;
             return;
         }
+
+        // 전방에 버섯 있으면 즉시 점프 시작
+        if (onGround && mushroomCD == 0 && DetectMushroomAhead(dir) && pendingJumpTimer < 0f)
+        {
+            // 예약
+            pendingJumpTimer = Mathf.Max(0.01f, mushroomJumpDelaySec);
+            pendingJumpDir = dir;
+
+            // 중복 예약/재트리거 방지
+            mushroomCD = mushroomCooldownFrames;
+            // 바로 return 할 필요 없음. 달리기는 계속 진행하면서 타이머만 깎이게 둔다.
+        }
+
 
         // 지면 샘플
         if (SampleGroundY(transform.position, out float groundY))
@@ -160,7 +205,37 @@ public class PlayerAutoRunner : MonoBehaviour
         float vy = climbSpeedPixelsPerSec * unitPerPixel * Time.deltaTime;
         MovePixelSnapped(new Vector2(0, vy));
     }
+    void TickJump()
+    {
+        // X는 고정 속도로 진행방향 유지, Y는 중력 적분
+        float dt = Time.deltaTime;
 
+        float dx = jumpHorizSpeedPixelsPerSec * unitPerPixel * dir * dt;
+        float dy = vyPixels * unitPerPixel * dt;
+
+        // 먼저 이동
+        MoveHorizontalWithCast(dx, ref lockedY); // 수평 캐스트는 유지(벽에 부딪히면 멈추지만 반전은 안 함)
+        MoveVerticalWithCast(dy);
+
+        // 중력 적용(다음 프레임에 반영)
+        vyPixels = Mathf.Max(vyPixels - gravityPixelsPerSec2 * dt, -maxFallSpeedPixelsPerSec);
+
+        // 착지 판정: 아래로 가는 중이며 발밑에 땅이 가까우면 Run 복귀
+        if (vyPixels <= 0f && SampleGroundY(transform.position, out float gy))
+        {
+            // 발 위치와 gy 차이가 한두 픽셀 이내면 착지로 간주
+            float step = unitPerPixel;
+            if (Mathf.Abs(transform.position.y - gy) <= 2f * step)
+            {
+                lockedY = gy;
+                onGround = true;
+                SnapYToLocked();
+
+                state = State.Run;
+                reverseCD = reverseCooldownFrames; // 바로 반전 방지(선택)
+            }
+        }
+    }
     // ────────────────── Movement helpers ──────────────────
 
     bool _lastHorizontalBlocked;
@@ -290,6 +365,34 @@ public class PlayerAutoRunner : MonoBehaviour
         return false;
     }
 
+    // ───────────── Mushroom Jump ─────────────
+    bool DetectMushroomAhead(int dirSign)
+    {
+        if (mushroomMask == 0) return false;
+
+        float halfX = bodySize.x * 0.5f;
+        Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + mushroomProbe * 0.5f), 0f);
+        Vector2 size = new Vector2(mushroomProbe, bodySize.y - skin * 2f);
+
+        return Physics2D.OverlapBox(center, size, 0f, mushroomMask) != null;
+    }
+
+    void StartMushroomJump(int jumpDir)
+    {
+        // 초기 수직속도: 정점 높이 H(px)에 도달하게 설정  vy0 = sqrt(2 g H)
+        float vy0 = Mathf.Sqrt(Mathf.Max(0.0001f, 2f * gravityPixelsPerSec2 * jumpPeakHeightPixels));
+
+        vyPixels = vy0; // 위(+)
+        onGround = false;
+        state = State.Jump;
+
+        // 가로 속도는 달리기 속도의 배수
+        dir = jumpDir;
+        jumpHorizSpeedPixelsPerSec = runSpeedPixelsPerSec * jumpHorizSpeedScale;
+
+        // 재트리거 방지
+        mushroomCD = mushroomCooldownFrames;
+    }
     // ───────────── Wall detection ─────────────
 
     bool DetectWallAhead(int dirSign)
