@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: 365749267}
   - component: {fileID: 365749266}
   - component: {fileID: 365749269}
+  - component: {fileID: 365749270}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -302,6 +303,24 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &365749270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365749265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34384250057bf894f9bd7ff634af30d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1531521708}
+  offset: {x: 0, y: 2, z: -10}
+  followLerp: 8
+  targetOrthoSize: 3
+  zoomLerp: 3
+  heightAlignDuration: 0.5
 --- !u!1 &848079714
 GameObject:
   m_ObjectHideFlags: 0
@@ -813,6 +832,10 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: mushroomJumpDelaySec
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: reverseOnMask.m_Bits
       value: 256
       objectReference: {fileID: 0}
@@ -823,6 +846,14 @@ PrefabInstance:
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: climbSpeedPixelsPerSec
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: requireGroundedAtLaunch
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6829849322806142116, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7365174361010732499, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: m_LocalScale.x
@@ -952,6 +983,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1531521708 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7365174361010732499, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+  m_PrefabInstance: {fileID: 1219513786}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1568195375
 GameObject:
   m_ObjectHideFlags: 0

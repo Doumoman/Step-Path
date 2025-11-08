@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3743330799335780109}
   - component: {fileID: 4578735063565907968}
   - component: {fileID: 6697497284895067807}
-  - component: {fileID: 6829849322806142116}
   - component: {fileID: 3252666093318397209}
   m_Layer: 0
   m_Name: Player
@@ -155,20 +154,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &6829849322806142116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7581888350024345788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961b4b2014a4424e81f9eab09631c85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pixelsPerUnit: 16
-  pixelStep: 1
 --- !u!114 &3252666093318397209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,16 +169,29 @@ MonoBehaviour:
   pixelsPerUnit: 16
   runSpeedPixelsPerSec: 32
   climbSpeedPixelsPerSec: 24
+  gravityPixelsPerSec2: 480
+  maxFallSpeedPixelsPerSec: 360
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  ladderMask:
+  ladderMap: {fileID: 0}
+  reverseOnMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
+  wallProbe: 0.1
+  reverseAlsoInAir: 1
+  reverseCooldownFrames: 6
   bodySize: {x: 0.5, y: 0.9}
-  groundCheckDepth: 0.2
-  frontCheckDistance: 0.1
-  ladderAlignEpsilonCells: 0.15
-  ladderProbeHeight: 1.2
-  ladderProbeWidth: 0.35
+  skin: 0.01
+  stepUpMax: 0.25
+  groundProbe: 0.4
   ladderTopExtra: 0.2
+  mushroomMask:
+    serializedVersion: 2
+    m_Bits: 0
+  mushroomProbe: 0.12
+  mushroomCooldownFrames: 8
+  jumpPeakHeightPixels: 64
+  jumpHorizSpeedScale: 1.25
+  mushroomJumpDelaySec: 0.25
+  requireGroundedAtLaunch: 1

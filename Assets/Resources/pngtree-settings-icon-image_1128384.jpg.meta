@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      pngtree-settings-icon-image_1128384_0: 1941368962851976903
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
