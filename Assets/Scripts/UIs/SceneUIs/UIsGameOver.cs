@@ -31,16 +31,17 @@ public class UIsGameOver : MonoBehaviour
 
     private IEnumerator RestartGame()
     {
+        
 
         // 점수를 서버(혹은 PlayerPrefs)에 저장
         //yield return GameManager.Instance.SaveScoreToServer(); // 시간이 걸리는 비동기 작업 -> 코루틴 필요
 
         // 점수 초기화
         GameManager.Instance.ResetScore();
+        yield return null; // 1프레임 대기해서 GUI 이벤트 종료 기다림
 
         // 인게임 씬 다시 로드
         SceneManager.LoadScene("InGame");
-        yield break;
 
     }
 }
