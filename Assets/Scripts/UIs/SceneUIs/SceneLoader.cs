@@ -19,7 +19,7 @@ public class SceneLoader : MonoBehaviour
         //GameManager.Instance.SetNowInGame(1);
         SoundManager.Instance.EffectSoundOn("3");
         SceneManager.LoadScene("InGame");
-        SoundManager.Instance.Stage1BgmOn();
+        SoundManager.Instance.InGameBgmOn();
         Time.timeScale = 1.0f;
     }
 

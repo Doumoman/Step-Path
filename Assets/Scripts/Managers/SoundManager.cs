@@ -1,51 +1,44 @@
 using JetBrains.Annotations;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using Core;
+
 public class SoundManager : Singleton<SoundManager>
 {
     private void Awake()
     {
-        // ∏∏æ‡ «√∑π¿ÃæÓ «¡∑æΩ∫ø° ¿˙¿Âµ» bgm∞˙ effect¿« Volume∞™¿Ã ¿÷¥Ÿ∏È ∫“∑Øø¬¥Ÿ. ∞‘¿”¿Ã ≤®¡≥¥Ÿ ƒ—¡Æµµ ¿¸¿« ∞™¿ª ¿Ø¡ˆ«œ±‚ ¿ß«‘.
-        if (!PlayerPrefs.HasKey("bgmVolume")) PlayerPrefs.SetFloat("bgmVolume", 1.0f);
-        if (!PlayerPrefs.HasKey("effectVolume")) PlayerPrefs.SetFloat("effectVolume", 1.0f);
-
+        // Í≤åÏûÑÏù¥ Í∫ºÏ°åÎã§ ÏºúÏ†∏ÎèÑ Ïù¥Ï†Ñ ÏÑ§Ï†ï Ïú†ÏßÄ
+        if (!PlayerPrefs.HasKey("BGMVolume")) PlayerPrefs.SetFloat("BGMVolume", 1.0f);
+        if (!PlayerPrefs.HasKey("SFXVolume")) PlayerPrefs.SetFloat("SFXVolume", 1.0f);
         Init();
     }
 
-    AudioClip bgmMain; // ∏ﬁ¿Œ ø¿µø¿≈¨∏≥
-    AudioClip bgmStage1; // Ω∫≈◊¿Ã¡ˆ ø¿µø¿≈¨∏≥
-    AudioClip bgmStage2;
-    AudioClip bgmStage3;
-    AudioClip win;
-    AudioClip lose;
+    AudioClip bgmMain;
+    AudioClip bgmInGame;
+    AudioClip clear;
+    AudioClip GameOver;
     AudioClip ending;
-    private AudioSource audioSource1; // πË∞Ê¿Ω ø¿µø¿º“Ω∫, πË∞Ê¿ΩµÈ¿ª ¿˙¿Â«ÿº≠ ªÁøÎ«‘
-    private AudioSource audioSource2; // »ø∞˙¿Ω ø¿µø¿º“Ω∫, »ø∞˙¿ΩµÈ¿ª ¿˙¿Â«ÿº≠ ªÁøÎ«‘
 
+    private AudioSource audioSource1; // BGM
+    private AudioSource audioSource2; // SFX
 
     AudioSource[] _audioSources = new AudioSource[(int)Sound.MaxCount];
     Dictionary<string, AudioClip> _audioClips = new Dictionary<string, AudioClip>();
 
     public AudioMixer audioMixer;
-
     public float currentBGMVolume { get; set; }
-    public float currentEffectVolume { get; set; }
+    public float currentSFXVolume { get; set; }
 
     public void Init()
     {
-        currentBGMVolume = PlayerPrefs.GetFloat("bgmVolume");
-        currentEffectVolume = PlayerPrefs.GetFloat("effectVolume");
+        currentBGMVolume = PlayerPrefs.GetFloat("BGMVolume");
+        currentSFXVolume = PlayerPrefs.GetFloat("SFXVolume");
+
         audioMixer = Resources.Load<AudioMixer>("NewMixer");
         AudioMixerGroup[] audioMixerGroups = audioMixer.FindMatchingGroups("Master");
 
-        //GameObject root = GameObject.Find("@Sound");
-        //root = new GameObject { name = "@Sound" };
         GameObject root = this.gameObject;
-        //root.AddComponent<SoundManager>();
-        //Object.DontDestroyOnLoad(root);
 
         string[] soundNames = System.Enum.GetNames(typeof(Sound));
         for (int i = 0; i < soundNames.Length - 1; i++)
@@ -58,178 +51,90 @@ public class SoundManager : Singleton<SoundManager>
 
         _audioSources[(int)Sound.Bgm].loop = true;
         _audioSources[(int)Sound.LoopEffect].loop = true;
+    }
 
-    }
-    public void Clear()
+    void Start()
     {
-        foreach (AudioSource audioSource in _audioSources)
-        {
-            audioSource.clip = null;
-            audioSource.Stop();
-        }
-        _audioClips.Clear();
-    }
-    public void Play(AudioClip audioClip, Sound type = Sound.Effect, float pitch = 1.0f)
-    {
-        if (audioClip == null)
-        {
-            return;
-        }
-        if (type == Sound.Bgm)
-        {
-            AudioSource audioSource = _audioSources[(int)Sound.Bgm];
-            if (audioSource.isPlaying)
-                audioSource.Stop();
-            audioSource.pitch = pitch;
-            audioSource.clip = audioClip;
-            audioSource.volume = PlayerPrefs.GetFloat("bgmVolume");
-            audioSource.Play();
-        }
-        else if (type == Sound.LoopEffect)
-        {
-            AudioSource audioSource = _audioSources[(int)Sound.LoopEffect];
-            if (audioSource.isPlaying)
-                audioSource.Stop();
-            audioSource.pitch = pitch;
-            audioSource.clip = audioClip;
-            audioSource.volume = PlayerPrefs.GetFloat("effectVolume");
-            audioSource.Play();
-        }
-        else
-        {
-            AudioSource audioSource = _audioSources[(int)Sound.Effect];
-
-            audioSource.pitch = pitch;
-            audioSource.volume = PlayerPrefs.GetFloat("effectVolume");
-            audioSource.PlayOneShot(audioClip);
-        }
-    }
-    public void Play(string path, Sound type = Sound.Effect, float pitch = 1.0f)
-    {
-        AudioClip audioClip = GetOrAddAudioClip(path, type);
-        Play(audioClip, type, pitch);
-    }
-    AudioClip GetOrAddAudioClip(string path, Sound type = Sound.Effect)
-    {
-        if (path.Contains("Sounds/") == false)
-            path = $"Sounds/{path}";
-        AudioClip audioClip = null;
-
-        if (type == Sound.Bgm)
-        {
-            audioClip = GameManager.Resource.Load<AudioClip>(path);
-        }
-        else
-        {
-            if (_audioClips.TryGetValue(path, out audioClip) == false)
-            {
-                audioClip = GameManager.Resource.Load<AudioClip>(path);
-                _audioClips.Add(path, audioClip);
-            }
-        }
-
-        if (audioClip == null)
-            Debug.Log($"AudioClip Missing {path}");
-
-        return audioClip;
-    }
-    public bool isBGMPlaying()
-    {
-        return _audioSources[(int)Sound.Bgm].isPlaying;
-    }
-    public void StopLoopEffect()
-    {
-        AudioSource audioSource = _audioSources[(int)Sound.LoopEffect];
-        audioSource.clip = null;
-        audioSource.Stop();
-    }
-    public bool isLoopEffectPlaying()
-    {
-        return _audioSources[(int)Sound.LoopEffect].isPlaying;
-    }
-    void Start() // ∞‘¿” √≥¿Ω Ω√¿€Ω√ ¿Ωæ«ºº∆√
-    {
-
-        // audioSourceø° AudioSource ƒƒ∆˜≥Õ∆Æ∏¶ √ﬂ∞°
         audioSource1 = gameObject.AddComponent<AudioSource>();
         audioSource2 = gameObject.AddComponent<AudioSource>();
         audioSource1.loop = true;
 
-        // ø¿µø¿ ≈¨∏≥ø° ø¿µø¿ √ﬂ∞°
         bgmMain = Resources.Load<AudioClip>("Sounds/main");
-        bgmStage1 = Resources.Load<AudioClip>("Sounds/1stageTheme_first_dream");
-        bgmStage2 = Resources.Load<AudioClip>("Sounds/2stageTheme_foggy_classroom");
-        bgmStage3 = Resources.Load<AudioClip>("Sounds/3stage");
-        win = Resources.Load<AudioClip>("Sounds/win");
-        lose = Resources.Load<AudioClip>("Sounds/lose");
+        bgmInGame = Resources.Load<AudioClip>("Sounds/1stageTheme_first_dream");
+        clear = Resources.Load<AudioClip>("Sounds/win");
+        GameOver = Resources.Load<AudioClip>("Sounds/lose");
         ending = Resources.Load<AudioClip>("Sounds/EndingBGM");
 
-
-        MainBgmOn(); // ∞‘¿” Ω√¿€Ω√ ∏ﬁ¿Œ∏ﬁ¥∫ø°º≠ ø¿«¡¥◊Bgm ¿Áª˝
+        MainBgmOn();
     }
 
+    //  UIsSettings Ïä¨ÎùºÏù¥Îçî Ïó∞ÎèôÏö© ‚Äî Î≥ºÎ•® Ï°∞Ï†à
+    public void SetBGMVolume(float volume)
+    {
+        audioSource1.volume = volume;
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        audioSource2.volume = volume;
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+    }
+
+    //  UIsSettingsÏóêÏÑú Ï¥àÍ∏∞Í∞í ÏùΩÍ∏∞Ïö©
+    public float GetBGMVolume()
+    {
+        return PlayerPrefs.GetFloat("BGMVolume", 1f);
+    }
+
+    public float GetSFXVolume()
+    {
+        return PlayerPrefs.GetFloat("SFXVolume", 1f);
+    }
+
+    // Í∏∞Ï°¥ BGM Í¥ÄÎ†® Î°úÏßÅ
     public void MainBgmOn()
     {
         audioSource1.clip = bgmMain;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume"); // «√∑π¿ÃæÓ«¡∑æΩ∫ø°º≠ bgmVolume ∞™ ∞°¡Æø¿±‚
+        audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
     }
-    public void Stage1BgmOn()
+
+    public void InGameBgmOn()
     {
-        audioSource1.clip = bgmStage1;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume");
+        audioSource1.clip = bgmInGame;
+        audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
+    
     }
-    public void Stage2BgmOn()
+
+    public void ClearBgmOn()
     {
-        audioSource1.clip = bgmStage2;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume");
+        audioSource1.clip = clear;
+        audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
     }
-    public void Stage3BgmOn()
+
+    public void GameOverBgmOn()
     {
-        audioSource1.clip = bgmStage3;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume");
+        audioSource1.clip = GameOver;
+        audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
     }
-    public void winBgmOn()
-    {
-        audioSource1.clip = win;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume");
-        audioSource1.Play();
-    }
-    public void loseBgmOn()
-    {
-        audioSource1.clip = lose;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume");
-        audioSource1.Play();
-    }
+
     public void EndingBgmOn()
     {
         audioSource1.clip = ending;
-        audioSource1.volume = PlayerPrefs.GetFloat("bgmVolume");
+        audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
     }
-    //ø…º«√¢ ¿Ω«‚ ΩΩ∂Û¿Ã¥ıø°º≠ ∞™ ∫Ø∞ÊΩ√ ø¿µø¿º“Ω∫¿« ∫º∑˝¿ª ¡∂¿˝«œ∞Ì ¿Ã ∞™¿ª «√∑π¿ÃæÓ «¡∑æΩ∫ø° ¿˙¿Â
-    public void OnBgmVolumeChange(float volume)
-    {
-        audioSource1.volume = volume;
-        PlayerPrefs.SetFloat("bgmVolume", volume);
-    }
-    public void OnEffectVolumeChange(float volume)
-    {
-        audioSource2.volume = volume;
-        PlayerPrefs.SetFloat("effectVolume", volume);
-    }
 
-    // ø¯«œ¥¬ ∞˜ø° »ø∞˙¿Ω √ﬂ∞° ¿ß«— «‘ºˆ
-    // SoundManager.Instance.EffectSoundOn("Walk")øÕ ∞∞¿Ã ªÁøÎ
+    // Ìö®Í≥ºÏùå Ïû¨ÏÉù
     public void EffectSoundOn(string effectName)
     {
-        string effect = "Sounds/" + effectName;
-        AudioClip effectClip = Resources.Load<AudioClip>(effect);
-        audioSource2.volume = PlayerPrefs.GetFloat("effectVolume"); // «√∑π¿ÃæÓ«¡∑æΩ∫ø°º≠ effectVolume ∞™ ∞°¡Æø¿±‚
-        audioSource2.clip = effectClip;
+        string effectPath = "Sounds/" + effectName;
+        AudioClip effectClip = Resources.Load<AudioClip>(effectPath);
+        audioSource2.volume = GetSFXVolume();
         audioSource2.PlayOneShot(effectClip);
     }
 
