@@ -15,3 +15,4 @@ MonoBehaviour:
   itemName: basic
   rerollCost: 3
   itemFrequency: 3
+  eachLogic: {fileID: 11400000, guid: 4ba0c92ceb2a4f4488bb79245c3bcd53, type: 2}

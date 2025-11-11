@@ -18,7 +18,7 @@ public class ItemController : MonoBehaviour
     public ItemDataHub ctx;
     void Awake()
     {
-        
+        root.PushState(new BackgroundState(ctx, root));
     }
 
     private void Update()

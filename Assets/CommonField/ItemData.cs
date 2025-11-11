@@ -13,5 +13,6 @@ public class ItemData : ScriptableObject
     [Header("아이템 빈도")]
     public float itemFrequency = 3f;
 
-
+    [Header("아이템 로직")]
+    public ItemLogic eachLogic;
 }

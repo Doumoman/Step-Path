@@ -27,7 +27,7 @@ public sealed class ItemStateMachine
         if (next != null)
         {
             stack.Push(next);
-            next.Exit();
+            next.Enter();
         }
     }
 
