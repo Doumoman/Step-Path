@@ -15,4 +15,7 @@ public class ItemData : ScriptableObject
 
     [Header("아이템 로직")]
     public ItemLogic eachLogic;
+
+    [Header("이벤트 전달")]
+    public ItemPrepabDelegate itemDelegate;
 }

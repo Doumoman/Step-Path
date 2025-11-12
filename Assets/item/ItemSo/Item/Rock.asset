@@ -16,3 +16,4 @@ MonoBehaviour:
   rerollCost: 3
   itemFrequency: 3
   eachLogic: {fileID: 11400000, guid: baa1fc5710dc25f4c9dc5e7d13896929, type: 2}
+  itemDelegate: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}

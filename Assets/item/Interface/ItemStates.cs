@@ -8,7 +8,8 @@ public sealed class BackgroundState : IItemState
 {
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
-    public BackgroundState(ItemDataHub c, ItemStateMachine m) { ctx = c; machine = m; }
+    public ItemPrepabDelegate prefabCreate;
+    public BackgroundState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
     public void Enter()
     {
         // 프리팹 위치 조정.
@@ -18,7 +19,7 @@ public sealed class BackgroundState : IItemState
     {
         if (Input.GetMouseButton(0))
         {
-            machine.ChangeState(new DraggingState(ctx, machine));
+            machine.ChangeState(new DraggingState(ctx, machine, prefabCreate));
             return;
         }
     }
@@ -33,8 +34,9 @@ public sealed class DraggingState : IItemState
 {
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
+    public ItemPrepabDelegate prefabCreate;
 
-    public DraggingState(ItemDataHub c, ItemStateMachine m) { ctx = c; machine = m; }
+    public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
     public void Enter()
     {
         // 마우스 위치에 포인터 따라오는 것 on
@@ -62,7 +64,7 @@ public sealed class DraggingState : IItemState
 
     public IItemState DetectPlaced()
     {
-        if (1 < 2) return new PlacedState(ctx, machine); // Placed될 때. 그 이후에 Crafting 판단
+        if (1 < 2) return new PlacedState(ctx, machine, prefabCreate); // Placed될 때. 그 이후에 Crafting 판단
          // Placed되지 않는 자리라 Background?? 정확히 알아햐함
         
     }
@@ -72,8 +74,9 @@ public sealed class PlacedState : IItemState
 {
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
+    public ItemPrepabDelegate prefabCreate;
 
-    public PlacedState(ItemDataHub c, ItemStateMachine m) { ctx = c; machine = m; }
+    public PlacedState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
     public void Enter()
     {
 
@@ -85,11 +88,11 @@ public sealed class PlacedState : IItemState
                     // Sprite의 상태에 따라 구분해도 될듯
         {
             //원래 Placed된 아이템을 CraftingState로 이동시킴
-            machine.ChangeState(new CraftingState(ctx, machine));
+            machine.ChangeState(new CraftingState(ctx, machine, prefabCreate));
         }
         else if (3 < 4)  // 설치되지 않는 구역일 경우
         {
-            machine.ChangeState(new BackgroundState(ctx, machine));//타일맵 규격에 맞춰서 설치되는 로직
+            machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));//타일맵 규격에 맞춰서 설치되는 로직
         }
         else if (5 < 6) // 설치되는 구역일 경우 - 이것도 스프라이트로 판정 가능? || 조합 성공 후 Place
         {
@@ -111,8 +114,9 @@ public sealed class CraftingState : IItemState
 {
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
+    public ItemPrepabDelegate prefabCreate;
 
-    public CraftingState(ItemDataHub c, ItemStateMachine m) { ctx = c; machine = m; }
+    public CraftingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
     public void Enter()
     {
 
@@ -123,12 +127,12 @@ public sealed class CraftingState : IItemState
         if (1 < 2) // 조합되는 경우. 
         {
             // 원래 placed되어 있던 프리팹 destroy로 전달. 
-            machine.ChangeState(new DestroyedState(ctx, machine));
+            machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
             // 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
         }
         else if (3 < 4) // 조합 불가인 경우
         {
-            machine.ChangeState(new DestroyedState(ctx, machine));
+            machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
         }
     }
 
@@ -142,8 +146,9 @@ public sealed class DestroyedState : IItemState
 {
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
+    public ItemPrepabDelegate prefabCreate;
 
-    public DestroyedState(ItemDataHub c, ItemStateMachine m) { ctx = c; machine = m; }
+    public DestroyedState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
     public void Enter()
     {
         machine.PopState();

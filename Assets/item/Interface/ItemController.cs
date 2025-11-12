@@ -6,8 +6,10 @@ public class ItemController : MonoBehaviour
 {
     [SerializeField] ItemData data;
     [SerializeField] Vector3 spawnL;
+    [SerializeField] ItemPrepabDelegate prefab;
     public ItemStateMachine StateMachine => root;
     public ItemData Data => data;
+    public ItemPrepabDelegate Prefab => prefab;
     ItemStateMachine root = new();
     public Transform item { get; private set; }
 
@@ -18,7 +20,7 @@ public class ItemController : MonoBehaviour
     public ItemDataHub ctx;
     void Awake()
     {
-        root.PushState(new BackgroundState(ctx, root));
+        root.PushState(new BackgroundState(ctx, root, Prefab));
     }
 
     private void Update()

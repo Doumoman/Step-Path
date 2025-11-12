@@ -11,6 +11,7 @@ public sealed class ItemDataHub
 {
     public readonly ItemController mono;
     public readonly ItemStateMachine sm;
+    public readonly ItemPrepabDelegate pd;
     
     public readonly ItemData data;
     public readonly Transform transform;
@@ -23,6 +24,7 @@ public sealed class ItemDataHub
         sm = owner.StateMachine;
         data = owner.Data;
         transform = owner.transform;
+        pd = owner.Prefab;
         spawnL = mono.SpawnL;
     }
 }
