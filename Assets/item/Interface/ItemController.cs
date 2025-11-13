@@ -22,8 +22,10 @@ public class ItemController : MonoBehaviour
     
     void Awake()
     {
-
+        item = this.transform;
+        ctx = new ItemDataHub(this);    
         root.PushState(new BackgroundState(ctx, root, Prefab, item));
+        _initialized = true;
     }
 
     private void Update()

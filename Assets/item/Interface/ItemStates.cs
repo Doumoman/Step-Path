@@ -46,19 +46,21 @@ public sealed class DraggingState : IItemState
     public void Enter()
     {
         // 마우스 위치에 포인터 따라오는 것 on
-        TrackingMouse(item);
+        
 
     }
 
     public void Update()
     { 
         OnPoint(ctx);
+        TrackingMouse(item);
         if (Input.GetMouseButtonUp(0)) //오브젝트는 터치시 터치 위치로 올라오는 것 구현 필요   
         {
             OffPoint(ctx);
-            machine.ChangeState(DetectPlaced(ctx));
+            machine.ChangeState(DetectPlaced(ctx, machine, prefabCreate, item));
             return;
         }
+        
     }
 
     public void Exit()
@@ -83,7 +85,7 @@ public sealed class DraggingState : IItemState
         return;
     }
 
-    public IItemState DetectPlaced(ItemDataHub ctx)
+    public IItemState DetectPlaced(ItemDataHub ctx, ItemStateMachine machine, ItemPrepabDelegate prefabCreate, Transform item)
     {
         if (ctx.IsPlaceable) return new PlacedState(ctx, machine, prefabCreate, item); // Placed될 때. 그 이후에 Crafting 판단
         else return new BackgroundState(ctx, machine, prefabCreate, item);
