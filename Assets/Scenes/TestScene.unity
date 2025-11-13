@@ -873,7 +873,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7365174361010732499, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.01
+      value: -4.3
       objectReference: {fileID: 0}
     - target: {fileID: 7365174361010732499, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1264,17 +1264,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   patterns:
-  - {fileID: 11400000, guid: 13a5105f15764814dad76b41aec86243, type: 2}
+  - {fileID: 11400000, guid: 494edfe8ede65c3458ea2a959b1e348c, type: 2}
+  - {fileID: 11400000, guid: fd2a5d3bef709e94281082175fad140b, type: 2}
+  - {fileID: 11400000, guid: 0e2ddbbae35576744867e1bf9f812bfe, type: 2}
   cellOffsets: []
-  targetGridRoot: {fileID: 176256916}
   clearBeforeSpawn: 0
   createMissingLayers: 1
+  targetGridRoot: {fileID: 176256916}
   groundLayerNames:
   - Ground
   ladderLayerNames:
   - Ladder
   useCompositeForGround: 0
   addStaticRigidbodyIfComposite: 0
+  useChunkStreaming: 1
+  player: {fileID: 1531521708}
+  startChunk: {x: 0, y: 0}
+  dynamicObjectMask:
+    serializedVersion: 2
+    m_Bits: 0
+  globalCellOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &1757359527
 Transform:
   m_ObjectHideFlags: 0
