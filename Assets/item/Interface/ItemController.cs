@@ -18,9 +18,12 @@ public class ItemController : MonoBehaviour
     bool _initialized = false;
 
     public ItemDataHub ctx;
+
+    
     void Awake()
     {
-        root.PushState(new BackgroundState(ctx, root, Prefab));
+
+        root.PushState(new BackgroundState(ctx, root, Prefab, item));
     }
 
     private void Update()

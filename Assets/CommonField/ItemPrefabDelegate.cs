@@ -7,6 +7,7 @@ public class ItemPrepabDelegate : ScriptableObject
 {
     public Action OnSimpleItem;
     public Action OnCraftedItem;
+    
 
     public void CreateSimpleItem()
     {
@@ -17,4 +18,6 @@ public class ItemPrepabDelegate : ScriptableObject
     {
         OnCraftedItem?.Invoke();
     }
+
+
 }
