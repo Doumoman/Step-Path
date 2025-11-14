@@ -23,21 +23,21 @@ public class UIsPause : MonoBehaviour
     }
 
     // ====== 버튼 기능 ======
-    private void OnClickClose()
+    public void OnClickClose()
     {
         // 창 닫기 + 게임 재개
         Time.timeScale = 1f;
         gameObject.SetActive(false);
     }
 
-    private void OnClickHome()
+    public void OnClickHome()
     {
         // 메인으로
         Time.timeScale = 1f;
         SceneManager.LoadScene("Main");
     }
 
-    private void OnClickRetry()
+    public void OnClickRetry()
     {
         // 재시작
         Time.timeScale = 1f;
