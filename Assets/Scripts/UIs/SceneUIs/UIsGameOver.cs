@@ -20,7 +20,7 @@ public class UIsGameOver : MonoBehaviour
         float score = GameManager.Instance.GetScore(); // 현재 점수 불러오기
         bool isBest = GameManager.Instance.IsBestRecord(); //최고 기록인지 판별
         transform.gameObject.SetActive(true); // 게임오버창 활성화
-        textGameResult.text = $"{score.ToString("F0")}m"; //
+        textGameResult.text = $"{score.ToString("F0")}m"; //소수점 제거해서 점수를 바로 문자열에 넣음
         textBestLabel.gameObject.SetActive(isBest); //최고기록이면 best! (아니면 안나타남)
     }
 
@@ -44,5 +44,13 @@ public class UIsGameOver : MonoBehaviour
         SceneManager.LoadScene("InGame");
 
     }
+
+    public void onClick_Home() //홈버튼
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Main");
+    }
 }
+
+
 
