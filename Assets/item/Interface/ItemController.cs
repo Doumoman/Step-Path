@@ -33,4 +33,9 @@ public class ItemController : MonoBehaviour
         if (!_initialized) return;
         root.Update();
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        root.OnTriggerEnter2D(collision);
+    }
 }

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6154303696095640397}
   m_Layer: 0
   m_Name: item_Cloud
-  m_TagString: Untagged
+  m_TagString: item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -139,3 +139,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: a57b43ba6cfefe644bf5e9747165750f, type: 2}
   spawnL: {x: 0, y: 0, z: 0}
+  prefab: {fileID: 0}

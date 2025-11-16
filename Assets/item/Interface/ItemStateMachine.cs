@@ -7,6 +7,7 @@ public interface IItemState
     void Enter();
     void Update();
     void Exit();
+    void OnTriggerEnter2D(Collider2D collision);
 
 }
 
@@ -47,4 +48,5 @@ public sealed class ItemStateMachine
     }
 
     public void Update() => Current?.Update();
+    public void OnTriggerEnter2D(Collider2D collision) => Current?.OnTriggerEnter2D(collision);
 }

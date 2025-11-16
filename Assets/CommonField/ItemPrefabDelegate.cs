@@ -5,18 +5,18 @@ using System;
 
 public class ItemPrepabDelegate : ScriptableObject
 {
-    public Action OnSimpleItem;
-    public Action OnCraftedItem;
+    public Action OnSimpleitem;
+    public Action OnCrafteditem;
     
 
-    public void CreateSimpleItem()
+    public void CreateSimpleitem()
     {
-        OnSimpleItem?.Invoke();
+        OnSimpleitem?.Invoke();
     }
 
-    public void CreateCraftedItem()
+    public void CreateCrafteditem()
     {
-        OnCraftedItem?.Invoke();
+        OnCrafteditem?.Invoke();
     }
 
 
