@@ -6,15 +6,21 @@ using UnityEditor.Media;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public sealed class ItemDataHub
 {
     public readonly ItemController mono;
+    public readonly ImageController image;
     public readonly ItemStateMachine sm;
     public readonly ItemPrepabDelegate pd;    
     public readonly ItemData data;
     public readonly Transform transform;
+    public readonly RectTransform rect;
     public readonly SpriteRenderer sr;
+    public readonly GridData gd;
+    public readonly Grid map;
+    public readonly Image im;
     public readonly Color originalColor; //원래 스프라이트 컬러 백업본
     public Vector3 spawnL;
     public bool IsPlaceable; // 설치가능여부
@@ -30,9 +36,25 @@ public sealed class ItemDataHub
         transform = owner.transform;
         pd = owner.Prefab;
         sr = owner.gameObject.GetComponent<SpriteRenderer>();
+        gd = owner.Grid;
         spawnL = mono.SpawnL;
-        originalColor = sr.color;
+        map = owner.Grid.currentGrid;
+        originalColor = im.color;
     }
 
-    
+    public ItemDataHub(ImageController owner)
+    {
+        image = owner;
+        sm = owner.StateMachine;
+        data = owner.Data;
+        transform = owner.transform;
+        pd = owner.Prefab;
+        gd = owner.Grid;
+        spawnL = mono.SpawnL;
+        rect = owner.Rect;
+        map = owner.Grid.currentGrid;
+        im = owner.imm;
+        originalColor = im.color;
+    }
+
 }

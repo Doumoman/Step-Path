@@ -14,20 +14,18 @@ public sealed class BackgroundState : IItemState
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
     readonly Transform item;
-    private Camera mainCamera;
     public BackgroundState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
     public void Enter()
     {
-        mainCamera = Camera.main;
-        Vector2 screenspawn = mainCamera.ScreenToWorldPoint(ctx.spawnL);
-        item.position = screenspawn;
+        if (ctx.image != null)
+        {
+            ctx.rect.anchoredPosition = ctx.spawnL;
+        }
 
     }
 
     public void Update()
     {
-        Vector2 screenspawn = mainCamera.ScreenToWorldPoint(ctx.spawnL);
-        item.position = screenspawn;
         if (Input.GetMouseButtonDown(0))
         {
             machine.ChangeState(new DraggingState(ctx, machine, prefabCreate, item));
@@ -53,8 +51,7 @@ public sealed class DraggingState : IItemState
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
     readonly Transform item;
-    RaycastHit2D isitPlaceable;
-    Vector2 raystart;
+    bool CraftCheck;
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
     public void Enter()
@@ -66,88 +63,101 @@ public sealed class DraggingState : IItemState
     public void Update()
     { 
         OnPoint(ctx);
-        TrackingMouse(item);
-        raystart = (Vector2)item.position + (Vector2.down * 0.255f);
-        Debug.DrawRay(raystart, Vector2.down * 0.375f, new Color(1, 0, 0));
-        isitPlaceable = Physics2D.Raycast(raystart, Vector2.down, 0.375f, LayerMask.GetMask("Ground"));
+        TrackingMouse(ctx);
         if (Input.GetMouseButtonUp(0)) 
         {
             OffPoint(ctx);
-            machine.ChangeState(DetectPlaced(ctx, machine, prefabCreate, item));
-            return;
+            IsitPlaceable(ctx);
+            if (ctx.IsPlaceable && CraftCheck)
+            {
+                machine.ChangeState(new CraftingState(ctx, machine, prefabCreate));
+            }
+            else if (ctx.IsPlaceable && !CraftCheck)
+            {
+                machine.ChangeState(new PlacedState(ctx, machine, prefabCreate, item));
+            }
+            else machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate, item));
+                return;
         }
         
     }
 
     public void Exit()
     {
-        EndTrackingMouse(item);
+        
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "item") ctx.IsObjecthere = true;
-        else if (!collision)
-        {
-            ctx.IsPlaceable = false;
-        }
-        else
-        {
-            ctx.IsObjecthere = false;
-            ctx.IsPlaceable = true;
-        }
 
-        
     }
 
-    void TrackingMouse(Transform item) 
+    void TrackingMouse(ItemDataHub ctx) 
     {
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePosition = new Vector2(mousePosition.x - mousePosition.x % 0.25f, mousePosition.y - mousePosition.y % 0.25f); // 위치 규격 맞추는 작업은 프리팹 종류에 따라 SO로 따로 받도록 해야함
-        item.position = mousePosition;
+        ctx.rect.position = Input.mousePosition;
         return;
-    }
-
-    void EndTrackingMouse(Transform item)
-    {
-        Vector2 currentPosition = item.position;
-        currentPosition = new Vector2(currentPosition.x,currentPosition.y);
-        item.position = currentPosition;
-        return;
-    }
-
-    public IItemState DetectPlaced(ItemDataHub ctx, ItemStateMachine machine, ItemPrepabDelegate prefabCreate, Transform item)
-    {
-        if (isitPlaceable.collider) return new PlacedState(ctx, machine, prefabCreate, item); // Placed될 때. 그 이후에 Crafting 판단
-        else return new BackgroundState(ctx, machine, prefabCreate, item);
-        
     }
 
     //가능 여부에 따른 스프라이트 투명도, 색상 전환.
     void OnPoint(ItemDataHub ctx)
     {
-        if(ctx.sr == null) return;
-        Color CurrentColor = ctx.sr.color;
+        if(ctx.im == null) return;
+        Color CurrentColor = ctx.im.color;
         CurrentColor.a = 0.5f;
-        if (isitPlaceable.collider && ctx.IsPlaceable) //오브젝트 놓을 수 있음 - 조건 추가해야함. 땅에 겹쳐지지 않도록 해야함.
+        if (ctx.IsPlaceable) //오브젝트 놓을 수 있음 - 조건 추가해야함. 땅에 겹쳐지지 않도록 해야함.
         {
             CurrentColor = Color.Lerp(CurrentColor, Color.green, 0.5f);
-            ctx.sr.color = CurrentColor;
+            ctx.im.color = CurrentColor;
             return;
         }
         else
         {
             CurrentColor = Color.Lerp(CurrentColor, Color.red, 0.5f);
-            ctx.sr.color = CurrentColor;
+            ctx.im.color = CurrentColor;
             return;
         }
     }
 
     void OffPoint(ItemDataHub ctx)
     {
-        ctx.sr.color = ctx.originalColor;
+        ctx.im.color = ctx.originalColor;
     }
     //배치 가능 여부 판단
+    public void IsitPlaceable(ItemDataHub ctx)
+    {
+        Vector3 mouseScreenPos = Input.mousePosition;
+        mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos);
+
+        Vector3 cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
+
+
+        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.9f;
+
+        Collider2D hitGround = Physics2D.OverlapBox(cellCenterPos, boxSize, 0f, LayerMask.GetMask("Ground"));
+        Collider2D hititem = Physics2D.OverlapBox(cellCenterPos, boxSize, 0f, ~0);
+
+        if (hitGround == null && hititem == null)
+        {
+            ctx.IsPlaceable = true;
+            CraftCheck = false;
+            return; 
+        }
+        else if(hitGround == null && hititem != null) 
+        {
+            ctx.IsPlaceable = true;
+            CraftCheck = true;
+            return; 
+        }
+        else
+        {
+            ctx.IsPlaceable = false;
+            CraftCheck = false;
+            return;
+        }
+    }
     
 }
 

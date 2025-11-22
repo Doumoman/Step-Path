@@ -5,12 +5,15 @@ using System.Collections.Generic;
 public class ItemManager : MonoBehaviour
 {
     [SerializeField] ItemPrepabDelegate prefab;
+    [SerializeField] Grid grid;
+    [SerializeField] GridData gridData;
     public List<GameObject> itemPrefabs;
     public Transform itemContainer;
 
     void Start()
     {
         SpawnRandomItem();
+        gridData.currentGrid = grid;
     }
 
     // Update is called once per frame
