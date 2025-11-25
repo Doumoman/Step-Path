@@ -52,6 +52,7 @@ public sealed class DraggingState : IItemState
     readonly ItemPrepabDelegate prefabCreate;
     readonly Transform item;
     bool CraftCheck;
+    bool IsPlaceable;
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
     public void Enter()
@@ -61,18 +62,20 @@ public sealed class DraggingState : IItemState
     }
 
     public void Update()
-    { 
+    {
+        TrackingMouse(ctx, 2, 2);
         OnPoint(ctx);
-        TrackingMouse(ctx);
+        IsitPlaceable(ctx);
         if (Input.GetMouseButtonUp(0)) 
         {
+   
             OffPoint(ctx);
-            IsitPlaceable(ctx);
-            if (ctx.IsPlaceable && CraftCheck)
+            
+            if (IsPlaceable && CraftCheck)
             {
                 machine.ChangeState(new CraftingState(ctx, machine, prefabCreate));
             }
-            else if (ctx.IsPlaceable && !CraftCheck)
+            else if (IsPlaceable && !CraftCheck)
             {
                 machine.ChangeState(new PlacedState(ctx, machine, prefabCreate, item));
             }
@@ -92,10 +95,66 @@ public sealed class DraggingState : IItemState
 
     }
 
-    void TrackingMouse(ItemDataHub ctx) 
+    void TrackingMouse(ItemDataHub ctx, int width, int height) 
     {
-        ctx.rect.position = Input.mousePosition;
+        Vector3 mouseScreenPos = Input.mousePosition;
+        mouseScreenPos.z = 10f;
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos);
+        // 3. 짝수/홀수 여부 확인
+        bool isEvenWidth = (width % 2 == 0);   
+        bool isEvenHeight = (height % 2 == 0); 
+
+        // 4. 최종 월드 좌표 계산 변수
+        Vector3 finalWorldPos;
+
+        // [X축 계산] 짝수면 '선(CellToWorld)', 홀수면 '중앙(GetCellCenterWorld)'
+        if (isEvenWidth)
+            finalWorldPos.x = ctx.map.CellToWorld(cellPos).x;
+        else
+            finalWorldPos.x = ctx.map.GetCellCenterWorld(cellPos).x;
+
+        // [Y축 계산] 짝수면 '선(CellToWorld)', 홀수면 '중앙(GetCellCenterWorld)'
+        if (isEvenHeight)
+            finalWorldPos.y = ctx.map.CellToWorld(cellPos).y;
+        else
+            finalWorldPos.y = ctx.map.GetCellCenterWorld(cellPos).y;
+
+        // Z축은 0으로 고정
+        finalWorldPos.z = 0;
+
+        // 5. 월드 -> UI 스크린 좌표 변환 및 적용
+        Vector3 snappedScreenPos = Camera.main.WorldToScreenPoint(finalWorldPos);
+        ctx.rect.position = snappedScreenPos;
+
+        ResizeImageToGrid(ctx, 2, 2);
         return;
+    }
+
+    void ResizeImageToGrid(ItemDataHub ctx, int sizeX, int sizeY)
+    {
+        Vector3 cellSize = ctx.map.cellSize;
+        float targetWorldWidth = cellSize.x * sizeX;
+        float targetWorldHeight = cellSize.y * sizeY;
+
+        Vector3 worldBasePos = ctx.rect.position;
+
+        // 가로/세로 끝점 (월드 좌표)
+        Vector3 worldRightPos = worldBasePos + new Vector3(targetWorldWidth, 0, 0);
+        Vector3 worldUpPos = worldBasePos + new Vector3(0, targetWorldHeight, 0);
+
+        // 화면 좌표로 변환
+        Vector3 screenBasePos = Camera.main.WorldToScreenPoint(worldBasePos);
+        Vector3 screenRightPos = Camera.main.WorldToScreenPoint(worldRightPos);
+        Vector3 screenUpPos = Camera.main.WorldToScreenPoint(worldUpPos);
+
+        // 4. 픽셀 거리(크기) 계산
+        float pixelWidth = Vector3.Distance(screenBasePos, screenRightPos);
+        float pixelHeight = Vector3.Distance(screenBasePos, screenUpPos);
+
+        // 5. UI 이미지(RectTransform)에 크기 적용
+        ctx.rect.sizeDelta = new Vector2(pixelWidth, pixelHeight);
     }
 
     //가능 여부에 따른 스프라이트 투명도, 색상 전환.
@@ -104,7 +163,7 @@ public sealed class DraggingState : IItemState
         if(ctx.im == null) return;
         Color CurrentColor = ctx.im.color;
         CurrentColor.a = 0.5f;
-        if (ctx.IsPlaceable) //오브젝트 놓을 수 있음 - 조건 추가해야함. 땅에 겹쳐지지 않도록 해야함.
+        if (IsPlaceable) 
         {
             CurrentColor = Color.Lerp(CurrentColor, Color.green, 0.5f);
             ctx.im.color = CurrentColor;
@@ -118,7 +177,7 @@ public sealed class DraggingState : IItemState
         }
     }
 
-    void OffPoint(ItemDataHub ctx)
+    void OffPoint( ItemDataHub ctx)
     {
         ctx.im.color = ctx.originalColor;
     }
@@ -133,27 +192,32 @@ public sealed class DraggingState : IItemState
 
         Vector3 cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
 
+        Vector3 cellCenterPosGround = new Vector3(cellCenterPos.x - ctx.map.cellSize.x / 2, cellCenterPos.y - ctx.map.cellSize.y*2, cellCenterPos.z);
+        Vector3 cellCenterPositem = ctx.map.CellToWorld(cellPos);
 
-        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.9f;
 
-        Collider2D hitGround = Physics2D.OverlapBox(cellCenterPos, boxSize, 0f, LayerMask.GetMask("Ground"));
-        Collider2D hititem = Physics2D.OverlapBox(cellCenterPos, boxSize, 0f, ~0);
 
-        if (hitGround == null && hititem == null)
+        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.6f;
+
+        Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
+        Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, LayerMask.GetMask("item"));
+        Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, LayerMask.GetMask("item"));
+
+        if (hitGround != null && hititem == null && hitGroundCenter == null)
         {
-            ctx.IsPlaceable = true;
+            IsPlaceable = true;
             CraftCheck = false;
             return; 
         }
-        else if(hitGround == null && hititem != null) 
+        else if(hitGround != null && hititem != null && hitGroundCenter == null) 
         {
-            ctx.IsPlaceable = true;
+            IsPlaceable = true;
             CraftCheck = true;
             return; 
         }
         else
         {
-            ctx.IsPlaceable = false;
+            IsPlaceable = false;
             CraftCheck = false;
             return;
         }

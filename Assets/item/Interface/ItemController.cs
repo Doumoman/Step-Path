@@ -27,7 +27,6 @@ public class ItemController : MonoBehaviour
     {
         item = this.transform;
         ctx = new ItemDataHub(this);    
-        root.PushState(new BackgroundState(ctx, root, Prefab, item));
         _initialized = true;
     }
 

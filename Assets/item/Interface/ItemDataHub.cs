@@ -18,7 +18,6 @@ public sealed class ItemDataHub
     public readonly Transform transform;
     public readonly RectTransform rect;
     public readonly SpriteRenderer sr;
-    public readonly GridData gd;
     public readonly Grid map;
     public readonly Image im;
     public readonly Color originalColor; //원래 스프라이트 컬러 백업본
@@ -36,10 +35,9 @@ public sealed class ItemDataHub
         transform = owner.transform;
         pd = owner.Prefab;
         sr = owner.gameObject.GetComponent<SpriteRenderer>();
-        gd = owner.Grid;
-        spawnL = mono.SpawnL;
+        spawnL = owner.SpawnL;
         map = owner.Grid.currentGrid;
-        originalColor = im.color;
+        originalColor = sr.color;
     }
 
     public ItemDataHub(ImageController owner)
@@ -49,12 +47,12 @@ public sealed class ItemDataHub
         data = owner.Data;
         transform = owner.transform;
         pd = owner.Prefab;
-        gd = owner.Grid;
-        spawnL = mono.SpawnL;
-        rect = owner.Rect;
+        spawnL = owner.SpawnL;
+        rect = owner.GetComponent<RectTransform>();
         map = owner.Grid.currentGrid;
-        im = owner.imm;
+        im = owner.gameObject.GetComponent<Image>();
         originalColor = im.color;
+
     }
 
 }

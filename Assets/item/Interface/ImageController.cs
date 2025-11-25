@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,16 +23,12 @@ public class ImageController : MonoBehaviour
     public ItemDataHub ctx;
 
     
-    public RectTransform Rect {  get; private set; }
-    public Image imm { get; private set; }
 
 
-    void Awake()
+    void Start()
     {
         item = this.transform;
-        Rect = this.GetComponent<RectTransform>();
         ctx = new ItemDataHub(this);
-        imm = this.GetComponent<Image>();
         root.PushState(new BackgroundState(ctx, root, Prefab, item));
         _initialized = true;
 

@@ -479,7 +479,7 @@ PrefabInstance:
     - target: {fileID: 6514054592008355438, guid: ec5533092dcf23045808dabbcc4bfb1f, type: 3}
       propertyPath: grid
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
     - target: {fileID: 6514054592008355438, guid: ec5533092dcf23045808dabbcc4bfb1f, type: 3}
       propertyPath: spawnL.y
       value: 65

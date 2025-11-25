@@ -10,9 +10,9 @@ public class ItemManager : MonoBehaviour
     public List<GameObject> itemPrefabs;
     public Transform itemContainer;
 
-    void Start()
+    void Awake()
     {
-        SpawnRandomItem();
+        //SpawnRandomItem();
         gridData.currentGrid = grid;
     }
 
@@ -37,6 +37,6 @@ public class ItemManager : MonoBehaviour
         }
         GameObject prefabToSpawn = itemPrefabs[0];
 
-        Instantiate(prefabToSpawn, Vector3.zero, Quaternion.identity, itemContainer);
+        
     }
 }
