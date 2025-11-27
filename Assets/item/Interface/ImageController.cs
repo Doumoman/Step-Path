@@ -25,7 +25,7 @@ public class ImageController : MonoBehaviour
     
 
 
-    void Start()
+    void Awake()
     {
         item = this.transform;
         ctx = new ItemDataHub(this);

@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3811245245088075945}
   - component: {fileID: 5628447067241481687}
   - component: {fileID: 6514054592008355438}
-  m_Layer: 5
-  m_Name: Image
+  m_Layer: 20
+  m_Name: Mushroom_image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,11 +33,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -209}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 65}
   m_SizeDelta: {x: 75, y: 75}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &3811245245088075945
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2496393862226010660, guid: 15de8372f81912845899a4671318feb3, type: 3}
+  m_Sprite: {fileID: -5409847850790781356, guid: d89063ab4907fea448264198439039cd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -91,4 +91,4 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 11902b7c6bb6d3349bb2574f4ae7a690, type: 2}
   spawnL: {x: 0, y: 65, z: 0}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
-  grid: {fileID: 0}
+  grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -2239564026043920191}
   - component: {fileID: 2179483340625592356}
   - component: {fileID: 8441042415271252425}
-  m_Layer: 0
+  m_Layer: 21
   m_Name: item_Rock
   m_TagString: item
   m_Icon: {fileID: 0}
@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 6709277255714258841, guid: ac5d27ee359956d42b7d4e834db11f6c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -178,6 +178,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 11902b7c6bb6d3349bb2574f4ae7a690, type: 2}
   spawnL: {x: 525, y: 100, z: 11}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
+  grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
 --- !u!50 &8441042415271252425
 Rigidbody2D:
   serializedVersion: 5

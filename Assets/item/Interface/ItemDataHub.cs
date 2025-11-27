@@ -30,6 +30,7 @@ public sealed class ItemDataHub
     public ItemDataHub(ItemController owner)
     {
         mono = owner;
+        image = null;
         sm = owner.StateMachine;
         data = owner.Data;
         transform = owner.transform;

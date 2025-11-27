@@ -1,19 +1,29 @@
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 public class ItemManager : MonoBehaviour
 {
     [SerializeField] ItemPrepabDelegate prefab;
     [SerializeField] Grid grid;
     [SerializeField] GridData gridData;
+    [SerializeField] public Transform itemContainer;
+    [SerializeField] public Transform imageContainer;
     public List<GameObject> itemPrefabs;
-    public Transform itemContainer;
+    public List<GameObject> itemimages;
+    private Queue<int> itemnumstack = new Queue<int>();
+    
 
     void Awake()
     {
-        //SpawnRandomItem();
         gridData.currentGrid = grid;
+        
+    }
+
+    private void Start()
+    {
+        SpawnRandomItemImage();
     }
 
     // Update is called once per frame
@@ -24,19 +34,33 @@ public class ItemManager : MonoBehaviour
 
     void OnEnable()
     {
-        prefab.OnSimpleitem += SpawnRandomItem;
+        prefab.Onitemimage += SpawnRandomItemImage;
+        prefab.OnSimpleitem += Spawnitem;
     }
 
 
-    void SpawnRandomItem()
+    void SpawnRandomItemImage()
     {
-        if (itemPrefabs == null || itemPrefabs.Count == 0)
+        int num = Random.Range(0, itemimages.Count);
+        itemnumstack.Enqueue(num);
+        if (itemimages == null || itemimages.Count == 0)
         {
             Debug.LogWarning("itemPrefabs 목록이 비어있습니다!");
             return;
         }
-        GameObject prefabToSpawn = itemPrefabs[0];
+        GameObject imageToSpawn = Instantiate(itemimages[num], imageContainer, false);
 
-        
+    }
+
+    void Spawnitem()
+    {
+        int id = itemnumstack.Dequeue();
+        if(itemPrefabs == null || itemPrefabs.Count == 0)
+        {
+            Debug.LogWarning("itemPrefabs 목록이 비어있습니다!");
+            return;
+        }
+        Vector3 spawnpos = grid.CellToWorld(gridData.positioncell);
+        GameObject itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
     }
 }

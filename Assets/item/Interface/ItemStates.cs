@@ -17,10 +17,9 @@ public sealed class BackgroundState : IItemState
     public BackgroundState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
     public void Enter()
     {
-        if (ctx.image != null)
-        {
-            ctx.rect.anchoredPosition = ctx.spawnL;
-        }
+
+        ctx.rect.anchoredPosition = ctx.spawnL;
+
 
     }
 
@@ -134,6 +133,7 @@ public sealed class DraggingState : IItemState
 
     void ResizeImageToGrid(ItemDataHub ctx, int sizeX, int sizeY)
     {
+        Canvas canvas = ctx.rect.GetComponentInParent<Canvas>();
         Vector3 cellSize = ctx.map.cellSize;
         float targetWorldWidth = cellSize.x * sizeX;
         float targetWorldHeight = cellSize.y * sizeY;
@@ -153,8 +153,10 @@ public sealed class DraggingState : IItemState
         float pixelWidth = Vector3.Distance(screenBasePos, screenRightPos);
         float pixelHeight = Vector3.Distance(screenBasePos, screenUpPos);
 
+        float finalWidth = pixelWidth / canvas.scaleFactor;
+        float finalHeight = pixelHeight / canvas.scaleFactor;
         // 5. UI 이미지(RectTransform)에 크기 적용
-        ctx.rect.sizeDelta = new Vector2(pixelWidth, pixelHeight);
+        ctx.rect.sizeDelta = new Vector2(finalWidth, finalHeight);
     }
 
     //가능 여부에 따른 스프라이트 투명도, 색상 전환.
@@ -184,11 +186,15 @@ public sealed class DraggingState : IItemState
     //배치 가능 여부 판단
     public void IsitPlaceable(ItemDataHub ctx)
     {
+        int targetLayerIndex = LayerMask.NameToLayer("item");
+        int higherLayerMask = ~0 << (targetLayerIndex + 1);
+        int lowerLayerMask = (1 << targetLayerIndex) - 1;
         Vector3 mouseScreenPos = Input.mousePosition;
         mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
 
-        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos);
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos); cellPos.y++;
+        ctx.image.Grid.positioncell = cellPos;
 
         Vector3 cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
 
@@ -200,8 +206,8 @@ public sealed class DraggingState : IItemState
         Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.6f;
 
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
-        Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, LayerMask.GetMask("item"));
-        Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, LayerMask.GetMask("item"));
+        Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
+        Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
 
         if (hitGround != null && hititem == null && hitGroundCenter == null)
         {
@@ -235,24 +241,28 @@ public sealed class PlacedState : IItemState
     public PlacedState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
     public void Enter()
     {
-        prefabCreate.CreateSimpleitem();
+        
     }
 
     public void Update()
     {
-        if (ctx.IsObjecthere) //오브젝트가 존재함 - crafting 판정 필요 - 상태 전환
+        if(ctx.image != null)
         {
-            //원래 Placed된 아이템을 CraftingState로 이동시킴
-            machine.ChangeState(new CraftingState(ctx, machine, prefabCreate));
-            return;
+            ctx.im.enabled = false;
+            prefabCreate.CreateSimpleitem();
+            machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
         }
-        
-        //item 로직 실행 - 단일 오브젝트 설치. 로직 계속 실행하도록. 이 로직 안에 
+        else
+        {
+            //item 로직 실행 - 단일 오브젝트 설치. 로직 계속 실행하도록. 이 로직 안에 
+        }
+
+
     }
 
     public void Exit()
     {
-        
+        prefabCreate.Createitemimage();
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
@@ -321,7 +331,7 @@ public sealed class DestroyedState : IItemState // 잘못 조합된 경우
 
     public void Exit()
     {
-        
+        Object.Destroy(ctx.image.gameObject);
         //잘못 조합된 경우 / 조합했을 때 가장 최근의 프리팹의 destroy에만 프리팹 생성 전달
     }
 
