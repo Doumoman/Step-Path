@@ -203,7 +203,7 @@ public sealed class DraggingState : IItemState
 
 
 
-        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.6f;
+        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
 
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
@@ -215,10 +215,11 @@ public sealed class DraggingState : IItemState
             CraftCheck = false;
             return; 
         }
-        else if(hitGround != null && hititem != null && hitGroundCenter == null) 
+        else if(hitGround != null && hititem != null && hitGroundCenter == null) // 2개에 동시에 겹칠 경우에 생각해봐야할듯
         {
             IsPlaceable = true;
             CraftCheck = true;
+            Debug.Log("조합 가능");
             return; 
         }
         else
