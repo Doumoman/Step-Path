@@ -7,25 +7,27 @@ public class CameraMover : MonoBehaviour
     public static CameraMover Instance { get; private set; }
 
     [Header("Follow Target")]
-    [SerializeField] private Transform player;      // PlayerAutoRunner ºÙ¾î ÀÖ´Â ¿ÀºêÁ§Æ®
+    [SerializeField] private Transform player;
     [SerializeField] private Vector3 offset = new(0f, 0f, -10f);
-    [SerializeField] private float followLerp = 8f; // Ä«¸Ş¶ó°¡ ÇÃ·¹ÀÌ¾î¸¦ µû¶ó°¡´Â ¼Óµµ
+    [SerializeField] private float followLerp = 8f;
 
     [Header("Zoom")]
-    [Tooltip("Ä«¸Ş¶ó°¡ ÇÃ·¹ÀÌ¾î¸¦ ¾ó¸¶³ª È®´ëÇØ¼­ º¼Áö(ÀÛÀ»¼ö·Ï ´õ È®´ë)")]
     [SerializeField] private float targetOrthoSize = 5f;
     [SerializeField] private float zoomLerp = 3f;
 
     [Header("Vertical Align On Run")]
-    [Tooltip("Run »óÅÂ·Î µ¹¾Æ¿ÔÀ» ¶§ Y¸¦ ¸ÂÃâ ½Ã°£(ÃÊ)")]
     [SerializeField] private float heightAlignDuration = 0.5f;
+
+    [Header("Horizontal Limit")]
+    [Tooltip("ì¹´ë©”ë¼ê°€ ì´ë™í•  ìˆ˜ ìˆëŠ” X ìµœì†Œê°’")]
+    [SerializeField] private float minX = -999f;
+
+    [Tooltip("ì¹´ë©”ë¼ê°€ ì´ë™í•  ìˆ˜ ìˆëŠ” X ìµœëŒ€ê°’")]
+    [SerializeField] private float maxX = 999f;
 
     private Camera cam;
 
-    // ³ôÀÌ Àá±İ ¿©ºÎ (Fall, LadderClimb, StairClimb, Lifting µ¿¾È true)
     private bool lockHeight = false;
-
-    // RunÀ¸·Î µ¹¾Æ¿ÔÀ» ¶§ Y¸¦ ¼­¼­È÷ ¸ÂÃâ ÄÚ·çÆ¾
     private Coroutine heightAlignRoutine;
 
     private void Awake()
@@ -42,24 +44,21 @@ public class CameraMover : MonoBehaviour
 
     private void Start()
     {
-        // Inspector¿¡¼­ ¾È ³Ö¾úÀ¸¸é ÀÚµ¿À¸·Î Ã£±â
         if (player == null)
         {
             var runner = FindObjectOfType<PlayerAutoRunner>();
             if (runner != null) player = runner.transform;
         }
 
-        // ½ÃÀÛ ½Ã Ä«¸Ş¶ó À§Ä¡¸¦ ÇÃ·¹ÀÌ¾î¿¡ ¸ÂÃç ¼¼ÆÃ
         if (player != null)
         {
             Vector3 pos = player.position + offset;
-            pos.z = transform.position.z; // Z´Â ±×´ë·Î(2D Ä«¸Ş¶ó ±íÀÌ)
+            pos.z = transform.position.z;
+            pos.x = Mathf.Clamp(pos.x, minX, maxX);
             transform.position = pos;
 
             if (cam != null && cam.orthographic)
-            {
                 cam.orthographicSize = targetOrthoSize;
-            }
         }
     }
 
@@ -70,17 +69,20 @@ public class CameraMover : MonoBehaviour
         Vector3 current = transform.position;
         Vector3 target = player.position + offset;
 
-        // ³ôÀÌ Àá±İ »óÅÂ¶ó¸é Y´Â À¯Áö
+        // ë†’ì´ ì ê¸ˆ ìƒíƒœì—ì„œëŠ” Y ìœ ì§€
         if (lockHeight)
             target.y = current.y;
 
-        // Z´Â Ä«¸Ş¶ó ±íÀÌ À¯Áö
+        // ZëŠ” ê³ ì •
         target.z = current.z;
 
-        // ºÎµå·´°Ô µû¶ó°¡±â
+        // X ì œí•œ ì ìš©
+        target.x = Mathf.Clamp(target.x, minX, maxX);
+
+        // ë¶€ë“œëŸ½ê²Œ ë”°ë¼ê°
         transform.position = Vector3.Lerp(current, target, followLerp * Time.deltaTime);
 
-        // ÁÜµµ ¼­¼­È÷ º¸°£
+        // ì¤Œë„ ë³´ê°„
         if (cam != null && cam.orthographic)
         {
             cam.orthographicSize =
@@ -88,9 +90,6 @@ public class CameraMover : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ÇÃ·¹ÀÌ¾î »óÅÂ°¡ ¹Ù²ğ ¶§ PlayerAutoRunner¿¡¼­ È£ÃâÇØÁÖ¸é µÊ
-    /// </summary>
     public void OnPlayerStateChanged(IPlayerState newState)
     {
         bool isVerticalChanging =
@@ -99,7 +98,6 @@ public class CameraMover : MonoBehaviour
             newState is PlayerStairClimbState ||
             newState is PlayerLiftingState;
 
-        // ³ôÀÌ ¿òÁ÷ÀÌ´Â »óÅÂ ¡æ Y Àá±İ + ÄÚ·çÆ¾ ÁßÁö
         if (isVerticalChanging)
         {
             lockHeight = true;
@@ -111,7 +109,6 @@ public class CameraMover : MonoBehaviour
             return;
         }
 
-        // Run »óÅÂ ¡æ ÄÚ·çÆ¾À¸·Î Y Á¤·Ä ½ÃÀÛ
         if (newState is PlayerRunState)
         {
             if (heightAlignRoutine != null)
@@ -121,13 +118,9 @@ public class CameraMover : MonoBehaviour
             return;
         }
 
-        // ±× ¿Ü »óÅÂµé(¿¹: Jump µî)Àº ±×³É Y µû¶ó°¡µµ·Ï Àá±İ ÇØÁ¦
         lockHeight = false;
     }
 
-    /// <summary>
-    /// Run »óÅÂ¿¡¼­ ÇÃ·¹ÀÌ¾î ³ôÀÌ¿¡ ¸ÂÃç Ä«¸Ş¶ó Y¸¦ ¼­¼­È÷ ¸ÂÃß´Â ÄÚ·çÆ¾
-    /// </summary>
     private IEnumerator AlignHeightToPlayerSmooth()
     {
         if (player == null)
@@ -136,7 +129,6 @@ public class CameraMover : MonoBehaviour
             yield break;
         }
 
-        // ÄÚ·çÆ¾ µ¿¾ÈÀº Y´Â ÀÌ ÄÚ·çÆ¾ÀÌ Ã¥ÀÓÁö°í Á¶Á¤ÇÏ¹Ç·Î Àá±İ À¯Áö
         lockHeight = true;
 
         float elapsed = 0f;
@@ -145,6 +137,10 @@ public class CameraMover : MonoBehaviour
         float startY = transform.position.y;
         float targetY = (player.position + offset).y;
 
+        float startX = transform.position.x; // XëŠ” ìœ ì§€í•˜ë˜...
+        float clampedX = Mathf.Clamp(startX, minX, maxX); // í˜¹ì‹œ ì´ˆê³¼í–ˆìœ¼ë©´ ë‹¤ì‹œ Clamp ì ìš©
+        transform.position = new Vector3(clampedX, startY, transform.position.z);
+
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
@@ -152,14 +148,15 @@ public class CameraMover : MonoBehaviour
 
             Vector3 pos = transform.position;
             pos.y = Mathf.Lerp(startY, targetY, t);
+            pos.x = Mathf.Clamp(pos.x, minX, maxX); // ì½”ë£¨í‹´ ì¤‘ì—ë„ ë³´ì • ìœ ì§€
             transform.position = pos;
 
             yield return null;
         }
 
-        // ¸¶Áö¸·¿¡ Á¤È®È÷ ¸ÂÃçÁÖ°í, ÀÌÈÄºÎÅÍ´Â ´Ù½Ã ÀÚÀ¯·Ó°Ô µû¶ó°¡µµ·Ï Àá±İ ÇØÁ¦
         Vector3 finalPos = transform.position;
         finalPos.y = (player.position + offset).y;
+        finalPos.x = Mathf.Clamp(finalPos.x, minX, maxX);
         transform.position = finalPos;
 
         lockHeight = false;

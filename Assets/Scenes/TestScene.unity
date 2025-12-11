@@ -353,6 +353,8 @@ MonoBehaviour:
   targetOrthoSize: 3
   zoomLerp: 3
   heightAlignDuration: 0.5
+  minX: -1.1
+  maxX: 1.1
 --- !u!1 &848079714
 GameObject:
   m_ObjectHideFlags: 0

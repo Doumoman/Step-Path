@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: "\uB545_0"
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -2837383762957642366, guid: ad2748d5a05e05a40927636c6bdf4172, type: 3}
+  m_Sprite: {fileID: -8349151695572281407, guid: 2e45e84c33330df43be4a590721fa772, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -33,4 +33,4 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 1
+  m_ColliderType: 2
