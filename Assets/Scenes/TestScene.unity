@@ -1166,9 +1166,21 @@ MonoBehaviour:
   itemPrefabs:
   - {fileID: 7647054886370508402, guid: ae6c400de6773ed4c85ae5fb508b4761, type: 3}
   - {fileID: 7647054886370508402, guid: 778a883ce0c324942908fe06d8da77b9, type: 3}
+  - {fileID: 7647054886370508402, guid: 21d5c90742a26784cb1ae966a89a2b65, type: 3}
+  - {fileID: 7647054886370508402, guid: 574a61ec02d6e764b9a847215748c7c1, type: 3}
+  - {fileID: 7647054886370508402, guid: 442521b11f09b4140b0669096e3db56c, type: 3}
+  - {fileID: 7647054886370508402, guid: f5fb040bf8eb2554d83b82fbc00b07c8, type: 3}
+  - {fileID: 7647054886370508402, guid: 4b638e2e9a016604bb5d97eaa9519d1d, type: 3}
   itemimages:
   - {fileID: 2330050038687841085, guid: ec5533092dcf23045808dabbcc4bfb1f, type: 3}
   - {fileID: 2330050038687841085, guid: e849c45d48f8e1a44b1aa510c8750fac, type: 3}
+  - {fileID: 2330050038687841085, guid: 3bd6090f45057a74c9cd4517023632e3, type: 3}
+  - {fileID: 2330050038687841085, guid: 3d71cca832a0bb1429815f09a64134e3, type: 3}
+  - {fileID: 2330050038687841085, guid: 62a8cf7ce3c87a44596d2efa3047c0aa, type: 3}
+  - {fileID: 2330050038687841085, guid: fdbc72e405a74164088cfc8a5ff7df44, type: 3}
+  - {fileID: 2330050038687841085, guid: c4155fd70cf9ccd43826a4f7a9a5508a, type: 3}
+  Crafteditems:
+  - {fileID: 7647054886370508402, guid: 9f6f1e94a90745d4da7ce10320b580f8, type: 3}
 --- !u!1 &1676807894
 GameObject:
   m_ObjectHideFlags: 0

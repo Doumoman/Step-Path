@@ -27,7 +27,7 @@ public class ItemController : MonoBehaviour
     {
         item = this.transform;
         ctx = new ItemDataHub(this);
-        root.PushState(new PlacedState(ctx, root, Prefab, item));
+        root.PushState(new PlacedState(ctx, root, Prefab));
         _initialized = true;
     }
 

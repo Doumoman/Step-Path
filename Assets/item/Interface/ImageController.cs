@@ -9,6 +9,7 @@ public class ImageController : MonoBehaviour
     [SerializeField] ItemPrepabDelegate prefab;
     [SerializeField] GridData grid;
 
+
     public ItemStateMachine StateMachine => root;
     public ItemData Data => data;
     public GridData Grid => grid;
@@ -29,7 +30,7 @@ public class ImageController : MonoBehaviour
     {
         item = this.transform;
         ctx = new ItemDataHub(this);
-        root.PushState(new BackgroundState(ctx, root, Prefab, item));
+        root.PushState(new BackgroundState(ctx, root, Prefab));
         _initialized = true;
 
         

@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e952c92458af3f4287a9955bf79d5bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 11902b7c6bb6d3349bb2574f4ae7a690, type: 2}
+  data: {fileID: 11400000, guid: a57b43ba6cfefe644bf5e9747165750f, type: 2}
   spawnL: {x: 525, y: 100, z: 11}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}

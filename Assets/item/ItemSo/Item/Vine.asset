@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cbbc9fc50e1725488677ee745a26b65, type: 3}
   m_Name: Vine
   m_EditorClassIdentifier: 
-  itemName: basic
+  itemName: vine
   rerollCost: 3
   itemFrequency: 3
+  eachLogic: {fileID: 0}
+  itemDelegate: {fileID: 0}

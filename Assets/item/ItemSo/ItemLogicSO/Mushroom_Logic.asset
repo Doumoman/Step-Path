@@ -9,9 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cbbc9fc50e1725488677ee745a26b65, type: 3}
-  m_Name: Plant
+  m_Script: {fileID: 11500000, guid: 9eb1ca3162b71514eb6b96a0d78b16ef, type: 3}
+  m_Name: Mushroom_Logic
   m_EditorClassIdentifier: 
-  itemName: basic
-  rerollCost: 3
-  itemFrequency: 3

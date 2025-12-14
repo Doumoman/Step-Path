@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cbbc9fc50e1725488677ee745a26b65, type: 3}
   m_Name: Cloud
   m_EditorClassIdentifier: 
-  itemName: basic
+  itemName: cloud
   rerollCost: 3
   itemFrequency: 3
   eachLogic: {fileID: 11400000, guid: 4ba0c92ceb2a4f4488bb79245c3bcd53, type: 2}

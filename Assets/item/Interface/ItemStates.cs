@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.Rendering;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 
 
@@ -14,8 +15,8 @@ public sealed class BackgroundState : IItemState
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
-    readonly Transform item;
-    public BackgroundState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
+    
+    public BackgroundState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
     public void Enter()
     {
 
@@ -28,7 +29,7 @@ public sealed class BackgroundState : IItemState
     {
         if (Input.GetMouseButtonDown(0))
         {
-            machine.ChangeState(new DraggingState(ctx, machine, prefabCreate, item));
+            machine.ChangeState(new DraggingState(ctx, machine, prefabCreate));
             return;
             
         }
@@ -54,8 +55,9 @@ public sealed class DraggingState : IItemState
     bool CraftCheck;
     bool IsPlaceable;
     bool groundcheck;
+    ItemDataHub placed_ctx;
 
-    public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
+    public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
     public void Enter()
     {
         groundcheck = ctx.image.gameObject.layer >= 26;
@@ -71,17 +73,21 @@ public sealed class DraggingState : IItemState
         {
    
             OffPoint(ctx);
-            
+            Movectx(ctx);
             if (IsPlaceable && CraftCheck)
             {
-                machine.ChangeState(new CraftingState(ctx, machine, prefabCreate));
+                machine.ChangeState(new CraftingState(ctx, machine, prefabCreate, placed_ctx));
             }
             else if (IsPlaceable && !CraftCheck)
             {
-                machine.ChangeState(new PlacedState(ctx, machine, prefabCreate, item));
+                machine.ChangeState(new PlacedState(ctx, machine, prefabCreate));
             }
-            else machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate, item));
-                return;
+            else
+            {
+                if (ctx.image.gameObject.layer == 24) { machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate)); prefabCreate.DeletitemStack(); prefabCreate.Createitemimage(); }
+                machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
+            }    
+            return;
         }
         
     }
@@ -216,13 +222,35 @@ public sealed class DraggingState : IItemState
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
-
+        
         if (groundcheck)
         {
             if (hititem == null && hitGroundCenter == null)
             {
                 IsPlaceable = true;
                 CraftCheck = false;
+                return;
+            }
+            else
+            {
+                IsPlaceable = false;
+                CraftCheck = false;
+                return;
+            }
+        }
+        else if (ctx.image.gameObject.layer == 24)
+        {
+            if (hititem == null && hitGroundCenter == null)
+            {
+                IsPlaceable = false;
+                CraftCheck = false;
+                return;
+            }
+            else if (hititem != null && hitGroundCenter == null)
+            {
+                IsPlaceable = true;
+                CraftCheck = true;
+                Debug.Log("조합 가능");
                 return;
             }
             else
@@ -257,6 +285,34 @@ public sealed class DraggingState : IItemState
 
         
     }
+
+    void Movectx(ItemDataHub ctx)
+    {
+        int targetLayerIndex = LayerMask.NameToLayer("item");
+        int higherLayerMask = ~0 << (targetLayerIndex + 1);
+        Vector3 mouseScreenPos = Input.mousePosition;
+        mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos); cellPos.y++;
+        ctx.image.Grid.positioncell = cellPos;
+
+        Vector3 cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
+
+        Vector3 cellCenterPosGround = new Vector3(cellCenterPos.x - ctx.map.cellSize.x / 2, cellCenterPos.y - ctx.map.cellSize.y * 2, cellCenterPos.z);
+        Vector3 cellCenterPositem = ctx.map.CellToWorld(cellPos);
+
+
+
+        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
+        Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
+        if(hititem != null)
+        {
+            ItemController c = hititem.GetComponent<ItemController>();
+            placed_ctx = c.ctx;
+        }
+        else placed_ctx = null;
+    }
     
 }
 
@@ -265,33 +321,40 @@ public sealed class PlacedState : IItemState
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
-    readonly Transform item;
+    bool ok = false;
 
-    public PlacedState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
+
+    public PlacedState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
     public void Enter()
     {
-        
-    }
-
-    public void Update()
-    {
-        if(ctx.image != null)
+        if (ctx.image != null)
         {
             ctx.im.enabled = false;
             prefabCreate.CreateSimpleitem();
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
         }
-        else
-        {
-            //item 로직 실행 - 단일 오브젝트 설치. 로직 계속 실행하도록. 이 로직 안에 
-        }
+        if (ctx == null || ctx.data == null ||  ctx.data.eachLogic == null) ctx.data.eachLogic.PlacedItemLogic(ctx);
 
+    }
+
+    public void Update()
+    {
+        if (!ok)
+        {
+            if (ctx == null || ctx.data == null || ctx.data.eachLogic == null) return;
+            else { ctx.data.eachLogic.PlacedItemLogic(ctx); ok = true; }
+        }
+        
+        if (ctx.data.itemName != "cloud")
+        {
+            ctx.data.eachLogic.PlacedItemLogic(ctx);
+        }
 
     }
 
     public void Exit()
     {
-        prefabCreate.Createitemimage();
+        if(ctx.data.itemName != "cloud") prefabCreate.Createitemimage();
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
@@ -305,25 +368,40 @@ public sealed class CraftingState : IItemState
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
+    ItemDataHub placed_ctx;
+    bool IsCraftable;
+    string itemName;
+    string craftitemName;
 
-    public CraftingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
+    public CraftingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, ItemDataHub item) { ctx = c; machine = m; prefabCreate = p; placed_ctx = item; }
     public void Enter()
     {
 
+        itemName = ctx.data.itemName;
+        if(itemName != "water" && itemName != "wood") { machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate)); return; }
+        craftitemName = ctx.data.eachLogic.CraftingCheck(placed_ctx, ref IsCraftable);
+        return;
+        
     }
 
     public void Update()
     {
-        if (ctx.IsCraftable) // 조합되는 경우. 
+        if (IsCraftable) // 조합되는 경우. 
         {
+            placed_ctx.mono.Grid.craftedPos = placed_ctx.transform.position;
+            placed_ctx.mono.Grid.crafteditemName = craftitemName;
             // 원래 placed되어 있던 프리팹 destroy로 전달. 
+            placed_ctx.sm.ChangeState(new DestroyedState(placed_ctx, placed_ctx.sm, placed_ctx.pd));
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+            
             prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
             return;
         }
-        else // 조합 불가인 경우
+        else // 조합 불가인 경우 
         {
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+            prefabCreate.DeletitemStack();
+            prefabCreate.Createitemimage();
             return;
         }
     }
@@ -338,9 +416,11 @@ public sealed class CraftingState : IItemState
         
         
     }
+
+    
 }
 
-public sealed class DestroyedState : IItemState // 잘못 조합된 경우
+public sealed class DestroyedState : IItemState 
 {
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
@@ -360,7 +440,8 @@ public sealed class DestroyedState : IItemState // 잘못 조합된 경우
 
     public void Exit()
     {
-        Object.Destroy(ctx.image.gameObject);
+        if(ctx.image != null) Object.Destroy(ctx.image.gameObject);
+        if(ctx.mono != null) Object.Destroy(ctx.mono.gameObject);
         //잘못 조합된 경우 / 조합했을 때 가장 최근의 프리팹의 destroy에만 프리팹 생성 전달
     }
 

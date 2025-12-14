@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 7925569215541386451}
   - component: {fileID: 6001388609037809617}
   - component: {fileID: 2179483340625592356}
-  - component: {fileID: -2499841793268292126}
-  m_Layer: 24
-  m_Name: Water_item
+  - component: {fileID: -169883732080262214}
+  m_Layer: 28
+  m_Name: Bigmushroom_item
   m_TagString: item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 5774506809615752826, guid: d00243c42f1091741b91030c1913d1df, type: 3}
+  m_Sprite: {fileID: -5057932325967785759, guid: eb87b48bbc510df4d9de1ec510526d8b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -101,11 +101,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e952c92458af3f4287a9955bf79d5bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: ef5de80af65159d469764dd97d8dac7c, type: 2}
+  data: {fileID: 11400000, guid: 85bf6063a35ecec46b93bcfcce1dccad, type: 2}
   spawnL: {x: 525, y: 100, z: 11}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
---- !u!60 &-2499841793268292126
+--- !u!60 &-169883732080262214
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,7 +143,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.28, y: 0.32}
+    oldSize: {x: 0.48, y: 0.32}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -151,9 +151,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.16, y: -0.16}
-      - {x: 0.16, y: -0.16}
-      - {x: 0.16, y: 0.16}
-      - {x: -0.11, y: 0.16}
-      - {x: -0.16, y: 0.08}
+    - - {x: -0.24, y: 0.16}
+      - {x: -0.24, y: -0.07}
+      - {x: -0.16, y: -0.16}
+      - {x: 0.14999999, y: -0.16}
+      - {x: 0.24, y: -0.089999996}
+      - {x: 0.24, y: 0.16}
   m_UseDelaunayMesh: 0

@@ -9,7 +9,7 @@ public class ItemPrepabDelegate : ScriptableObject
     public Action OnSimpleitem;
     public Action Onitemimage;
     public Action OnCrafteditem;
-
+    public Action Dequeueitem;
 
 
 
@@ -28,5 +28,8 @@ public class ItemPrepabDelegate : ScriptableObject
         OnCrafteditem?.Invoke();
     }
 
-
+    public void DeletitemStack()
+    {
+        Dequeueitem?.Invoke();
+    }
 }
