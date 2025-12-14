@@ -1,5 +1,6 @@
 using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.Rendering;
 using UnityEngine;
 
@@ -52,11 +53,12 @@ public sealed class DraggingState : IItemState
     readonly Transform item;
     bool CraftCheck;
     bool IsPlaceable;
+    bool groundcheck;
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p, Transform i) { ctx = c; machine = m; prefabCreate = p; item = i; }
     public void Enter()
     {
-        
+        groundcheck = ctx.image.gameObject.layer >= 26;
 
     }
 
@@ -120,14 +122,19 @@ public sealed class DraggingState : IItemState
         else
             finalWorldPos.y = ctx.map.GetCellCenterWorld(cellPos).y;
 
+        if (groundcheck)
+            finalWorldPos.y += 0.15f;
         // Z축은 0으로 고정
         finalWorldPos.z = 0;
-
+            
         // 5. 월드 -> UI 스크린 좌표 변환 및 적용
         Vector3 snappedScreenPos = Camera.main.WorldToScreenPoint(finalWorldPos);
         ctx.rect.position = snappedScreenPos;
 
-        ResizeImageToGrid(ctx, 2, 2);
+        if (groundcheck)
+            ResizeImageToGrid(ctx, 2, 1);
+        else
+            ResizeImageToGrid(ctx, 2, 2);
         return;
     }
 
@@ -156,6 +163,7 @@ public sealed class DraggingState : IItemState
         float finalWidth = pixelWidth / canvas.scaleFactor;
         float finalHeight = pixelHeight / canvas.scaleFactor;
         // 5. UI 이미지(RectTransform)에 크기 적용
+
         ctx.rect.sizeDelta = new Vector2(finalWidth, finalHeight);
     }
 
@@ -179,7 +187,7 @@ public sealed class DraggingState : IItemState
         }
     }
 
-    void OffPoint( ItemDataHub ctx)
+    void OffPoint(ItemDataHub ctx)
     {
         ctx.im.color = ctx.originalColor;
     }
@@ -209,25 +217,45 @@ public sealed class DraggingState : IItemState
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
 
-        if (hitGround != null && hititem == null && hitGroundCenter == null)
+        if (groundcheck)
         {
-            IsPlaceable = true;
-            CraftCheck = false;
-            return; 
-        }
-        else if(hitGround != null && hititem != null && hitGroundCenter == null) // 2개에 동시에 겹칠 경우에 생각해봐야할듯
-        {
-            IsPlaceable = true;
-            CraftCheck = true;
-            Debug.Log("조합 가능");
-            return; 
+            if (hititem == null && hitGroundCenter == null)
+            {
+                IsPlaceable = true;
+                CraftCheck = false;
+                return;
+            }
+            else
+            {
+                IsPlaceable = false;
+                CraftCheck = false;
+                return;
+            }
         }
         else
         {
-            IsPlaceable = false;
-            CraftCheck = false;
-            return;
+            if (hitGround != null && hititem == null && hitGroundCenter == null)
+            {
+                IsPlaceable = true;
+                CraftCheck = false;
+                return;
+            }
+            else if (hitGround != null && hititem != null && hitGroundCenter == null) // 2개에 동시에 겹칠 경우에 생각해봐야할듯
+            {
+                IsPlaceable = true;
+                CraftCheck = true;
+                Debug.Log("조합 가능");
+                return;
+            }
+            else
+            {
+                IsPlaceable = false;
+                CraftCheck = false;
+                return;
+            }
         }
+
+        
     }
     
 }

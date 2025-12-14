@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3811245245088075945}
   - component: {fileID: 5628447067241481687}
   - component: {fileID: 6514054592008355438}
-  m_Layer: 22
-  m_Name: Mushroom_image
+  m_Layer: 23
+  m_Name: Sprout_image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -5409847850790781356, guid: d89063ab4907fea448264198439039cd, type: 3}
+  m_Sprite: {fileID: -3599059414226342452, guid: 40d4e34d7e51d244988c2b38b67f3f4f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

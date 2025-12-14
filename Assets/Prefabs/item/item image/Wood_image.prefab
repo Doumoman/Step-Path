@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3811245245088075945}
   - component: {fileID: 5628447067241481687}
   - component: {fileID: 6514054592008355438}
-  m_Layer: 22
-  m_Name: Mushroom_image
+  m_Layer: 27
+  m_Name: Wood_image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 2330050038687841085}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -5409847850790781356, guid: d89063ab4907fea448264198439039cd, type: 3}
+  m_Sprite: {fileID: 1123706183361393910, guid: 2bb5fe5f6d6613c4282da5670a5a8435, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 6001388609037809617}
   - component: {fileID: 2179483340625592356}
   - component: {fileID: -2499841793268292126}
-  m_Layer: 21
-  m_Name: item_Rock
+  m_Layer: 25
+  m_Name: Spaceship_item
   m_TagString: item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 6709277255714258841, guid: ac5d27ee359956d42b7d4e834db11f6c, type: 3}
+  m_Sprite: {fileID: 6104498062217291220, guid: 152235e6938714f4f98058fe127b783e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

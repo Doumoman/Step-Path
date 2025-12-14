@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using UnityEditor;
 
 public class ItemManager : MonoBehaviour
 {
@@ -60,7 +61,12 @@ public class ItemManager : MonoBehaviour
             Debug.LogWarning("itemPrefabs 목록이 비어있습니다!");
             return;
         }
-        Vector3 spawnpos = grid.CellToWorld(gridData.positioncell);
+
+        Vector3 spawnpos;
+
+        if (id >= itemimages.Count - 2) { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.043f; }
+        else { spawnpos = grid.CellToWorld(gridData.positioncell); }
+
         GameObject itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
     }
 }
