@@ -9,11 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cbbc9fc50e1725488677ee745a26b65, type: 3}
-  m_Name: Wood
+  m_Script: {fileID: 11500000, guid: 38bb307ef3e4a03499935bc8ad17ecde, type: 3}
+  m_Name: Wood_Logic
   m_EditorClassIdentifier: 
-  itemName: wood
-  rerollCost: 3
-  itemFrequency: 3
-  eachLogic: {fileID: 11400000, guid: b0edc2608ff4dfb46aa0406788e91f32, type: 2}
-  itemDelegate: {fileID: 0}

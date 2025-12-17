@@ -15,5 +15,5 @@ MonoBehaviour:
   itemName: sprout
   rerollCost: 3
   itemFrequency: 3
-  eachLogic: {fileID: 0}
+  eachLogic: {fileID: 11400000, guid: df076a435d11a6c44aed5f4a21fe499a, type: 2}
   itemDelegate: {fileID: 0}

@@ -21,14 +21,18 @@ public class ItemController : MonoBehaviour
 
     public ItemDataHub ctx;
 
-
-    
-    void Awake()
+    private void Awake()
     {
         item = this.transform;
         ctx = new ItemDataHub(this);
-        root.PushState(new PlacedState(ctx, root, Prefab));
         _initialized = true;
+    }
+
+    void Start()
+    {
+        
+        root.PushState(new PlacedState(ctx, root, Prefab));
+       
     }
 
     private void Update()
