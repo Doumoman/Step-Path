@@ -19,7 +19,6 @@ public sealed class BackgroundState : IItemState
     public BackgroundState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
     public void Enter()
     {
-
         ctx.rect.anchoredPosition = ctx.spawnL;
 
 
@@ -56,12 +55,13 @@ public sealed class DraggingState : IItemState
     bool IsPlaceable;
     bool groundcheck;
     ItemDataHub placed_ctx;
+    Vector2 originalscale;
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
     public void Enter()
     {
         groundcheck = ctx.image.gameObject.layer >= 26;
-
+        originalscale = ctx.rect.sizeDelta;
     }
 
     public void Update()
@@ -196,6 +196,7 @@ public sealed class DraggingState : IItemState
     void OffPoint(ItemDataHub ctx)
     {
         ctx.im.color = ctx.originalColor;
+        ctx.rect.sizeDelta = originalscale;
     }
     //배치 가능 여부 판단
     public void IsitPlaceable(ItemDataHub ctx)
