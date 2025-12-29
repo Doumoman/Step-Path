@@ -67,8 +67,8 @@ public sealed class DraggingState : IItemState
     public void Update()
     {
         TrackingMouse(ctx, 2, 2);
-        OnPoint(ctx);
         IsitPlaceable(ctx);
+        OnPoint(ctx);
         if (Input.GetMouseButtonUp(0)) 
         {
    
@@ -265,13 +265,32 @@ public sealed class DraggingState : IItemState
         {
             if (hitGround != null && hititem == null && hitGroundCenter == null)
             {
+                ItemController c = hitGround.GetComponent<ItemController>();
+
+                if (c == null)
+                {
+                    IsPlaceable = true;
+                    CraftCheck = false;
+                    return;
+                }
+                
+
+                if (c.ctx.data.itemName == "cloud")
+                {
+                    IsPlaceable = false;
+                    CraftCheck = false;
+                    return;
+                }
+
+
+
                 IsPlaceable = true;
                 CraftCheck = false;
                 return;
             }
             else if (hitGround != null && hititem != null && hitGroundCenter == null) // 2개에 동시에 겹칠 경우에 생각해봐야할듯
             {
-                IsPlaceable = true;
+                IsPlaceable = false;
                 CraftCheck = true;
                 Debug.Log("조합 가능");
                 return;

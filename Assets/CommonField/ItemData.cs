@@ -11,7 +11,7 @@ public class ItemData : ScriptableObject
     public float rerollCost = 3f;
 
     [Header("아이템 빈도")]
-    public float itemFrequency = 3f;
+    public int itemFrequency = 3;
 
     [Header("아이템 로직")]
     public ItemLogic eachLogic;

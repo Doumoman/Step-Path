@@ -35,7 +35,7 @@ public sealed class ItemDataHub
         data = owner.Data;
         transform = owner.transform;
         pd = owner.Prefab;
-        sr = owner.gameObject.GetComponent<SpriteRenderer>();
+        sr = owner.gameObject.GetComponentInChildren<SpriteRenderer>();
         spawnL = owner.SpawnL;
         map = owner.Grid.currentGrid;
         originalColor = sr.color;

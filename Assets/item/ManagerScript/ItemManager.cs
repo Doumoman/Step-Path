@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 
 public class ItemManager : MonoBehaviour
 {
@@ -11,21 +12,27 @@ public class ItemManager : MonoBehaviour
     [SerializeField] GridData gridData;
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
+    [SerializeField] public Transform Ground_item;
     public List<GameObject> itemPrefabs;
     public List<GameObject> itemimages;
     public List<GameObject> Crafteditems;
+    public List<ItemData> itemDatas;
     private Queue<int> itemnumstack = new Queue<int>();
+    int sum = 0;
     
 
     void Awake()
     {
         gridData.currentGrid = grid;
         
+        
     }
 
     private void Start()
     {
+        SumOfFreq(itemDatas);
         SpawnRandomItemImage();
+        
     }
 
     // Update is called once per frame
@@ -45,7 +52,7 @@ public class ItemManager : MonoBehaviour
 
     void SpawnRandomItemImage()
     {
-        int num = Random.Range(0, itemimages.Count);
+        int num = RandomDraw(itemDatas);
         itemnumstack.Enqueue(num);
         if (itemimages == null || itemimages.Count == 0)
         {
@@ -66,11 +73,15 @@ public class ItemManager : MonoBehaviour
         }
 
         Vector3 spawnpos;
+        
 
-        if (id >= itemimages.Count - 2) { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.043f; }
+        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.043f; }
         else { spawnpos = grid.CellToWorld(gridData.positioncell); }
 
-        GameObject itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
+
+        GameObject itemspawn;
+        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, Ground_item);
+        else itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
     }
 
     void SpawnCrafteditem()
@@ -98,5 +109,26 @@ public class ItemManager : MonoBehaviour
     void Deletitemstack()
     {
         itemnumstack.Dequeue();
+    }
+
+    void SumOfFreq(List<ItemData> itemlist)
+    {
+        for(int i = 0; i < itemlist.Count; i++)
+        {
+            sum += itemlist[i].itemFrequency;
+        } 
+    }
+
+    int RandomDraw(List<ItemData> itemlist)
+    {
+        
+        int n = Random.Range(0,sum);
+        for (int i = 0; i < itemlist.Count; i++) 
+        {
+            if(n >= itemlist[i].itemFrequency) n -= itemlist[i].itemFrequency;
+            else { return i; }
+        }
+
+        return 0;
     }
 }

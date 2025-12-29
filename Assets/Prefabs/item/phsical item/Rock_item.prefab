@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2179483340625592356}
   - component: {fileID: -2499841793268292126}
   m_Layer: 21
-  m_Name: iRock_item
+  m_Name: Rock_item
   m_TagString: item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
