@@ -88,7 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc9874abe1f5d854a824fa4ff0a55f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 11902b7c6bb6d3349bb2574f4ae7a690, type: 2}
+  data: {fileID: 11400000, guid: 13f4d0237ad7b4e4087d9cefe7e01893, type: 2}
   spawnL: {x: 0, y: 65, z: 0}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}

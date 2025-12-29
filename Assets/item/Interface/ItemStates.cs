@@ -223,20 +223,56 @@ public sealed class DraggingState : IItemState
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
-        
+
+        ItemController con;
+        string name;
+
+        if (hitGroundCenter != null)
+        {
+            con = hitGroundCenter.GetComponent<ItemController>();
+            if (con != null) name = con.Data.itemName;
+            else name = null;
+        }
+        else name = null;
+
         if (groundcheck)
         {
-            if (hititem == null && hitGroundCenter == null)
+            if (name == "wood" && ctx.image.gameObject.layer == 27)
             {
-                IsPlaceable = true;
-                CraftCheck = false;
-                return;
+                if (hititem == null && hitGroundCenter == null)
+                {
+                    IsPlaceable = true;
+                    CraftCheck = false;
+                    return;
+                }
+                else if (hititem == null && hitGroundCenter != null)
+                {
+                    IsPlaceable = true;
+                    CraftCheck = true;
+                    return;
+                }
+                else
+                {
+                    IsPlaceable = false;
+                    CraftCheck = false;
+                    return;
+                }
             }
             else
             {
-                IsPlaceable = false;
-                CraftCheck = false;
-                return;
+                if (hititem == null && hitGroundCenter == null)
+                {
+                    IsPlaceable = true;
+                    CraftCheck = false;
+                    return;
+                }
+                else
+                {
+
+                    IsPlaceable = false;
+                    CraftCheck = false;
+                    return;
+                }
             }
         }
         else if (ctx.image.gameObject.layer == 24)
@@ -273,7 +309,7 @@ public sealed class DraggingState : IItemState
                     CraftCheck = false;
                     return;
                 }
-                
+
 
                 if (c.ctx.data.itemName == "cloud")
                 {
@@ -281,8 +317,6 @@ public sealed class DraggingState : IItemState
                     CraftCheck = false;
                     return;
                 }
-
-
 
                 IsPlaceable = true;
                 CraftCheck = false;
@@ -310,6 +344,7 @@ public sealed class DraggingState : IItemState
     {
         int targetLayerIndex = LayerMask.NameToLayer("item");
         int higherLayerMask = ~0 << (targetLayerIndex + 1);
+        int lowerLayerMask = (1 << targetLayerIndex) - 1;
         Vector3 mouseScreenPos = Input.mousePosition;
         mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
@@ -326,10 +361,22 @@ public sealed class DraggingState : IItemState
 
         Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
-        if(hititem != null)
+        Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
+        if (hititem != null)
         {
             ItemController c = hititem.GetComponent<ItemController>();
             placed_ctx = c.ctx;
+        }
+        else if(hitGroundCenter != null)
+        {
+            ItemController c = hitGroundCenter.GetComponent<ItemController>();
+            if(c != null)
+            {
+                placed_ctx = c.ctx;
+                Debug.Log("우드 ctx 전달 완");
+                return;
+            }
+            else placed_ctx = null;
         }
         else placed_ctx = null;
     }

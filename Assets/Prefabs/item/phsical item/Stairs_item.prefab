@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 6001388609037809617}
   - component: {fileID: 2179483340625592356}
   - component: {fileID: 7723476842573337907}
-  - component: {fileID: -1224562829788573355}
+  - component: {fileID: 8848321457692860558}
   m_Layer: 6
-  m_Name: Wood_item
+  m_Name: Stairs_item
   m_TagString: item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1123706183361393910, guid: 2bb5fe5f6d6613c4282da5670a5a8435, type: 3}
+  m_Sprite: {fileID: -8394394436682032109, guid: 58332be08eae730409425c391340cb43, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e952c92458af3f4287a9955bf79d5bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 13f4d0237ad7b4e4087d9cefe7e01893, type: 2}
+  data: {fileID: 11400000, guid: 1a650444b58adf440a68a37c33b2471c, type: 2}
   spawnL: {x: 525, y: 100, z: 11}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
@@ -144,8 +144,8 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!61 &-1224562829788573355
-BoxCollider2D:
+--- !u!60 &8848321457692860558
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -178,15 +178,21 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.025}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.32, y: 0.16}
+    oldSize: {x: 0.64, y: 0.64}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.33, y: 0.15}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.02, y: 0.32}
+      - {x: -0.32, y: -0.03}
+      - {x: -0.32, y: -0.32}
+      - {x: 0.32, y: -0.32}
+      - {x: 0.32, y: 0.32}
+  m_UseDelaunayMesh: 0

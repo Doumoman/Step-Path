@@ -4,7 +4,17 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ItemData", menuName = "Items/Item Logic/New Wood Logic")]
 public class Wood_L : ItemLogic
 {
-    public override string CraftingCheck(ItemDataHub ctx, ref bool Craft) { return null; }
+    public override string CraftingCheck(ItemDataHub ctx, ref bool craft) 
+    {
+        if (ctx == null) Debug.LogError("🚨 비상! ctx가 비어있습니다!");
+        else if (ctx.map == null) Debug.LogError("🚨 비상! ctx.map(그리드)이 비어있습니다!");
+        else if (ctx.data == null) Debug.LogError("🚨 비상! ctx.data(SO)가 비어있습니다!");
+        string itemName = ctx.data.itemName;
+
+        if (itemName == "wood") { craft = true; return "stairs"; }
+        else { craft = false; return null; }
+    }
+
 
     public override void PlacedItemLogic(ItemDataHub ctx) { return; }
 
