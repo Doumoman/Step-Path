@@ -380,13 +380,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1531521708}
-  offset: {x: 0, y: 2, z: -10}
+  offset: {x: 0, y: 1.5, z: -10}
   followLerp: 8
-  targetOrthoSize: 3
+  targetOrthoSize: 2.5
   zoomLerp: 3
   heightAlignDuration: 0.5
-  minX: -1.1
-  maxX: 1.1
+  minX: -0.59
+  maxX: 0.59
 --- !u!1 &848079714
 GameObject:
   m_ObjectHideFlags: 0
@@ -515,8 +515,8 @@ Transform:
   m_GameObject: {fileID: 848079714}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.3, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 10, z: 1}
+  m_LocalPosition: {x: 2.5, y: 200, z: 0}
+  m_LocalScale: {x: 1, y: 500, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -752,8 +752,8 @@ Transform:
   m_GameObject: {fileID: 1009277340}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.3, y: 0.02, z: 0}
-  m_LocalScale: {x: 1, y: 10, z: 1}
+  m_LocalPosition: {x: -2.5, y: 200, z: 0}
+  m_LocalScale: {x: 1, y: 500, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1377,9 +1377,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   patterns:
-  - {fileID: 11400000, guid: 494edfe8ede65c3458ea2a959b1e348c, type: 2}
-  - {fileID: 11400000, guid: fd2a5d3bef709e94281082175fad140b, type: 2}
-  - {fileID: 11400000, guid: 0e2ddbbae35576744867e1bf9f812bfe, type: 2}
+  - {fileID: 11400000, guid: b67387897c1c5b04abdfe74e9dd4b8f6, type: 2}
+  - {fileID: 11400000, guid: a6bdffc589607d34ba76a6049092359b, type: 2}
+  - {fileID: 11400000, guid: 0ac7f9a54ee4f224f9518571b2684335, type: 2}
+  - {fileID: 11400000, guid: 4c78cbaf9dfc84245a19d1501339a5ee, type: 2}
+  - {fileID: 11400000, guid: 4f10e4754c8199340b7112735beb50d5, type: 2}
+  - {fileID: 11400000, guid: fd84adecd03221744b090505b702698d, type: 2}
+  - {fileID: 11400000, guid: f6dc70a0ddfc7694081852d844f78e44, type: 2}
+  - {fileID: 11400000, guid: cc9ae8f5b0035ee48bd050e9fc9a8408, type: 2}
+  - {fileID: 11400000, guid: 15d3966565001fd4e9f02d2c16108de9, type: 2}
+  - {fileID: 11400000, guid: 1959cbf6dac97e34a825183cca1cf33b, type: 2}
+  - {fileID: 11400000, guid: 3eab1d697af6b6841a9950e29f8ee119, type: 2}
+  - {fileID: 11400000, guid: 8078c0f809d07bf43b2a24642f272208, type: 2}
+  - {fileID: 11400000, guid: 7aee1c1db87d3c24e8bbf724f0b0dbca, type: 2}
+  - {fileID: 11400000, guid: 0f184433daf8a0e43a04a5c59086ccbd, type: 2}
+  - {fileID: 11400000, guid: 480a690f21d8e7a4badb3f6405d696a1, type: 2}
   cellOffsets: []
   clearBeforeSpawn: 0
   createMissingLayers: 1
@@ -1391,12 +1403,15 @@ MonoBehaviour:
   useCompositeForGround: 0
   addStaticRigidbodyIfComposite: 0
   useChunkStreaming: 1
+  streamRows: 10
   player: {fileID: 1531521708}
-  startChunk: {x: 0, y: 0}
+  startChunkY: 0
   dynamicObjectMask:
     serializedVersion: 2
     m_Bits: 0
-  globalCellOffset: {x: 0, y: 0, z: 0}
+  globalCellOffset: {x: 4, y: 0, z: 0}
+  chunkStepYCells: 0
+  extraGapYCells: 4
 --- !u!4 &1757359527
 Transform:
   m_ObjectHideFlags: 0

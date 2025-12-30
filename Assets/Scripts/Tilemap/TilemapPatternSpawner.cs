@@ -5,6 +5,9 @@ using UnityEngine.Tilemaps;
 
 /// 패턴 SO를 읽어 타일을 깔고, 필요시 레이어/콜라이더를 자동 세팅.
 /// ※ Rigidbody2D 절대 강제 생성하지 않음(옵션으로만).
+/// === 세로(Vertical) 청크 스트리밍 전용 버전 ===
+/// - 좌우(dx) 청크 생성 로직 제거
+/// - 청크는 Y축(세로)으로만 로드/언로드
 public class TilemapPatternSpawner : MonoBehaviour
 {
     [Header("기존 패턴 스폰 (정적)")]
@@ -24,15 +27,18 @@ public class TilemapPatternSpawner : MonoBehaviour
     public bool useCompositeForGround = false;         // true면 TilemapCollider→Composite로 합치기
     public bool addStaticRigidbodyIfComposite = false; // ↑일 때만 상위/자신에 Static RB 추가
 
-    // ===================== 3×3 스트리밍 옵션 =====================
-    [Header("=== 청크 스트리밍 옵션 ===")]
+    // ===================== 세로 스트리밍 옵션 =====================
+    [Header("=== 세로(Vertical) 청크 스트리밍 옵션 ===")]
     public bool useChunkStreaming = false;             // true면 아래 스트리밍 모드 사용
+
+    [Header("스트리밍 범위(세로 청크 개수)")]
+    [Min(1)] public int streamRows = 10;               // 세로 청크 개수 (10이면 총 10줄)
 
     [Tooltip("플레이어 Transform (위치 기준으로 청크 이동 판정).")]
     public Transform player;
 
-    [Tooltip("시작 청크 좌표 (대부분 0,0이면 충분).")]
-    public Vector2Int startChunk = Vector2Int.zero;
+    [Tooltip("시작 청크 Y좌표(그리드가 없거나 player가 없을 때 fallback).")]
+    public int startChunkY = 0;
 
     [Tooltip("언로드 시 지울 오브젝트 레이어(아이템 등).")]
     public LayerMask dynamicObjectMask;
@@ -40,12 +46,19 @@ public class TilemapPatternSpawner : MonoBehaviour
     [Tooltip("모든 청크에 공통으로 더해지는 셀 오프셋 (예: 0,-1,0 넣으면 전체 맵이 그리드 한 칸 아래로).")]
     public Vector3Int globalCellOffset = Vector3Int.zero;
 
+    [Header("청크 간격/스텝(셀 단위)")]
+    [Tooltip("0이면 패턴 size 기반 자동 스텝 사용. 1 이상이면 고정 스텝(셀) 사용.")]
+    [Min(0)] public int chunkStepYCells = 0;
+
+    [Tooltip("자동 스텝일 때(size.y-1 기반)에 추가로 띄울 셀 수.")]
+    [Min(0)] public int extraGapYCells = 0;
+
     Dictionary<string, Tilemap> _layerMap;
     Grid _grid;
 
-    // 스트리밍용 상태
-    Vector2Int _currentChunk;
-    readonly HashSet<Vector2Int> _loadedChunks = new();
+    // 스트리밍용 상태(세로만)
+    int _currentChunkY;
+    readonly HashSet<int> _loadedChunkYs = new();
 
     // 스트리밍에서 청크 크기를 참조할 패턴 (모든 패턴은 같은 size를 쓴다고 가정)
     TilemapPatternAsset ChunkBasePattern
@@ -69,7 +82,6 @@ public class TilemapPatternSpawner : MonoBehaviour
         }
         else
         {
-            // 기존: 한 번만 굽고 끝나는 방식
             if (clearBeforeSpawn) ClearAllTiles();
 
             for (int i = 0; i < patterns.Length; i++)
@@ -95,17 +107,16 @@ public class TilemapPatternSpawner : MonoBehaviour
         var basePattern = ChunkBasePattern;
         if (!basePattern) return;
 
-        // 플레이어의 현재 청크 좌표 계산
         Vector3Int cell = _grid.WorldToCell(player.position);
-        Vector2Int newChunk = new Vector2Int(
-            Mathf.FloorToInt(cell.x / (float)basePattern.size.x),
-            Mathf.FloorToInt(cell.y / (float)basePattern.size.y)
-        );
 
-        if (newChunk != _currentChunk)
+        int stepY = GetStepY(basePattern);
+
+        int newChunkY = Mathf.FloorToInt(cell.y / (float)stepY);
+
+        if (newChunkY != _currentChunkY)
         {
-            _currentChunk = newChunk;
-            UpdateChunksAround(_currentChunk);
+            _currentChunkY = newChunkY;
+            UpdateChunksAroundY(_currentChunkY);
         }
     }
 
@@ -154,13 +165,12 @@ public class TilemapPatternSpawner : MonoBehaviour
             }
         }
 
-        // 5) 각 레이어 콜라이더 정책 적용(절대 RB 강제 안 함)
+        // 5) 각 레이어 콜라이더 정책 적용(RB 강제 안 함)
         foreach (var pair in _layerMap)
         {
             var tm = pair.Value;
             var go = tm.gameObject;
 
-            // BoxCollider2D는 타일 단위 충돌과 맞지 않으므로 제거
             var box = go.GetComponent<BoxCollider2D>();
             if (box) DestroyImmediate(box);
 
@@ -173,14 +183,12 @@ public class TilemapPatternSpawner : MonoBehaviour
                 tmc.isTrigger = false;
                 tmc.usedByComposite = useCompositeForGround;
 
-                // Composite 사용 여부에 따라 부착/제거
                 var comp = go.GetComponent<CompositeCollider2D>();
                 if (useCompositeForGround)
                 {
                     if (!comp) comp = go.AddComponent<CompositeCollider2D>();
                     comp.geometryType = CompositeCollider2D.GeometryType.Polygons;
 
-                    // 옵션: Composite가 필요할 때만 Static Rigidbody 보장
                     if (addStaticRigidbodyIfComposite)
                     {
                         var rb = go.GetComponent<Rigidbody2D>();
@@ -196,10 +204,6 @@ public class TilemapPatternSpawner : MonoBehaviour
             else if (ladderLayerNames.Contains(go.name))
             {
                 tmc.isTrigger = true;
-            }
-            else
-            {
-                // 기타 레이어는 팔레트에서 ColliderType=None 등으로 제어
             }
         }
     }
@@ -229,10 +233,10 @@ public class TilemapPatternSpawner : MonoBehaviour
             var tmc = tm.GetComponent<TilemapCollider2D>();
             if (tmc) tmc.ProcessTilemapChanges();
         }
-        Physics2D.SyncTransforms(); // 물리 쿼리 최신화
+        Physics2D.SyncTransforms();
     }
 
-    // ===================== 스트리밍 전용 구현 =====================
+    // ===================== 세로 스트리밍 전용 구현 =====================
 
     void InitChunkStreaming()
     {
@@ -249,104 +253,110 @@ public class TilemapPatternSpawner : MonoBehaviour
         }
 
         if (clearBeforeSpawn) ClearAllTiles();
-        _loadedChunks.Clear();
+        _loadedChunkYs.Clear();
 
-        // 플레이어 위치 기준으로 초기 청크 잡기 (startChunk를 쓰고 싶으면 이 부분 대신 사용)
+        int stepY = GetStepY(basePattern);
+
         if (_grid)
         {
             Vector3Int cell = _grid.WorldToCell(player.position);
-            _currentChunk = new Vector2Int(
-                Mathf.FloorToInt(cell.x / (float)basePattern.size.x),
-                Mathf.FloorToInt(cell.y / (float)basePattern.size.y)
-            );
+            _currentChunkY = Mathf.FloorToInt(cell.y / (float)stepY);
         }
         else
         {
-            _currentChunk = startChunk;
+            _currentChunkY = startChunkY;
         }
 
-        UpdateChunksAround(_currentChunk);
+        UpdateChunksAroundY(_currentChunkY);
     }
 
-    void UpdateChunksAround(Vector2Int center)
+    void UpdateChunksAroundY(int centerY)
     {
-        // center 기준 3×3 필요한 청크 집합
-        HashSet<Vector2Int> needed = new();
-        for (int dy = -1; dy <= 1; dy++)
+        int rows = Mathf.Max(1, streamRows);
+
+        // (down + 1 + up) = rows
+        int down = rows / 2;
+        int up = rows - down - 1;
+
+        HashSet<int> needed = new();
+        for (int dy = -down; dy <= up; dy++)
+            needed.Add(centerY + dy);
+
+        // 언로드
+        List<int> toRemove = new();
+        foreach (var y in _loadedChunkYs)
         {
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                needed.Add(new Vector2Int(center.x + dx, center.y + dy));
-            }
+            if (!needed.Contains(y))
+                toRemove.Add(y);
         }
 
-        // 언로드할 청크
-        List<Vector2Int> toRemove = new();
-        foreach (var c in _loadedChunks)
-        {
-            if (!needed.Contains(c))
-                toRemove.Add(c);
-        }
+        foreach (var y in toRemove)
+            UnloadChunkY(y);
 
-        foreach (var c in toRemove)
-            UnloadChunk(c);
-
-        // 새로 로드할 청크
-        foreach (var c in needed)
+        // 로드
+        foreach (var y in needed)
         {
-            if (_loadedChunks.Contains(c)) continue;
-            SpawnChunk(c);
+            if (_loadedChunkYs.Contains(y)) continue;
+            SpawnChunkY(y);
         }
 
         RebuildAllColliders();
     }
 
-    void SpawnChunk(Vector2Int chunk)
+    void SpawnChunkY(int chunkY)
     {
-        // 이 청크에 쓸 패턴을 랜덤(좌표 기반 결정적)으로 고른다.
-        var pattern = PickPatternForChunk(chunk);
+        var pattern = PickPatternForChunkY(chunkY);
         if (!pattern) return;
 
-        Vector3Int offset = ChunkToCellOffset(chunk, pattern);
+        Vector3Int offset = ChunkYToCellOffset(chunkY, pattern);
         Spawn(pattern, offset);
-        _loadedChunks.Add(chunk);
+        _loadedChunkYs.Add(chunkY);
     }
 
-    void UnloadChunk(Vector2Int chunk)
+    void UnloadChunkY(int chunkY)
     {
-        ClearChunkTiles(chunk);
-        ClearChunkDynamicObjects(chunk);
-        _loadedChunks.Remove(chunk);
+        ClearChunkTilesY(chunkY);
+        ClearChunkDynamicObjectsY(chunkY);
+        _loadedChunkYs.Remove(chunkY);
     }
 
-    // 청크 좌표에 따른 패턴 선택 (좌표 기반 결정적 랜덤)
-    TilemapPatternAsset PickPatternForChunk(Vector2Int chunk)
+    // 세로 청크 Y에 따른 패턴 선택(결정적)
+    TilemapPatternAsset PickPatternForChunkY(int chunkY)
     {
         if (patterns == null || patterns.Length == 0) return null;
         if (patterns.Length == 1) return patterns[0];
 
-        int hash = chunk.x * 73856093 ^ chunk.y * 19349663;
+        // y만 사용
+        int hash = chunkY * 83492791;
         int idx = Mathf.Abs(hash) % patterns.Length;
         return patterns[idx];
     }
 
-    Vector3Int ChunkToCellOffset(Vector2Int chunk, TilemapPatternAsset pattern)
+    int GetStepY(TilemapPatternAsset basePattern)
     {
-        int stepX = Mathf.Max(1, pattern.size.x - 1);
-        int stepY = Mathf.Max(1, pattern.size.y - 1);
+        if (chunkStepYCells > 0) return Mathf.Max(1, chunkStepYCells);
+        return Mathf.Max(1, (basePattern.size.y - 1) + extraGapYCells);
+    }
 
+    Vector3Int ChunkYToCellOffset(int chunkY, TilemapPatternAsset pattern)
+    {
+        var basePattern = ChunkBasePattern ? ChunkBasePattern : pattern;
+        int stepY = GetStepY(basePattern);
+
+        // X는 0 고정(좌우 청크 없음)
         return new Vector3Int(
-            chunk.x * stepX,
-            chunk.y * stepY,
+            0,
+            chunkY * stepY,
             0
         ) + globalCellOffset;
     }
-    void ClearChunkTiles(Vector2Int chunk)
+
+    void ClearChunkTilesY(int chunkY)
     {
         var basePattern = ChunkBasePattern;
         if (!basePattern) return;
 
-        Vector3Int origin = ChunkToCellOffset(chunk, basePattern);
+        Vector3Int origin = ChunkYToCellOffset(chunkY, basePattern);
         Vector3Int size = basePattern.size;
 
         foreach (var tm in _layerMap.Values)
@@ -364,13 +374,12 @@ public class TilemapPatternSpawner : MonoBehaviour
         }
     }
 
-    void ClearChunkDynamicObjects(Vector2Int chunk)
+    void ClearChunkDynamicObjectsY(int chunkY)
     {
         var basePattern = ChunkBasePattern;
         if (!basePattern || dynamicObjectMask == 0 || !_grid) return;
 
-        // 청크의 셀 영역 → 월드 박스로 변환
-        Vector3Int cellMin = ChunkToCellOffset(chunk, basePattern);
+        Vector3Int cellMin = ChunkYToCellOffset(chunkY, basePattern);
         Vector3Int cellMax = cellMin + new Vector3Int(basePattern.size.x, basePattern.size.y, 0);
 
         Vector3 worldMin = _grid.CellToWorld(cellMin);
@@ -396,25 +405,27 @@ public class TilemapPatternSpawner : MonoBehaviour
         var basePattern = ChunkBasePattern;
         if (!basePattern) return;
 
+        int rows = Mathf.Max(1, streamRows);
+        int down = rows / 2;
+        int up = rows - down - 1;
+
         Gizmos.color = new Color(0f, 1f, 0f, 0.2f);
 
-        for (int dy = -1; dy <= 1; dy++)
+        for (int dy = -down; dy <= up; dy++)
         {
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                Vector2Int c = new Vector2Int(_currentChunk.x + dx, _currentChunk.y + dy);
-                Vector3Int cellMin = ChunkToCellOffset(c, basePattern);
-                Vector3Int cellMax = cellMin + new Vector3Int(basePattern.size.x, basePattern.size.y, 0);
+            int y = _currentChunkY + dy;
 
-                Vector3 worldMin = _grid.CellToWorld(cellMin);
-                Vector3 worldMax = _grid.CellToWorld(cellMax);
+            Vector3Int cellMin = ChunkYToCellOffset(y, basePattern);
+            Vector3Int cellMax = cellMin + new Vector3Int(basePattern.size.x, basePattern.size.y, 0);
 
-                Vector3 center = (worldMin + worldMax) * 0.5f;
-                Vector3 size3 = worldMax - worldMin;
-                Vector3 size = new Vector3(Mathf.Abs(size3.x), Mathf.Abs(size3.y), 0f);
+            Vector3 worldMin = _grid.CellToWorld(cellMin);
+            Vector3 worldMax = _grid.CellToWorld(cellMax);
 
-                Gizmos.DrawCube(center, size);
-            }
+            Vector3 center = (worldMin + worldMax) * 0.5f;
+            Vector3 size3 = worldMax - worldMin;
+            Vector3 size = new Vector3(Mathf.Abs(size3.x), Mathf.Abs(size3.y), 0f);
+
+            Gizmos.DrawCube(center, size);
         }
     }
 #endif
