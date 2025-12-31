@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ad2748d5a05e05a40927636c6bdf4172
+guid: 49c79ff908cd6fe46bedaf749ee6c9aa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2837383762957642366
-    second: "\uB545_0"
+      213: -551871021763020819
+    second: dog_3_nobg_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 400
+  spritePixelsToUnits: 200
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uB545_0"
+      name: dog_3_nobg_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 100
-        height: 100
+        width: 320
+        height: 320
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 285d27d20869f98d0800000000000000
-      internalID: -2837383762957642366
+      spriteID: de7bbf9ca3c5758f0800000000000000
+      internalID: -551871021763020819
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\uB545_0": -2837383762957642366
+      dog_3_nobg_0: -551871021763020819
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4578735063565907968}
   - component: {fileID: 6697497284895067807}
   - component: {fileID: 3252666093318397209}
+  - component: {fileID: 5413457656056095683}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -166,6 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f74a8ea643c0624e9290c5308ee34c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  anim: {fileID: 5413457656056095683}
+  sr: {fileID: 3743330799335780109}
+  animLayer: 0
   pixelsPerUnit: 16
   runSpeedPixelsPerSec: 32
   climbSpeedPixelsPerSec: 24
@@ -195,3 +199,39 @@ MonoBehaviour:
   jumpHorizSpeedScale: 1.25
   mushroomJumpDelaySec: 0.25
   requireGroundedAtLaunch: 1
+  pendingJumpTimer: -1
+  pendingJumpDir: 1
+  mushroomCD: 0
+  jumpHorizSpeedPixelsPerSec: 0
+  unitPerPixel: 0
+  pixelAccum: {x: 0, y: 0}
+  vyPixels: 0
+  lockedY: 0
+  onGround: 0
+  reverseCD: 0
+  dir: 1
+  curLadderCell: {x: 0, y: 0, z: 0}
+  targetLadderCenterX: 0
+  lastHorizontalBlocked: 0
+--- !u!95 &5413457656056095683
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7581888350024345788}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 00bd3c9bdcef9724c91bded82cd4e778, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
