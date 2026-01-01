@@ -1294,7 +1294,7 @@ MonoBehaviour:
   Crafteditems:
   - {fileID: 7647054886370508402, guid: 9f6f1e94a90745d4da7ce10320b580f8, type: 3}
   - {fileID: 8085639127566336830, guid: 7f7f8e3444403ed4993e94dd6c8981fb, type: 3}
-  - {fileID: 7647054886370508402, guid: 438d8410e04316e4f9ab15929ff7f82e, type: 3}
+  - {fileID: 4210272924160167202, guid: 5e4ee0837953d124a89e8021bd0a4036, type: 3}
   itemDatas:
   - {fileID: 11400000, guid: ef5de80af65159d469764dd97d8dac7c, type: 2}
   - {fileID: 11400000, guid: 7909737fc5ad55a46891a0ff9c11f17b, type: 2}
