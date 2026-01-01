@@ -36,7 +36,8 @@ public class GameManager : Singleton<GameManager>
 
     public Action OnGameOver;         // 게임오버 시 호출되는 이벤트
 
-
+    private bool isGameOver = false;
+    public bool IsGameOver => isGameOver;
     // ───────────────────────────────
     //   UNITY LIFECYCLE
     // ───────────────────────────────
@@ -60,6 +61,8 @@ public class GameManager : Singleton<GameManager>
 
     private void Update()
     {
+        if (isGameOver) return;
+
         _input.OnUpdate();  // 매 프레임 입력 업데이트
 
         UpdateTime();       // 매 프레임 남은 시간 감소 처리
@@ -138,6 +141,15 @@ public class GameManager : Singleton<GameManager>
     public float GetBestScore()
     {
         return bestScore;
+    }
+    public void TriggerGameOver()
+    {
+        if (isGameOver) return;
+        isGameOver = true;
+
+        currentTime = 0f;
+        SaveScore();
+        OnGameOver?.Invoke();
     }
 }
 

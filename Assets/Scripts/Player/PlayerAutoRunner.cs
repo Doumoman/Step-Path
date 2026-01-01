@@ -154,6 +154,10 @@ public class PlayerAutoRunner : MonoBehaviour
             CameraMover.Instance.OnPlayerStateChanged(newState);
         }
     }
+    public void SetGameOver()
+    {
+        ChangeState(new PlayerGameOverState(this, stateMachine));
+    }
     // ───────────────── 애니메이션 로직 ──────────────────
     public void PlayAnim(int stateHash, bool restart = false)
     {

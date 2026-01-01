@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 5413457656056095683}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -175,6 +175,9 @@ MonoBehaviour:
   climbSpeedPixelsPerSec: 24
   gravityPixelsPerSec2: 480
   maxFallSpeedPixelsPerSec: 360
+  airYSubDiv: 2
+  smoothAirY: 1
+  groundSnapToleranceUnits: 0.03
   groundMask:
     serializedVersion: 2
     m_Bits: 64
@@ -185,10 +188,13 @@ MonoBehaviour:
   wallProbe: 0.1
   reverseAlsoInAir: 1
   reverseCooldownFrames: 6
-  bodySize: {x: 0.5, y: 0.9}
-  skin: 0.01
-  stepUpMax: 0.25
-  groundProbe: 0.4
+  bodyCol: {fileID: 0}
+  useColliderBoundsForCasts: 1
+  castSkin: 0.01
+  stepUpMaxUnits: 0.25
+  groundProbeUnits: 0.4
+  groundCastWidthScale: 0.85
+  minGroundNormalY: 0.5
   ladderTopExtra: 0.2
   mushroomMask:
     serializedVersion: 2

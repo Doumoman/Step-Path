@@ -294,3 +294,39 @@ public class PlayerLiftingState : IPlayerState
 
     public void Exit() { }
 }
+
+public class PlayerGameOverState : IPlayerState
+{
+    private readonly PlayerAutoRunner p;
+    private readonly PlayerStateMachine fsm;
+
+    public PlayerGameOverState(PlayerAutoRunner player, PlayerStateMachine machine)
+    {
+        p = player; fsm = machine;
+    }
+
+    public void Enter()
+    {
+        // 이동/누적값/속도 전부 정지
+        p.vyPixels = 0f;
+        p.pixelAccum = Vector2.zero;
+
+        // 벽반전/버섯 같은 예약/쿨다운도 정지시키고 싶으면 초기화
+        p.pendingJumpTimer = -1f;
+        p.reverseCD = 0;
+        p.mushroomCD = 0;
+
+        // 애니메이션 멈춤(원하면 Idle 재생 후 멈추도록 바꿔도 됨)
+        p.PauseAnim(true);
+    }
+
+    public void Tick()
+    {
+        // 아무것도 하지 않음 = 완전 정지
+    }
+
+    public void Exit()
+    {
+        // 보통 게임오버는 Exit 안 함
+    }
+}
