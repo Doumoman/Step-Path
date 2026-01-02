@@ -11,7 +11,7 @@ public class Wood_L : ItemLogic
         else if (ctx.data == null) Debug.LogError("🚨 비상! ctx.data(SO)가 비어있습니다!");
         string itemName = ctx.data.itemName;
 
-        if (itemName == "wood") { craft = true; return "stairs"; }
+        if (itemName == "wood") { Debug.Log("계단 생성 전달"); craft = true; return "stairs"; }
         else { craft = false; return null; }
     }
 

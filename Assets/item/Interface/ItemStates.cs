@@ -220,13 +220,14 @@ public sealed class DraggingState : IItemState
         mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
 
-        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos);
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos); 
         Vector3 cellCenterPos;
         Vector3 cellCenterPosGround;
         Vector3 cellCenterPositem;
         
         if(groundcheck)
         {
+
             cellCenterPositem = ctx.map.GetCellCenterWorld(cellPos);
             cellCenterPosGround = new Vector3(cellCenterPositem.x, cellCenterPositem.y - ctx.map.cellSize.y, cellCenterPositem.z);
             
@@ -383,8 +384,9 @@ public sealed class DraggingState : IItemState
 
         if (groundcheck)
         {
-            cellPos.x++; cellPos.y++;
+            cellPos.y++;
             ctx.image.Grid.positioncell = cellPos;
+            cellPos.y--;
             cellCenterPositem = ctx.map.GetCellCenterWorld(cellPos);
         }
         else
