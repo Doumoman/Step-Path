@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 [CreateAssetMenu(menuName = "Grid/Grid Data")]
 public class GridData : ScriptableObject
@@ -11,4 +12,10 @@ public class GridData : ScriptableObject
     public string crafteditemName;
     [System.NonSerialized]
     public Vector3 craftedPos;
+    [System.NonSerialized]
+    public Vector3Int groundLposleft;
+    [System.NonSerialized]
+    public Vector3Int groundLposright;
+    [System.NonSerialized]
+    public Tilemap ground;
 }

@@ -1512,6 +1512,7 @@ MonoBehaviour:
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 176256915}
   gridData: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
+  groundtilemap: {fileID: 1882214681}
   itemContainer: {fileID: 84954683}
   imageContainer: {fileID: 855658526}
   Ground_item: {fileID: 103166048}

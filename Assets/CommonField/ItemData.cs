@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "Items/Item Data")]
@@ -18,4 +19,7 @@ public class ItemData : ScriptableObject
 
     [Header("이벤트 전달")]
     public ItemPrepabDelegate itemDelegate;
+
+    [Header("재귀 중복 체크")]
+    public bool isoriginal = true;
 }

@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UnityEngine.Tilemaps;
 
 public class ItemManager : MonoBehaviour
 {
     [SerializeField] ItemPrepabDelegate prefab;
     [SerializeField] Grid grid;
     [SerializeField] GridData gridData;
+    [SerializeField] Tilemap groundtilemap;
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
     [SerializeField] public Transform Ground_item;
@@ -24,6 +26,7 @@ public class ItemManager : MonoBehaviour
     void Awake()
     {
         gridData.currentGrid = grid;
+        gridData.ground = groundtilemap;
         
         
     }
@@ -47,6 +50,8 @@ public class ItemManager : MonoBehaviour
         prefab.OnSimpleitem += Spawnitem;
         prefab.OnCrafteditem += SpawnCrafteditem;
         prefab.Dequeueitem += Deletitemstack;
+        prefab.Grounditem += SpawnGrounditem;
+        prefab.Clouditem += SpawnClouditem;
     }
 
 
@@ -75,7 +80,7 @@ public class ItemManager : MonoBehaviour
         Vector3 spawnpos;
         
 
-        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.043f; }
+        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f; }
         else { spawnpos = grid.CellToWorld(gridData.positioncell); }
 
 
@@ -100,10 +105,58 @@ public class ItemManager : MonoBehaviour
             ItemController c = Crafteditems[i].gameObject.GetComponent<ItemController>();
             if (gridData.crafteditemName == c.Data.itemName)
             {
-                GameObject itemspawn = Instantiate(Crafteditems[i], gridData.craftedPos, Quaternion.identity, itemContainer);
+                GameObject itemspawn = Instantiate(Crafteditems[i], gridData.craftedPos, Quaternion.identity, Ground_item);
                 return;
             }
         }
+    }
+
+    void SpawnGrounditem()
+    {
+        GameObject itemspawn;
+        Vector3 spawnpos;
+        Vector3Int realpos;
+        Vector3Int createpos = gridData.groundLposleft; createpos.x++;
+        while(createpos.x < gridData.positioncell.x - 1)
+        {
+            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            itemspawn = Instantiate(itemPrefabs[3], spawnpos, Quaternion.identity, Ground_item);
+            createpos.x++;
+        }
+        createpos = gridData.groundLposright; createpos.x--;
+        while (createpos.x > gridData.positioncell.x - 1)
+        {
+            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            itemspawn = Instantiate(itemPrefabs[3], spawnpos, Quaternion.identity, Ground_item);
+            createpos.x--;
+        }
+        return;
+    }
+
+    void SpawnClouditem()
+    {
+        GameObject itemspawn;
+        Vector3 spawnpos;
+        Vector3Int realpos;
+        Vector3Int createpos = gridData.groundLposleft; createpos.x++;
+        while (createpos.x < gridData.positioncell.x - 1)
+        {
+            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            itemspawn = Instantiate(itemPrefabs[4], spawnpos, Quaternion.identity, Ground_item);
+            createpos.x++;
+        }
+        createpos = gridData.groundLposright; createpos.x--;
+        while (createpos.x > gridData.positioncell.x - 1)
+        {
+            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            itemspawn = Instantiate(itemPrefabs[4], spawnpos, Quaternion.identity, Ground_item);
+            createpos.x--;
+        }
+        return;
     }
 
     void Deletitemstack()
@@ -131,4 +184,6 @@ public class ItemManager : MonoBehaviour
 
         return 0;
     }
+
+    
 }

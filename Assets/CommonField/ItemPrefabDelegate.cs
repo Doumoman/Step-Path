@@ -10,6 +10,8 @@ public class ItemPrepabDelegate : ScriptableObject
     public Action Onitemimage;
     public Action OnCrafteditem;
     public Action Dequeueitem;
+    public Action Grounditem;
+    public Action Clouditem;
 
 
 
@@ -31,5 +33,15 @@ public class ItemPrepabDelegate : ScriptableObject
     public void DeletitemStack()
     {
         Dequeueitem?.Invoke();
+    }
+
+    public void CreateGroundL()
+    {
+        Grounditem?.Invoke();
+    }
+
+    public void CreateCloudL()
+    {
+        Clouditem?.Invoke();
     }
 }

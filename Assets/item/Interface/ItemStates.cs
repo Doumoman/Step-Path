@@ -1,9 +1,11 @@
 using NUnit.Framework.Constraints;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.Rendering;
 using UnityEngine;
 using static UnityEditor.Progress;
+
 
 
 
@@ -20,7 +22,7 @@ public sealed class BackgroundState : IItemState
     public void Enter()
     {
         ctx.rect.anchoredPosition = ctx.spawnL;
-
+        
 
     }
 
@@ -56,17 +58,21 @@ public sealed class DraggingState : IItemState
     bool groundcheck;
     ItemDataHub placed_ctx;
     Vector2 originalscale;
+    int x, y;
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
     public void Enter()
     {
         groundcheck = ctx.image.gameObject.layer >= 26;
         originalscale = ctx.rect.sizeDelta;
+        ctx.data.isoriginal = true;
     }
 
     public void Update()
     {
-        TrackingMouse(ctx, 2, 2);
+        if (groundcheck) x = y = 1;
+        else x = y = 2;
+            TrackingMouse(ctx, x, y);
         IsitPlaceable(ctx);
         OnPoint(ctx);
         if (Input.GetMouseButtonUp(0)) 
@@ -128,17 +134,23 @@ public sealed class DraggingState : IItemState
         else
             finalWorldPos.y = ctx.map.GetCellCenterWorld(cellPos).y;
 
-        if (groundcheck)
-            finalWorldPos.y += 0.15f;
+        
         // Z축은 0으로 고정
         finalWorldPos.z = 0;
+
             
         // 5. 월드 -> UI 스크린 좌표 변환 및 적용
         Vector3 snappedScreenPos = Camera.main.WorldToScreenPoint(finalWorldPos);
+        if (groundcheck)
+        {
+           snappedScreenPos.y += 17;
+        }
+
+
         ctx.rect.position = snappedScreenPos;
 
         if (groundcheck)
-            ResizeImageToGrid(ctx, 2, 1);
+            ResizeImageToGrid(ctx, 1, 1);
         else
             ResizeImageToGrid(ctx, 2, 2);
         return;
@@ -208,14 +220,27 @@ public sealed class DraggingState : IItemState
         mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
 
-        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos); cellPos.y++;
-        ctx.image.Grid.positioncell = cellPos;
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos);
+        Vector3 cellCenterPos;
+        Vector3 cellCenterPosGround;
+        Vector3 cellCenterPositem;
+        
+        if(groundcheck)
+        {
+            cellCenterPositem = ctx.map.GetCellCenterWorld(cellPos);
+            cellCenterPosGround = new Vector3(cellCenterPositem.x, cellCenterPositem.y - ctx.map.cellSize.y, cellCenterPositem.z);
+            
+        }
+        else
+        {
+            cellPos.y++;
+            ctx.image.Grid.positioncell = cellPos;
 
-        Vector3 cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
+            cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
 
-        Vector3 cellCenterPosGround = new Vector3(cellCenterPos.x - ctx.map.cellSize.x / 2, cellCenterPos.y - ctx.map.cellSize.y*2, cellCenterPos.z);
-        Vector3 cellCenterPositem = ctx.map.CellToWorld(cellPos);
-
+            cellCenterPosGround = new Vector3(cellCenterPos.x - ctx.map.cellSize.x / 2, cellCenterPos.y - ctx.map.cellSize.y * 2, cellCenterPos.z);
+            cellCenterPositem = ctx.map.CellToWorld(cellPos);
+        }
 
 
         Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
@@ -223,6 +248,8 @@ public sealed class DraggingState : IItemState
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
+
+        
 
         ItemController con;
         string name;
@@ -275,7 +302,7 @@ public sealed class DraggingState : IItemState
                 }
             }
         }
-        else if (ctx.image.gameObject.layer == 24)
+        else if (ctx.image.gameObject.layer == 24) // 물
         {
             if (hititem == null && hitGroundCenter == null)
             {
@@ -338,6 +365,7 @@ public sealed class DraggingState : IItemState
         }
 
         
+
     }
 
     void Movectx(ItemDataHub ctx)
@@ -349,19 +377,31 @@ public sealed class DraggingState : IItemState
         mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
 
-        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos); cellPos.y++;
-        ctx.image.Grid.positioncell = cellPos;
+        Vector3Int cellPos = ctx.map.WorldToCell(mouseWorldPos);
+        Vector3 cellCenterPos;
+        Vector3 cellCenterPositem;
 
-        Vector3 cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
+        if (groundcheck)
+        {
+            cellPos.x++; cellPos.y++;
+            ctx.image.Grid.positioncell = cellPos;
+            cellCenterPositem = ctx.map.GetCellCenterWorld(cellPos);
+        }
+        else
+        {
+            cellPos.y++;
+            ctx.image.Grid.positioncell = cellPos;
 
-        Vector3 cellCenterPosGround = new Vector3(cellCenterPos.x - ctx.map.cellSize.x / 2, cellCenterPos.y - ctx.map.cellSize.y * 2, cellCenterPos.z);
-        Vector3 cellCenterPositem = ctx.map.CellToWorld(cellPos);
-
+            cellCenterPos = ctx.map.GetCellCenterWorld(cellPos);
+            cellCenterPositem = ctx.map.CellToWorld(cellPos);
+        }
 
 
         Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
-        Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
+
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
+        Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
+
         if (hititem != null)
         {
             ItemController c = hititem.GetComponent<ItemController>();
@@ -400,8 +440,9 @@ public sealed class PlacedState : IItemState
             prefabCreate.CreateSimpleitem();
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
         }
-        if (ctx == null || ctx.data == null ||  ctx.data.eachLogic == null) ctx.data.eachLogic.PlacedItemLogic(ctx);
+        
 
+        
     }
 
     public void Update()
@@ -409,10 +450,15 @@ public sealed class PlacedState : IItemState
         if (!ok)
         {
             if (ctx == null || ctx.data == null || ctx.data.eachLogic == null) return;
-            else { ctx.data.eachLogic.PlacedItemLogic(ctx); ok = true; }
+            else 
+            { 
+                ctx.data.eachLogic.PlacedItemLogic(ctx);
+                ok = true;
+                if (ctx.data.itemName == "cloud") ctx.mono.StartCoroutine(DestroyCloud(ctx));
+            }
         }
         
-        if (ctx.data.itemName != "cloud")
+        if (ctx.data.itemName != "cloud" && ctx.data.itemName != "wood")
         {
             ctx.data.eachLogic.PlacedItemLogic(ctx);
         }
@@ -421,11 +467,18 @@ public sealed class PlacedState : IItemState
 
     public void Exit()
     {
-        if(ctx.data.itemName != "cloud") prefabCreate.Createitemimage();
+        if(ctx.data.itemName != "cloud" || ctx.image != null) prefabCreate.Createitemimage();
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
+        
+    }
+
+    public IEnumerator DestroyCloud(ItemDataHub ctx)
+    {
+        yield return new WaitForSeconds(5f);
+        ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
         
     }
 
