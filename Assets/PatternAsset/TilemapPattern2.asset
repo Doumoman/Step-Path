@@ -17,7 +17,7 @@ MonoBehaviour:
   cells:
   - layer: Ground
     pos: {x: -6, y: -20, z: 0}
-    tile: {fileID: 11400000, guid: 7577630e3b1e1644ea28692e40b86971, type: 2}
+    tile: {fileID: 11400000, guid: 5de7232a4d4404247870ac162f674f47, type: 2}
     transform:
       e00: 1
       e01: 0
@@ -164,7 +164,7 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 1}
   - layer: Ground
     pos: {x: 1, y: -20, z: 0}
-    tile: {fileID: 11400000, guid: 7577630e3b1e1644ea28692e40b86971, type: 2}
+    tile: {fileID: 11400000, guid: cc7370189f56c58479373acfc6133752, type: 2}
     transform:
       e00: 1
       e01: 0

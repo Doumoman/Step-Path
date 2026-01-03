@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1b8033decc32f764891f73497d93a2f4
+guid: ffaf5f8dfde4afd4397e88a26615df55
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4960744061859847408
-    second: Laserbeam3_0003_0
+      213: -7698384122393228749
+    second: Ground_Basic_R_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 400
+  spritePixelsToUnits: 125
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Laserbeam3_0003_0
+      name: Ground_Basic_R_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 414
-        height: 233
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 32
+        height: 16
+      alignment: 9
+      pivot: {x: 0.5, y: -0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0fcd8cce07a18d440800000000000000
-      internalID: 4960744061859847408
+      spriteID: 33a8e30bd68d92590800000000000000
+      internalID: -7698384122393228749
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: f4347bd23e657e64fbf6c2ee00bc67c6
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Laserbeam3_0003_0: 4960744061859847408
+      Ground_Basic_R_0: -7698384122393228749
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
