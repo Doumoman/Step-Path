@@ -9,19 +9,21 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField] private SpriteRenderer sr;
     [SerializeField] private int animLayer = 0;
 
-    public const string ANIM_RUN = "Run";
+    public const string ANIM_WALK = "Walk";
     public const string ANIM_IDLE = "Idle";
     public const string ANIM_CLIMB = "Climb";
     public const string ANIM_JUMP = "Jump";
     public const string ANIM_FALL = "Fall";
 
-    private int _runHash, _idleHash, _climbHash, _jumpHash, _fallHash;
+    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash;
 
     [Header("Pixel")]
     public int pixelsPerUnit = 16;
     public float runSpeedPixelsPerSec = 40f;
-    public float climbSpeedPixelsPerSec = 24f;
 
+    [Header("Enter By X")]
+    [SerializeField, Min(0f)] public float enterXTolerancePixels = 2f; // 목표X 도달 허용 오차(픽셀)
+    public float EnterXTolUnits => enterXTolerancePixels * unitPerPixel;
     [Header("Gravity")]
     public float gravityPixelsPerSec2 = 480f;
     public float maxFallSpeedPixelsPerSec = 360f;
@@ -35,7 +37,24 @@ public class PlayerAutoRunner : MonoBehaviour
 
     [Header("Layers/Maps")]
     public LayerMask groundMask;
-    public Tilemap ladderMap;
+
+    [Header("Climb (Ladder / Sprout)")]
+    public LayerMask ladderMask;
+
+    // 버섯처럼 "앞"에 프로브로 감지
+    [SerializeField, Min(0.01f)] public float ladderProbe = 0.12f;
+
+    // “잡고 잠깐 대기했다가” 오르기 시작 (요청한 ‘시간’)
+    [SerializeField, Min(0f)] public float climbEnterDelaySec = 0.12f;
+
+    // 오르는 속도(외부에서 조절)
+    [SerializeField, Min(1f)] public float climbSpeedPixelsPerSec = 24f;
+
+    // 어디까지 오를지: 콜라이더 top 기준으로 약간 더 올리는 보정
+    [SerializeField, Min(0f)] public float ladderTopExtra = 0.05f;
+
+    [SerializeField, Min(0f)] public float climbCooldownSec = 1f; // 0이면 쿨타임 없음
+    [HideInInspector] public int climbCD;
 
     [Header("Wall Reverse (Inspector에서 선택)")]
     public LayerMask reverseOnMask;
@@ -52,8 +71,6 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField, Range(0.3f, 1f)] private float groundCastWidthScale = 0.85f; // 바닥 판정 BoxCast 폭 축소(모서리 오판정 감소)
     [SerializeField, Range(0f, 1f)] private float minGroundNormalY = 0.5f;       // 바닥으로 인정할 노말 y(0.5면 대략 60도 이상을 바닥으로 인정)
 
-    [Header("Ladder")]
-    public float ladderTopExtra = 0.05f;
 
     [Header("Mushroom Jump")]
     public LayerMask mushroomMask;
@@ -64,6 +81,11 @@ public class PlayerAutoRunner : MonoBehaviour
     public float jumpHorizSpeedScale = 1.25f;
     public float mushroomJumpDelaySec = 0.25f;
     public bool requireGroundedAtLaunch = true;
+    [Header("Jump Tuning")]
+    [SerializeField, Min(0.05f)]
+    private float jumpTimeToApexSec = 0.22f;          // 정점까지 걸리는 시간(작을수록 더 빠르게 상승)
+    [SerializeField, Range(1f, 6f)]
+    private float fallGravityMultiplier = 2.0f;       // 낙하 가속 배수(클수록 더 빨리 떨어짐)
 
     // ───────── FSM에서 접근해야 하는 런타임 필드들 ─────────
     [HideInInspector] public float pendingJumpTimer = -1f;
@@ -78,15 +100,21 @@ public class PlayerAutoRunner : MonoBehaviour
     [HideInInspector] public bool onGround;
     [HideInInspector] public int reverseCD;
     [HideInInspector] public int dir = 1;
-
-    [HideInInspector] public Vector3Int curLadderCell;
-    [HideInInspector] public float targetLadderCenterX;
-
     [HideInInspector] public bool lastHorizontalBlocked;
+
+    // ───────── Climb 런타임 ─────────
+    [HideInInspector] public bool pendingClimb;          // 예약 여부
+    [HideInInspector] public float pendingClimbTargetX;  // 목표 X (centerX)
+    [HideInInspector] public float pendingClimbTargetCenterY; // 목표 높이
+
+    [HideInInspector] public float climbCenterX;
+    [HideInInspector] public float climbTargetCenterY;
 
     // 상태머신
     private PlayerStateMachine stateMachine;
-
+    // ───────── Mushroom 런타임 ─────────
+    [HideInInspector] public bool pendingMushroom;       // 예약 여부
+    [HideInInspector] public float pendingMushroomTargetX;
     // ───────────────── 캐스트 기준 ─────────────────
     private Vector2 CastSize
     {
@@ -110,16 +138,10 @@ public class PlayerAutoRunner : MonoBehaviour
     {
         unitPerPixel = 1f / Mathf.Max(1, pixelsPerUnit);
 
-        if (!ladderMap)
-        {
-            foreach (var tm in GetComponentsInChildren<Tilemap>(true))
-                if (tm.name == "Ladder") { ladderMap = tm; break; }
-        }
-
         if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
         if (!anim) anim = GetComponent<Animator>();
 
-        _runHash = Animator.StringToHash(ANIM_RUN);
+        _walkHash = Animator.StringToHash(ANIM_WALK);
         _idleHash = Animator.StringToHash(ANIM_IDLE);
         _climbHash = Animator.StringToHash(ANIM_CLIMB);
         _jumpHash = Animator.StringToHash(ANIM_JUMP);
@@ -137,7 +159,7 @@ public class PlayerAutoRunner : MonoBehaviour
     {
         if (reverseCD > 0) reverseCD--;
         if (mushroomCD > 0) mushroomCD--;
-
+        if (climbCD > 0) climbCD--;
         stateMachine.Update();
     }
     void LateUpdate()
@@ -176,11 +198,64 @@ public class PlayerAutoRunner : MonoBehaviour
         if (!anim) return;
         anim.speed = pause ? 0f : 1f;
     }
-    public int RunHash => _runHash;
+    public int WalkHash => _walkHash;
     public int IdleHash => _idleHash;
     public int ClimbHash => _climbHash;
     public int JumpHash => _jumpHash;
     public int FallHash => _fallHash;
+
+    #region 사다리 로직
+    public bool DetectClimbableAhead(int dirSign, out Collider2D col, out float centerX, out float targetCenterY)
+    {
+        col = null; centerX = 0f; targetCenterY = 0f;
+        if (climbCD > 0) return false;
+        if (ladderMask == 0) return false;
+
+        float halfX = CastSize.x * 0.5f;
+
+        // 버섯과 동일: 캐릭터 “앞쪽”에 얇은 박스를 둠
+        Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + ladderProbe * 0.5f), 0f);
+        Vector2 size = new Vector2(ladderProbe, CastSize.y - castSkin * 2f);
+
+        col = Physics2D.OverlapBox(center, size, 0f, ladderMask);
+        if (!col) return false;
+
+        float step = unitPerPixel;
+        centerX = Mathf.Round(col.bounds.center.x / step) * step;
+
+        // 목표 높이: “덩쿨/사다리 콜라이더 top”까지 올라가게
+        float halfH = CastSize.y * 0.5f;
+        float topY = col.bounds.max.y + ladderTopExtra;
+        targetCenterY = topY + halfH;
+        targetCenterY = Mathf.Round(targetCenterY / step) * step;
+
+        return true;
+    }
+
+    public bool IsStillOnClimbableAhead(int dirSign, Collider2D expected)
+    {
+        if (!expected) return false;
+        float halfX = CastSize.x * 0.5f;
+        Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + ladderProbe * 0.5f), 0f);
+        Vector2 size = new Vector2(ladderProbe, CastSize.y - castSkin * 2f);
+
+        var col = Physics2D.OverlapBox(center, size, 0f, ladderMask);
+        return col == expected;
+    }
+
+    public void SnapXTo(float worldX)
+    {
+        float step = unitPerPixel;
+        var pos = transform.position;
+        pos.x = Mathf.Round(worldX / step) * step;
+        transform.position = pos;
+    }
+    public void StartClimbCooldown()
+    {
+        if (climbCooldownSec <= 0f) { climbCD = 0; return; }
+        climbCD = Mathf.CeilToInt(climbCooldownSec / Mathf.Max(0.0001f, Time.deltaTime));
+    }
+    #endregion
     // ───────────────── Movement helpers ──────────────────
 
     public void MoveHorizontalWithCast(float dx, ref float lockedYRef)
@@ -342,38 +417,51 @@ public class PlayerAutoRunner : MonoBehaviour
         }
     }
 
-    public bool IsOnLadderCell(out Vector3Int cell, out float centerX)
+    
+
+    #region 점프 로직
+    // 원하는 높이(H)와 정점시간(T)로 "상승 중 중력"을 결정: g = 2H / T^2
+    public float JumpGravityUpPixelsPerSec2
     {
-        cell = default; centerX = 0f;
-        if (!ladderMap) return false;
-
-        var grid = ladderMap.layoutGrid;
-        var c0 = grid.WorldToCell(transform.position);
-
-        if (ladderMap.HasTile(c0)) { cell = c0; centerX = ladderMap.GetCellCenterWorld(c0).x; return true; }
-        var cu = c0 + Vector3Int.up;
-        if (ladderMap.HasTile(cu)) { cell = cu; centerX = ladderMap.GetCellCenterWorld(cu).x; return true; }
-        var cd = c0 + Vector3Int.down;
-        if (ladderMap.HasTile(cd)) { cell = cd; centerX = ladderMap.GetCellCenterWorld(cd).x; return true; }
-        return false;
+        get
+        {
+            float T = Mathf.Max(0.05f, jumpTimeToApexSec);
+            return 2f * jumpPeakHeightPixels / (T * T);
+        }
     }
-
-    public bool DetectMushroomAhead(int dirSign)
+    // 하강은 더 빠르게: gDown = gUp * multiplier
+    public float JumpGravityDownPixelsPerSec2 => JumpGravityUpPixelsPerSec2 * fallGravityMultiplier;
+    // 정점시간 T에 맞추는 초기 속도: v0 = gUp * T = 2H / T
+    public float JumpStartVyPixels
     {
+        get
+        {
+            float T = Mathf.Max(0.05f, jumpTimeToApexSec);
+            return JumpGravityUpPixelsPerSec2 * T;
+        }
+    }
+    public bool DetectMushroomAheadX(int dirSign, out float centerX)
+    {
+        centerX = 0f;
         if (mushroomMask == 0) return false;
 
         float halfX = CastSize.x * 0.5f;
         Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + mushroomProbe * 0.5f), 0f);
         Vector2 size = new Vector2(mushroomProbe, CastSize.y - castSkin * 2f);
 
-        return Physics2D.OverlapBox(center, size, 0f, mushroomMask) != null;
+        var col = Physics2D.OverlapBox(center, size, 0f, mushroomMask);
+        if (!col) return false;
+
+        float step = unitPerPixel;
+        centerX = Mathf.Round(col.bounds.center.x / step) * step;
+        return true;
     }
 
     public void StartMushroomJump(int jumpDir)
     {
-        float vy0 = Mathf.Sqrt(Mathf.Max(0.0001f, 2f * gravityPixelsPerSec2 * jumpPeakHeightPixels));
+        // (높이/정점시간) 기반으로 초기 속도 설정
+        vyPixels = JumpStartVyPixels;
 
-        vyPixels = vy0;
         onGround = false;
 
         dir = jumpDir;
@@ -381,7 +469,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
         mushroomCD = mushroomCooldownFrames;
     }
-
+    #endregion
 
     public bool DetectWallAhead(int dirSign)
     {

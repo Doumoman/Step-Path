@@ -13,11 +13,19 @@ public class PlayerRunState : IPlayerState
     public void Enter()
     {
         p.PauseAnim(false);
-        p.PlayAnim(p.RunHash);
+        p.PlayAnim(p.WalkHash);
     }
 
     public void Tick()
     {
+
+        // 덩쿨/사다리 감지 → 목표X 저장(한 번만)
+        if (!p.pendingClimb && p.DetectClimbableAhead(p.dir, out var col, out var cx, out var targetCY))
+        {
+            p.pendingClimb = true;
+            p.pendingClimbTargetX = cx;
+            p.pendingClimbTargetCenterY = targetCY;
+        }
         // 1) 벽 감지 → 방향 반전
         if ((p.onGround || p.reverseAlsoInAir) &&
             p.DetectWallAhead(p.dir) &&
@@ -25,38 +33,16 @@ public class PlayerRunState : IPlayerState
         {
             p.dir *= -1;
             p.reverseCD = p.reverseCooldownFrames;
+            p.pendingClimb = false;
+            p.pendingMushroom = false;
         }
 
-        // 2) 사다리 진입
-        if (p.IsOnLadderCell(out p.curLadderCell, out p.targetLadderCenterX))
-        {
-            p.onGround = false;
-            p.ChangeState(new PlayerLadderClimbState(p, fsm));
-            return;
-        }
 
-        // 3) 버섯 감지 → 점프 예약
-        if (p.onGround && p.mushroomCD == 0 &&
-            p.DetectMushroomAhead(p.dir) &&
-            p.pendingJumpTimer < 0f)
+        if (!p.pendingMushroom && p.onGround && p.mushroomCD == 0 &&
+    p.DetectMushroomAheadX(p.dir, out float mx))
         {
-            p.pendingJumpTimer = Mathf.Max(0.01f, p.mushroomJumpDelaySec);
-            p.pendingJumpDir = p.dir;
-        }
-
-        // 버섯 점프 예약 카운트다운
-        if (p.pendingJumpTimer >= 0f)
-        {
-            p.pendingJumpTimer -= Time.deltaTime;
-
-            if (p.pendingJumpTimer <= 0f &&
-                (!p.requireGroundedAtLaunch || p.onGround))
-            {
-                p.StartMushroomJump(p.pendingJumpDir);
-                p.pendingJumpTimer = -1f;
-                p.ChangeState(new PlayerJumpState(p, fsm));
-                return;
-            }
+            p.pendingMushroom = true;
+            p.pendingMushroomTargetX = mx;
         }
 
         // 4) 지면 샘플 & 이동
@@ -90,6 +76,43 @@ public class PlayerRunState : IPlayerState
             p.onGround = false;
             p.ChangeState(new PlayerFallState(p, fsm));
         }
+        float x = p.transform.position.x;
+        float tol = p.EnterXTolUnits;
+
+        // 클라임 실행 조건: 목표X에 도달/통과
+        if (p.pendingClimb)
+        {
+            bool reached = (p.dir > 0) ? (x >= p.pendingClimbTargetX - tol)
+                                      : (x <= p.pendingClimbTargetX + tol);
+
+            if (reached)
+            {
+                p.pendingClimb = false;
+
+                p.climbCenterX = p.pendingClimbTargetX;
+                p.climbTargetCenterY = p.pendingClimbTargetCenterY;
+
+                p.onGround = false;
+                p.ChangeState(new PlayerLadderClimbState(p, fsm));
+                return;
+            }
+        }
+
+        // 버섯 점프 실행 조건: 목표X에 도달/통과
+        if (p.pendingMushroom)
+        {
+            bool reached = (p.dir > 0) ? (x >= p.pendingMushroomTargetX - tol)
+                                      : (x <= p.pendingMushroomTargetX + tol);
+
+            if (reached && p.onGround && p.mushroomCD == 0)
+            {
+                p.pendingMushroom = false;
+
+                p.StartMushroomJump(p.dir);
+                p.ChangeState(new PlayerJumpState(p, fsm));
+                return;
+            }
+        }
     }
 
     public void Exit()
@@ -116,14 +139,9 @@ public class PlayerFallState : IPlayerState
 
     public void Tick()
     {
-        // 사다리 발견 → 탑승
-        if (p.IsOnLadderCell(out p.curLadderCell, out p.targetLadderCenterX))
-        {
-            p.ChangeState(new PlayerLadderClimbState(p, fsm));
-            return;
-        }
 
-        // 공중에서 벽 반전
+
+        // 2) 공중에서 벽 반전
         if (p.reverseAlsoInAir &&
             p.DetectWallAhead(p.dir) &&
             p.reverseCD == 0)
@@ -133,8 +151,8 @@ public class PlayerFallState : IPlayerState
         }
 
         float dt = Time.deltaTime;
-        p.vyPixels = Mathf.Max(p.vyPixels - p.gravityPixelsPerSec2 * dt,
-                               -p.maxFallSpeedPixelsPerSec);
+        p.vyPixels = Mathf.Max(p.vyPixels - p.JumpGravityDownPixelsPerSec2 * dt,
+                       -p.maxFallSpeedPixelsPerSec);
 
         float dx = p.runSpeedPixelsPerSec * p.unitPerPixel * p.dir * dt;
         float dy = p.vyPixels * p.unitPerPixel * dt;
@@ -181,25 +199,49 @@ public class PlayerLadderClimbState : IPlayerState
     {
         p.vyPixels = 0;
         p.onGround = false;
+
+        p.PauseAnim(false);
+        p.PlayAnim(p.ClimbHash);
     }
 
     public void Tick()
     {
-        if (!p.IsOnLadderCell(out p.curLadderCell, out p.targetLadderCenterX))
+        // 중심 정렬
+        p.SnapXTo(p.climbCenterX);
+
+        float dt = Time.deltaTime;
+        float dy = p.climbSpeedPixelsPerSec * p.unitPerPixel * dt;
+
+        // 위로 이동(천장/타일 충돌은 groundMask로 처리됨)
+        p.MoveVerticalWithCast(dy);
+
+        // 목표 높이에 도달하면 종료
+        float eps = p.unitPerPixel; // 1픽셀 정도 여유
+        if (p.transform.position.y >= p.climbTargetCenterY - eps)
         {
-            p.MovePixelSnapped(new Vector2(0, p.ladderTopExtra));
-            p.dir = (Random.value < 0.5f) ? -1 : 1;
-            p.ChangeState(new PlayerRunState(p, fsm));
-            return;
+            // 목표 높이로 스냅
+            var pos = p.transform.position;
+            pos.y = p.climbTargetCenterY;
+            p.transform.position = pos;
+
+            p.StartClimbCooldown();
+            // 착지 가능한지 확인
+            if (p.SampleGroundY(p.transform.position, out float groundY))
+            {
+                p.lockedY = groundY;
+                p.onGround = true;
+                p.vyPixels = 0f;
+                p.SnapYToLocked();
+
+                p.reverseCD = p.reverseCooldownFrames;
+                p.ChangeState(new PlayerRunState(p, fsm));
+            }
+            else
+            {
+                // 바닥이 없으면 그냥 낙하 상태로
+                p.ChangeState(new PlayerFallState(p, fsm));
+            }
         }
-
-        float step = p.unitPerPixel;
-        var pos = p.transform.position;
-        pos.x = Mathf.Round(p.targetLadderCenterX / step) * step;
-        p.transform.position = pos;
-
-        float vy = p.climbSpeedPixelsPerSec * p.unitPerPixel * Time.deltaTime;
-        p.MovePixelSnapped(new Vector2(0, vy));
     }
 
     public void Exit() { }
@@ -216,7 +258,8 @@ public class PlayerJumpState : IPlayerState
 
     public void Enter()
     {
-        // StartMushroomJump 에서 vyPixels, jumpHorizSpeedPixelsPerSec 세팅됨
+        p.PauseAnim(false);
+        p.PlayAnim(p.JumpHash);
     }
 
     public void Tick()
@@ -229,8 +272,8 @@ public class PlayerJumpState : IPlayerState
         p.MoveHorizontalWithCast(dx, ref p.lockedY);
         p.MoveVerticalWithCast(dy);
 
-        p.vyPixels = Mathf.Max(p.vyPixels - p.gravityPixelsPerSec2 * dt,
-                               -p.maxFallSpeedPixelsPerSec);
+        float g = (p.vyPixels > 0f) ? p.JumpGravityUpPixelsPerSec2 : p.JumpGravityDownPixelsPerSec2;
+        p.vyPixels = Mathf.Max(p.vyPixels - g * dt, -p.maxFallSpeedPixelsPerSec);
 
         if (p.vyPixels <= 0f &&
             p.SampleGroundY(p.transform.position, out float gy))

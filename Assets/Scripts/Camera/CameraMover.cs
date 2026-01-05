@@ -25,6 +25,10 @@ public class CameraMover : MonoBehaviour
     [Tooltip("카메라가 이동할 수 있는 X 최대값")]
     [SerializeField] private float maxX = 999f;
 
+    [Header("Vertical Limit (Min Only)")]
+    [Tooltip("카메라가 내려갈 수 있는 Y 최소값 (위로는 무한)")]
+    [SerializeField] private float minY = -999f;
+
     private Camera cam;
 
     private bool lockHeight = false;
@@ -55,6 +59,7 @@ public class CameraMover : MonoBehaviour
             Vector3 pos = player.position + offset;
             pos.z = transform.position.z;
             pos.x = Mathf.Clamp(pos.x, minX, maxX);
+            pos.y = Mathf.Max(pos.y, minY); // minY만 적용
             transform.position = pos;
 
             if (cam != null && cam.orthographic)
@@ -69,7 +74,7 @@ public class CameraMover : MonoBehaviour
         Vector3 current = transform.position;
         Vector3 target = player.position + offset;
 
-        // 높이 잠금 상태에서는 Y 유지
+        // 높이 잠금 상태에서는 Y 유지 (단, minY 아래로는 못 내려가게)
         if (lockHeight)
             target.y = current.y;
 
@@ -79,8 +84,17 @@ public class CameraMover : MonoBehaviour
         // X 제한 적용
         target.x = Mathf.Clamp(target.x, minX, maxX);
 
+        // Y는 min만 적용 (위로는 무한)
+        target.y = Mathf.Max(target.y, minY);
+
         // 부드럽게 따라감
         transform.position = Vector3.Lerp(current, target, followLerp * Time.deltaTime);
+
+        // (안전) 보간 결과도 minY/X Clamp 보정
+        Vector3 clamped = transform.position;
+        clamped.x = Mathf.Clamp(clamped.x, minX, maxX);
+        clamped.y = Mathf.Max(clamped.y, minY);
+        transform.position = clamped;
 
         // 줌도 보간
         if (cam != null && cam.orthographic)
@@ -137,9 +151,15 @@ public class CameraMover : MonoBehaviour
         float startY = transform.position.y;
         float targetY = (player.position + offset).y;
 
-        float startX = transform.position.x; // X는 유지하되...
-        float clampedX = Mathf.Clamp(startX, minX, maxX); // 혹시 초과했으면 다시 Clamp 적용
-        transform.position = new Vector3(clampedX, startY, transform.position.z);
+        // 목표 Y도 minY만 적용
+        targetY = Mathf.Max(targetY, minY);
+
+        float startX = transform.position.x;
+        float clampedX = Mathf.Clamp(startX, minX, maxX);
+
+        // 코루틴 시작 시 X/Y 보정
+        float clampedStartY = Mathf.Max(startY, minY);
+        transform.position = new Vector3(clampedX, clampedStartY, transform.position.z);
 
         while (elapsed < duration)
         {
@@ -147,15 +167,18 @@ public class CameraMover : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / duration);
 
             Vector3 pos = transform.position;
-            pos.y = Mathf.Lerp(startY, targetY, t);
-            pos.x = Mathf.Clamp(pos.x, minX, maxX); // 코루틴 중에도 보정 유지
-            transform.position = pos;
+            pos.y = Mathf.Lerp(clampedStartY, targetY, t);
 
+            // 코루틴 중에도 X/minY 보정 유지
+            pos.x = Mathf.Clamp(pos.x, minX, maxX);
+            pos.y = Mathf.Max(pos.y, minY);
+
+            transform.position = pos;
             yield return null;
         }
 
         Vector3 finalPos = transform.position;
-        finalPos.y = (player.position + offset).y;
+        finalPos.y = Mathf.Max((player.position + offset).y, minY);
         finalPos.x = Mathf.Clamp(finalPos.x, minX, maxX);
         transform.position = finalPos;
 

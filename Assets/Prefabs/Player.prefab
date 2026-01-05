@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7365174361010732499}
   - component: {fileID: 3743330799335780109}
+  - component: {fileID: 6123513098060005743}
   - component: {fileID: 4578735063565907968}
   - component: {fileID: 6697497284895067807}
   - component: {fileID: 3252666093318397209}
@@ -91,6 +92,52 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &6123513098060005743
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7581888350024345788}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 2}
+    newSize: {x: 1, y: 2}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 2}
+  m_EdgeRadius: 0
 --- !u!70 &4578735063565907968
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -181,10 +228,13 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  ladderMap: {fileID: 0}
-  reverseOnMask:
+  ladderMask:
     serializedVersion: 2
     m_Bits: 0
+  ladderTopExtra: 0.2
+  reverseOnMask:
+    serializedVersion: 2
+    m_Bits: 256
   wallProbe: 0.1
   reverseAlsoInAir: 1
   reverseCooldownFrames: 6
@@ -195,16 +245,17 @@ MonoBehaviour:
   groundProbeUnits: 0.4
   groundCastWidthScale: 0.85
   minGroundNormalY: 0.5
-  ladderTopExtra: 0.2
   mushroomMask:
     serializedVersion: 2
     m_Bits: 0
   mushroomProbe: 0.12
   mushroomCooldownFrames: 8
-  jumpPeakHeightPixels: 64
+  jumpPeakHeightPixels: 20
   jumpHorizSpeedScale: 1.25
   mushroomJumpDelaySec: 0.25
   requireGroundedAtLaunch: 1
+  jumpTimeToApexSec: 0.5
+  fallGravityMultiplier: 1
   pendingJumpTimer: -1
   pendingJumpDir: 1
   mushroomCD: 0
@@ -216,9 +267,13 @@ MonoBehaviour:
   onGround: 0
   reverseCD: 0
   dir: 1
-  curLadderCell: {x: 0, y: 0, z: 0}
-  targetLadderCenterX: 0
   lastHorizontalBlocked: 0
+  pendingClimbTimer: -1
+  pendingClimbCol: {fileID: 0}
+  pendingClimbCenterX: 0
+  pendingClimbTargetCenterY: 0
+  climbCenterX: 0
+  climbTargetCenterY: 0
 --- !u!95 &5413457656056095683
 Animator:
   serializedVersion: 7

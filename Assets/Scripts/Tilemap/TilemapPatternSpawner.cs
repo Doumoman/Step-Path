@@ -10,11 +10,21 @@ using UnityEngine.Tilemaps;
 /// - 청크는 Y축(세로)으로만 로드/언로드
 public class TilemapPatternSpawner : MonoBehaviour
 {
-    [Header("기존 패턴 스폰 (정적)")]
+
+    [Header("랜덤 패턴(세로 스트리밍)")]
+    [Tooltip("0이면 실행할 때마다 자동 시드(매 플레이 랜덤). 0이 아니면 고정 시드(재현 가능).")]
+    public int randomSeed = 0;
+    System.Random _rng;
+    readonly Dictionary<int, int> _chunkPatternIndex = new();
+
+    [Header("패턴 스폰")]
     public TilemapPatternAsset[] patterns;      // 여러 패턴을 넣어둔다.
     public Vector3Int[] cellOffsets;            // patterns와 길이 맞추면 각자 오프셋 적용
     public bool clearBeforeSpawn = false;       // 스폰 전에 싹 비우기
     public bool createMissingLayers = true;     // 패턴에 필요한 레이어 Tilemap 자동 생성
+
+    [Header("첫 시작 청크 고정 패턴(1개)")]
+    public TilemapPatternAsset firstSpawnPattern;
 
     [Header("타겟 Grid (없으면 자동 생성)")]
     public Transform targetGridRoot;            // 여기에 레이어별 Tilemap 존재/생성
@@ -78,7 +88,7 @@ public class TilemapPatternSpawner : MonoBehaviour
 
         if (useChunkStreaming)
         {
-            InitChunkStreaming();
+            InitChunkStreaming_AndSpawnFirstFixed();
         }
         else
         {
@@ -238,7 +248,7 @@ public class TilemapPatternSpawner : MonoBehaviour
 
     // ===================== 세로 스트리밍 전용 구현 =====================
 
-    void InitChunkStreaming()
+    void InitChunkStreaming_AndSpawnFirstFixed()
     {
         var basePattern = ChunkBasePattern;
         if (!basePattern)
@@ -251,12 +261,21 @@ public class TilemapPatternSpawner : MonoBehaviour
             Debug.LogError("[TilemapPatternSpawner] useChunkStreaming=true인데 player가 비어 있습니다.", this);
             return;
         }
+        if (!firstSpawnPattern)
+        {
+            Debug.LogError("[TilemapPatternSpawner] firstSpawnPattern(첫 고정 패턴)이 비어 있습니다.", this);
+            return;
+        }
 
         if (clearBeforeSpawn) ClearAllTiles();
         _loadedChunkYs.Clear();
+        _chunkPatternIndex.Clear();
+        int seed = (randomSeed != 0) ? randomSeed : System.Environment.TickCount;
+        _rng = new System.Random(seed);
 
         int stepY = GetStepY(basePattern);
 
+        // 현재 플레이어가 속한 청크 계산
         if (_grid)
         {
             Vector3Int cell = _grid.WorldToCell(player.position);
@@ -267,7 +286,22 @@ public class TilemapPatternSpawner : MonoBehaviour
             _currentChunkY = startChunkY;
         }
 
+        // 1) 첫 시작 청크만 고정 패턴으로 즉시 스폰
+        SpawnChunkY_FixedPattern(_currentChunkY, firstSpawnPattern);
+
+        // 2) 나머지 범위는 기존 로직으로 채우기 (필요한 청크만 추가 로드)
         UpdateChunksAroundY(_currentChunkY);
+
+        RebuildAllColliders();
+    }
+
+    void SpawnChunkY_FixedPattern(int chunkY, TilemapPatternAsset fixedPattern)
+    {
+        if (!fixedPattern) return;
+
+        Vector3Int offset = ChunkYToCellOffset(chunkY, fixedPattern);
+        Spawn(fixedPattern, offset);
+        _loadedChunkYs.Add(chunkY);
     }
 
     void UpdateChunksAroundY(int centerY)
@@ -320,15 +354,21 @@ public class TilemapPatternSpawner : MonoBehaviour
         _loadedChunkYs.Remove(chunkY);
     }
 
-    // 세로 청크 Y에 따른 패턴 선택(결정적)
     TilemapPatternAsset PickPatternForChunkY(int chunkY)
     {
         if (patterns == null || patterns.Length == 0) return null;
         if (patterns.Length == 1) return patterns[0];
 
-        // y만 사용
-        int hash = chunkY * 83492791;
-        int idx = Mathf.Abs(hash) % patterns.Length;
+        // (권장) chunkY마다 "처음 등장했을 때" 랜덤으로 하나 뽑아서 저장
+        // -> 언로드/리로드해도 같은 chunkY는 같은 패턴 유지
+        if (_chunkPatternIndex.TryGetValue(chunkY, out int idx))
+            return patterns[idx];
+
+        // rng가 아직 없으면(예외 상황) 안전하게 생성
+        _rng ??= new System.Random(System.Environment.TickCount);
+
+        idx = _rng.Next(0, patterns.Length);
+        _chunkPatternIndex[chunkY] = idx;
         return patterns[idx];
     }
 
