@@ -33,6 +33,10 @@ public class Wood_L : ItemLogic
             check = gt.HasTile(left);
             count++;
         }
+        if(count < 10)
+        {
+            gt.SetTile(left, ctx.grid.gTile);
+        }
         check = gt.HasTile(right);
         count = 0;
         while (!check)
@@ -42,6 +46,12 @@ public class Wood_L : ItemLogic
             check = gt.HasTile(right);
             count++;
         }
+        if (count < 10)
+        {
+            gt.SetTile(right, ctx.grid.gTile);
+        }
+
+
         ctx.grid.groundLposleft = left;
         ctx.grid.groundLposright = right;
         ctx.data.isoriginal = false;

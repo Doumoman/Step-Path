@@ -15,6 +15,8 @@ public class ItemManager : MonoBehaviour
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
     [SerializeField] public Transform Ground_item;
+    [SerializeField] public TileBase groundTile;
+    [SerializeField] public GameObject player;
     public List<GameObject> itemPrefabs;
     public List<GameObject> itemimages;
     public List<GameObject> Crafteditems;
@@ -27,6 +29,7 @@ public class ItemManager : MonoBehaviour
     {
         gridData.currentGrid = grid;
         gridData.ground = groundtilemap;
+        gridData.gTile = groundTile;
         
         
     }
@@ -76,11 +79,12 @@ public class ItemManager : MonoBehaviour
             Debug.LogWarning("itemPrefabs 목록이 비어있습니다!");
             return;
         }
+        gridData.playerpos = player.transform.position;
 
         Vector3 spawnpos;
         
 
-        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f; }
+        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f; }
         else { spawnpos = grid.CellToWorld(gridData.positioncell); }
 
 
@@ -99,13 +103,24 @@ public class ItemManager : MonoBehaviour
         }
 
         if (Crafteditems[0] == null)  Debug.Log("아이템 ㅌ");
-        
-        for(int i = 0; i < Crafteditems.Count; i++)
+
+        GameObject itemspawn;
+        for (int i = 0; i < Crafteditems.Count; i++)
         {
             ItemController c = Crafteditems[i].gameObject.GetComponent<ItemController>();
             if (gridData.crafteditemName == c.Data.itemName)
             {
-                GameObject itemspawn = Instantiate(Crafteditems[i], gridData.craftedPos, Quaternion.identity, Ground_item);
+                itemspawn = Instantiate(Crafteditems[i], gridData.craftedPos, Quaternion.identity, itemContainer);
+                if (i == 2)
+                {
+                    if (itemspawn.transform.position.x < gridData.playerpos.x)
+                    {
+                        Vector3 saveScale = itemspawn.transform.localScale;
+                        saveScale.x *= -1;
+                        itemspawn.transform.localScale = saveScale;
+                    }
+                }
+
                 return;
             }
         }
@@ -120,7 +135,7 @@ public class ItemManager : MonoBehaviour
         while(createpos.x < gridData.positioncell.x - 1)
         {
             realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f;
             itemspawn = Instantiate(itemPrefabs[3], spawnpos, Quaternion.identity, Ground_item);
             createpos.x++;
         }
@@ -128,7 +143,7 @@ public class ItemManager : MonoBehaviour
         while (createpos.x > gridData.positioncell.x - 1)
         {
             realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f;
             itemspawn = Instantiate(itemPrefabs[3], spawnpos, Quaternion.identity, Ground_item);
             createpos.x--;
         }
@@ -144,7 +159,7 @@ public class ItemManager : MonoBehaviour
         while (createpos.x < gridData.positioncell.x - 1)
         {
             realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f;
             itemspawn = Instantiate(itemPrefabs[4], spawnpos, Quaternion.identity, Ground_item);
             createpos.x++;
         }
@@ -152,7 +167,7 @@ public class ItemManager : MonoBehaviour
         while (createpos.x > gridData.positioncell.x - 1)
         {
             realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.035f;
+            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f;
             itemspawn = Instantiate(itemPrefabs[4], spawnpos, Quaternion.identity, Ground_item);
             createpos.x--;
         }

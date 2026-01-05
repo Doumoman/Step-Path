@@ -141,10 +141,7 @@ public sealed class DraggingState : IItemState
             
         // 5. 월드 -> UI 스크린 좌표 변환 및 적용
         Vector3 snappedScreenPos = Camera.main.WorldToScreenPoint(finalWorldPos);
-        if (groundcheck)
-        {
-           snappedScreenPos.y += 17;
-        }
+        
 
 
         ctx.rect.position = snappedScreenPos;
@@ -267,13 +264,13 @@ public sealed class DraggingState : IItemState
         {
             if (name == "wood" && ctx.image.gameObject.layer == 27)
             {
-                if (hititem == null && hitGroundCenter == null)
+                if (hititem == null && hitGroundCenter == null && cellPos.y % 4 == 0)
                 {
                     IsPlaceable = true;
                     CraftCheck = false;
                     return;
                 }
-                else if (hititem == null && hitGroundCenter != null)
+                else if (hititem == null && hitGroundCenter != null && cellPos.y % 4 == 0)
                 {
                     IsPlaceable = true;
                     CraftCheck = true;
@@ -288,7 +285,7 @@ public sealed class DraggingState : IItemState
             }
             else
             {
-                if (hititem == null && hitGroundCenter == null)
+                if (hititem == null && hitGroundCenter == null && cellPos.y % 4 == 0)
                 {
                     IsPlaceable = true;
                     CraftCheck = false;
@@ -513,9 +510,18 @@ public sealed class CraftingState : IItemState
             placed_ctx.mono.Grid.craftedPos = placed_ctx.transform.position;
             placed_ctx.mono.Grid.crafteditemName = craftitemName;
             // 원래 placed되어 있던 프리팹 destroy로 전달. 
-            placed_ctx.sm.ChangeState(new DestroyedState(placed_ctx, placed_ctx.sm, placed_ctx.pd));
-            machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
-            
+            if(ctx.data.itemName == "wood")
+            {
+                machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+                prefabCreate.Createitemimage();
+            }
+            else
+            {
+                placed_ctx.sm.ChangeState(new DestroyedState(placed_ctx, placed_ctx.sm, placed_ctx.pd));
+                machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+            }
+
+
             prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
             return;
         }

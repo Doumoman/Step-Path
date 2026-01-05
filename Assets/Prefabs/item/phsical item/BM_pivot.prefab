@@ -11,10 +11,9 @@ GameObject:
   - component: {fileID: 7925569215541386451}
   - component: {fileID: 6001388609037809617}
   - component: {fileID: 2179483340625592356}
-  - component: {fileID: 7723476842573337907}
-  - component: {fileID: 8848321457692860558}
-  m_Layer: 6
-  m_Name: Stairs_item_pivot
+  - component: {fileID: 215569225065467713}
+  m_Layer: 28
+  m_Name: BM_pivot
   m_TagString: item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,9 +28,9 @@ Transform:
   m_GameObject: {fileID: 7647054886370508402}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.11, y: -2.08, z: 1}
-  m_LocalScale: {x: 1.5, y: 0.75, z: 1.5}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -0.11, y: -2.08, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -79,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -8394394436682032109, guid: 58332be08eae730409425c391340cb43, type: 3}
+  m_Sprite: {fileID: -5564444493483308027, guid: 5c43af4a6c1a49b428d34925a109ce41, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -102,49 +101,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e952c92458af3f4287a9955bf79d5bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 1a650444b58adf440a68a37c33b2471c, type: 2}
+  data: {fileID: 11400000, guid: 85bf6063a35ecec46b93bcfcce1dccad, type: 2}
   spawnL: {x: 525, y: 100, z: 11}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
---- !u!1839735485 &7723476842573337907
-Tilemap:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7647054886370508402}
-  m_Enabled: 1
-  m_Tiles: {}
-  m_AnimatedTiles: {}
-  m_TileAssetArray: []
-  m_TileSpriteArray: []
-  m_TileMatrixArray: []
-  m_TileColorArray: []
-  m_TileObjectToInstantiateArray: []
-  m_AnimationFrameRate: 1
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Origin: {x: 0, y: 0, z: 0}
-  m_Size: {x: 0, y: 0, z: 1}
-  m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
-  m_TileOrientation: 0
-  m_TileOrientationMatrix:
-    e00: 1
-    e01: 0
-    e02: 0
-    e03: 0
-    e10: 0
-    e11: 1
-    e12: 0
-    e13: 0
-    e20: 0
-    e21: 0
-    e22: 1
-    e23: 0
-    e30: 0
-    e31: 0
-    e32: 0
-    e33: 1
---- !u!60 &8848321457692860558
+--- !u!60 &215569225065467713
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,7 +143,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.64, y: 0.64}
+    oldSize: {x: 0.5, y: 0.24}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -190,9 +151,13 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.02, y: 0.32}
-      - {x: -0.32, y: -0.03}
-      - {x: -0.32, y: -0.32}
-      - {x: 0.32, y: -0.32}
-      - {x: 0.32, y: 0.32}
+    - - {x: 0.13, y: 0.12}
+      - {x: -0.19, y: 0.12}
+      - {x: -0.25, y: 0.07}
+      - {x: -0.25, y: -0.089999996}
+      - {x: -0.22, y: -0.12}
+      - {x: 0.21, y: -0.12}
+      - {x: 0.25, y: -0.07}
+      - {x: 0.25, y: 0.049999997}
+      - {x: 0.19999999, y: 0.099999994}
   m_UseDelaunayMesh: 0

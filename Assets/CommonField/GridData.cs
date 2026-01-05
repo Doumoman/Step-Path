@@ -18,4 +18,8 @@ public class GridData : ScriptableObject
     public Vector3Int groundLposright;
     [System.NonSerialized]
     public Tilemap ground;
+    [System.NonSerialized]
+    public TileBase gTile;
+    [System.NonSerialized]
+    public Vector3 playerpos;
 }
