@@ -22,7 +22,7 @@ public class UIsSceneMain : MonoBehaviour
         yield return new WaitForSeconds(soundEffectDelayTime);
 
         // 인게임 씬으로 전환
-        SceneManager.LoadScene("InGame");
+        SceneManager.LoadScene("STEPPATH");
     }
     
     public GameObject settingsPopup; // 설정 팝업

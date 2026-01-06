@@ -12,8 +12,6 @@ public class UIsSettings : MonoBehaviour
 
     private void Awake()
     {
-        // 시작할 때 비활성화 (필요할 때만 열기)
-        gameObject.SetActive(false);
     }
 
     private void Start()
