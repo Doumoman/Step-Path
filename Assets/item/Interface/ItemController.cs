@@ -9,10 +9,12 @@ public class ItemController : MonoBehaviour
     [SerializeField] Vector3 spawnL;
     [SerializeField] ItemPrepabDelegate prefab;
     [SerializeField] GridData grid;
+    [SerializeField] itemSound itemS;
     public ItemStateMachine StateMachine => root;
     public ItemData Data => data;
     public GridData Grid => grid;
     public ItemPrepabDelegate Prefab => prefab;
+    public itemSound ItemSound => itemS;
     ItemStateMachine root = new();
     public Transform item { get; private set; }
 

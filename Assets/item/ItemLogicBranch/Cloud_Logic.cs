@@ -10,6 +10,7 @@ public class Cloud_L : ItemLogic
     public override void PlacedItemLogic(ItemDataHub ctx)
     {
         if (ctx.data.isoriginal == false) return;
+        ctx.data.forcloudsoundcheck = true;
         int count = 0;
         Vector3Int pos = ctx.grid.positioncell;
         Vector3Int left = new Vector3Int(pos.x - 1, pos.y - 1, 0);

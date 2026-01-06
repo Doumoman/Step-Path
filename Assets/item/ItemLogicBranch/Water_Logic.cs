@@ -13,7 +13,12 @@ public class Water_L : ItemLogic
         string itemName = ctx.data.itemName;
 
         if (itemName == "mushroom") { craft = true; return "bigmushroom";  }
-        else if (itemName == "sprout") { craft = true; return "vine"; }
+        else if (itemName == "sprout") 
+        {
+            craft = true;
+            ctx.isound.PlayvineG();
+            return "vine"; 
+        }
         else { craft = false; return null; }
     }
 

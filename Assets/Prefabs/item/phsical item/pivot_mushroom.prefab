@@ -105,6 +105,7 @@ MonoBehaviour:
   spawnL: {x: 525, y: 100, z: 11}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
+  itemS: {fileID: 11400000, guid: 7432d98892f3f5448856016a89a55a95, type: 2}
 --- !u!60 &-881943514371534891
 PolygonCollider2D:
   m_ObjectHideFlags: 0
