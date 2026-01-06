@@ -59,11 +59,11 @@ public class SoundManager : Singleton<SoundManager>
         audioSource2 = gameObject.AddComponent<AudioSource>();
         audioSource1.loop = true;
 
-        bgmMain = Resources.Load<AudioClip>("Sounds/main");
-        bgmInGame = Resources.Load<AudioClip>("Sounds/1stageTheme_first_dream");
-        clear = Resources.Load<AudioClip>("Sounds/win");
-        GameOver = Resources.Load<AudioClip>("Sounds/lose");
-        ending = Resources.Load<AudioClip>("Sounds/EndingBGM");
+        bgmMain = Resources.Load<AudioClip>("Sound/BGM/BGM_Play_001");
+        bgmInGame = Resources.Load<AudioClip>("Sound/BGM/BGM_Play_001");
+        //best = Resources.Load<AudioClip>("Sound/win");
+        //GameOver = Resources.Load<AudioClip>("Sound/SFX/character/Character_Fall");
+        ending = Resources.Load<AudioClip>("Sound/BGM/BGM_Play_001");
 
         MainBgmOn();
     }
@@ -108,12 +108,12 @@ public class SoundManager : Singleton<SoundManager>
     
     }
 
-    public void ClearBgmOn()
+    /*public void BestBgmOn()
     {
-        audioSource1.clip = clear;
+        audioSource1.clip = best;
         audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
-    }
+    }*/
 
     public void GameOverBgmOn()
     {
@@ -128,9 +128,29 @@ public class SoundManager : Singleton<SoundManager>
         audioSource1.volume = GetBGMVolume();
         audioSource1.Play();
     }
-
+    
+    public enum SFXType
+    {
+        Buton_Click,
+        Start_Game
+        Jump,
+        Hit,
+        Clear,
+        GameOver,
+        Button,
+        // 필요할 때 계속 추가
+    }
+    
+    Dictionary<SFXType, string> sfxPaths = new Dictionary<SFXType, string>
+    {
+        { SFXType.CharacterHit, "Sounds/SFX/Character/Hit" },
+        { SFXType.EnemyAttack, "Sounds/SFX/Character/Enemy/Attack" },
+        { SFXType.ObjectBreak, "Sounds/SFX/Object/Break" },
+        { SFXType.ButtonClick, "Sounds/SFX/UI/Button" }
+    };
+    
     // 효과음 재생
-    public void EffectSoundOn(string effectName)
+    /*public void EffectSoundOn(string effectName)
     {
         string effectPath = "Sounds/" + effectName;
         AudioClip effectClip = Resources.Load<AudioClip>(effectPath);
