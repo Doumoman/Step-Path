@@ -14,7 +14,8 @@ public sealed class ItemDataHub
     public readonly ItemController mono;
     public readonly ImageController image;
     public readonly ItemStateMachine sm;
-    public readonly ItemPrepabDelegate pd;    
+    public readonly ItemPrepabDelegate pd;
+    public readonly itemSound isound;
     public readonly ItemData data;
     public readonly Transform transform;
     public readonly RectTransform rect;
@@ -38,6 +39,7 @@ public sealed class ItemDataHub
         data = owner.Data;
         transform = owner.transform;
         pd = owner.Prefab;
+        isound = owner.ItemSound;
         sr = owner.gameObject.GetComponentInChildren<SpriteRenderer>();
         spawnL = owner.SpawnL;
         map = owner.Grid.currentGrid;
@@ -52,6 +54,7 @@ public sealed class ItemDataHub
         data = owner.Data;
         transform = owner.transform;
         pd = owner.Prefab;
+        isound = owner.ItemSound;
         spawnL = owner.SpawnL;
         rect = owner.GetComponent<RectTransform>();
         map = owner.Grid.currentGrid;

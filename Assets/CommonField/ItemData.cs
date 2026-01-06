@@ -22,4 +22,7 @@ public class ItemData : ScriptableObject
 
     [Header("재귀 중복 체크")]
     public bool isoriginal = true;
+
+    [System.NonSerialized]
+    public bool forcloudsoundcheck = true;
 }

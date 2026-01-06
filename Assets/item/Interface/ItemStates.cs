@@ -82,10 +82,12 @@ public sealed class DraggingState : IItemState
             Movectx(ctx);
             if (IsPlaceable && CraftCheck)
             {
+                ctx.isound.PlaytileP();
                 machine.ChangeState(new CraftingState(ctx, machine, prefabCreate, placed_ctx));
             }
             else if (IsPlaceable && !CraftCheck)
             {
+                ctx.isound.PlaytileP();
                 machine.ChangeState(new PlacedState(ctx, machine, prefabCreate));
             }
             else
@@ -477,6 +479,12 @@ public sealed class PlacedState : IItemState
     public IEnumerator DestroyCloud(ItemDataHub ctx)
     {
         yield return new WaitForSeconds(5f);
+        if (ctx.data.forcloudsoundcheck)
+        {
+            ctx.isound.PlaycloudF();
+            ctx.data.forcloudsoundcheck = false;
+        }
+        
         ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
         
     }
