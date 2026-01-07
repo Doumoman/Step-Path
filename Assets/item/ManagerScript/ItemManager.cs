@@ -85,10 +85,11 @@ public class ItemManager : MonoBehaviour
         
 
         if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f; }
+        else if(itemDatas[id].itemName == "rock" || itemDatas[id].itemName == "sprout") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.02f; }
         else { spawnpos = grid.CellToWorld(gridData.positioncell); }
 
 
-        GameObject itemspawn;
+            GameObject itemspawn;
         if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, Ground_item);
         else itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
     }

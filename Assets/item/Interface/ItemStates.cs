@@ -22,6 +22,7 @@ public sealed class BackgroundState : IItemState
     public void Enter()
     {
         ctx.rect.anchoredPosition = ctx.spawnL;
+        ctx.rect.localScale = new Vector3(2.45f, 2.45f, 2.45f);
         
 
     }
@@ -72,7 +73,7 @@ public sealed class DraggingState : IItemState
     {
         if (groundcheck) x = y = 1;
         else x = y = 2;
-            TrackingMouse(ctx, x, y);
+        TrackingMouse(ctx, x, y);
         IsitPlaceable(ctx);
         OnPoint(ctx);
         if (Input.GetMouseButtonUp(0)) 
@@ -157,6 +158,7 @@ public sealed class DraggingState : IItemState
 
     void ResizeImageToGrid(ItemDataHub ctx, int sizeX, int sizeY)
     {
+        ctx.rect.localScale = new Vector3(1f, 1f, 1f);
         Canvas canvas = ctx.rect.GetComponentInParent<Canvas>();
         Vector3 cellSize = ctx.map.cellSize;
         float targetWorldWidth = cellSize.x * sizeX;

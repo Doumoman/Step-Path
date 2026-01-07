@@ -28,8 +28,8 @@ RectTransform:
   m_GameObject: {fileID: 2330050038687841085}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -89,7 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: a57b43ba6cfefe644bf5e9747165750f, type: 2}
-  spawnL: {x: 0, y: 65, z: 0}
+  spawnL: {x: -225.3, y: 102.7, z: 0}
   prefab: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
   grid: {fileID: 11400000, guid: af4a9ce526b70334eaa15cb8c60f35b0, type: 2}
   itemS: {fileID: 11400000, guid: 7432d98892f3f5448856016a89a55a95, type: 2}
