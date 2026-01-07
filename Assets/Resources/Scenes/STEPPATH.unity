@@ -370,7 +370,7 @@ SpriteRenderer:
   m_Size: {x: 2.56, y: 0.64}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &134657859
@@ -628,6 +628,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: InGameCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 4934918320905071177, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5766513703482722589, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -1604443050267842622, guid: df0bf2b6e08f1ff4e97941cf0bd4748b, type: 3}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -638,19 +646,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_SizeDelta.x
@@ -690,11 +698,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: -708
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -326
       objectReference: {fileID: 0}
     - target: {fileID: 7102179200874601491, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -958,6 +966,11 @@ MonoBehaviour:
   keepCount: 2
   sortingOrder: -99
   sortingLayerName: 
+--- !u!1 &620084366 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7581888350024345788, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+  m_PrefabInstance: {fileID: 1219513786}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &693423585
 GameObject:
   m_ObjectHideFlags: 0
@@ -1650,6 +1663,9 @@ MonoBehaviour:
   offset: {x: 0, y: -2.9, z: 0}
   heightStallLimitSec: 10
   heightEpsilon: 0.1
+  stallGauge: {fileID: 0}
+  gaugeSmoothSpeed: 3
+  gameOverPopup: {fileID: 0}
 --- !u!50 &1171756767
 Rigidbody2D:
   serializedVersion: 5
@@ -1897,6 +1913,10 @@ PrefabInstance:
       propertyPath: maxFallSpeedPixelsPerSec
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 6123513098060005743, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6829849322806142116, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -1964,7 +1984,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7581888350024345788, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1531521720}
   m_SourcePrefab: {fileID: 100100000, guid: a4325e099a88aee418fccae7e1867392, type: 3}
 --- !u!1 &1294966581
 GameObject:
@@ -2198,8 +2221,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightText: {fileID: 289633609}
-  prefix: 
-  suffix: m
+  bestText: {fileID: 0}
+  heightPrefix: 
+  heightSuffix: m
+  bestPrefix: 
+  bestSuffix: m
   decimals: 0
   player: {fileID: 1531521708}
   unitsPerMeter: 1
@@ -2221,6 +2247,18 @@ BoxCollider2D:
   m_CorrespondingSourceObject: {fileID: 6123513098060005743, guid: a4325e099a88aee418fccae7e1867392, type: 3}
   m_PrefabInstance: {fileID: 1219513786}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1531521720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620084366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4798682391e5f4ff98acfad5e27c69b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1585818236
 GameObject:
   m_ObjectHideFlags: 0

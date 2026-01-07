@@ -151,6 +151,13 @@ public class GameManager : Singleton<GameManager>
         SaveScore();
         OnGameOver?.Invoke();
     }
+    
+    // 거리 1m 단위 점수 추가
+    public void AddScore(int amount)
+    {
+        currentScore += amount;
+    }
+
 }
 
 
