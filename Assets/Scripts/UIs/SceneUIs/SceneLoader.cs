@@ -26,7 +26,7 @@ public class SceneLoader : MonoBehaviour
         yield return StartCoroutine(SoundManager.Instance.PlayStartSequence());
 
         // 인게임 씬 로드
-        SceneManager.LoadScene("InGame");
+        SceneManager.LoadScene("STEPPATH");
         Time.timeScale = 1.0f;
     }
     public GameObject settingsPopup; // 설정 팝업
