@@ -5,31 +5,44 @@ using TMPro;
 
 public class UIsSceneInGame : MonoBehaviour
 {
-    // ───────────────────────────────
-    //   IN-GAME HUD
-    // ───────────────────────────────
-    [Header("InGameUI_HUD")]
-    [SerializeField] public TextMeshProUGUI BestScoreText;    // 화면 상단 최고 기록
-    [SerializeField] public TextMeshProUGUI CurrentScoreText; // 현재 점수
-    // [SerializeField] private Image timeBar;               // ← 주석 처리 (타임바 제거)
+    // ──────────── HUD ────────────
+    [Header("HUD")]
+    [SerializeField] private TextMeshProUGUI BestScoreText;
+    [SerializeField] private TextMeshProUGUI CurrentScoreText;
+    [SerializeField] private Button OpenPauseButton;
 
-    // ───────────────────────────────
-    //   PAUSE PANEL
-    // ───────────────────────────────
+    // ──────────── TimeBar ────────────
+    [Header("TimeBar")]
+    [SerializeField] private Slider timeSlider;
+    [SerializeField] private float maxTime = 10f;            // 타임바 최대 시간
+    [SerializeField] private float addTimePerScore = 1f;     // 점수 단위마다 회복할 시간
+    [SerializeField] private int scoreInterval = 10;         // 점수 단위
+    private float currentTime;
+    private int lastScoreCheckpoint = 0;                     // 마지막으로 회복한 점수 단위
+
+    // ──────────── Pause Panel ────────────
     [Header("PausePanel")]
-    public GameObject PausePanel;
+    [SerializeField] private GameObject PausePanel;
 
-    // ───────────────────────────────
-    //   GAME OVER POPUP
-    // ───────────────────────────────
+    // ──────────── Game Over ────────────
     [Header("GameOverPopup")]
-    public GameObject GameOverPopup;
-    [SerializeField] private TextMeshProUGUI gameOverScoreText;     // 게임오버 순간 점수
-    [SerializeField] private TextMeshProUGUI gameOverBestScoreText; // 최고기록 표시
-    [SerializeField] private GameObject gameOverBestLabel;          // "BEST!" 표기
+    [SerializeField] private GameObject GameOverPopup;
+    [SerializeField] private TextMeshProUGUI gameOverScoreText;
+    [SerializeField] private TextMeshProUGUI gameOverBestScoreText;
+    [SerializeField] private GameObject gameOverBestLabel;
 
     void Start()
     {
+        // 타임바 초기화
+        currentTime = maxTime;
+        if (timeSlider != null)
+        {
+            timeSlider.maxValue = maxTime;
+            timeSlider.minValue = 0f;
+            timeSlider.value = currentTime;
+        }
+
+        // 필드 연결 경고
         if (CurrentScoreText == null) Debug.LogWarning("CurrentScoreText is NULL");
         if (BestScoreText == null) Debug.LogWarning("BestScoreText is NULL");
         if (PausePanel == null) Debug.LogWarning("PausePanel is NULL");
@@ -37,38 +50,75 @@ public class UIsSceneInGame : MonoBehaviour
         if (gameOverScoreText == null) Debug.LogWarning("gameOverScoreText is NULL");
         if (gameOverBestScoreText == null) Debug.LogWarning("gameOverBestScoreText is NULL");
         if (gameOverBestLabel == null) Debug.LogWarning("gameOverBestLabel is NULL");
+        if (GameManager.Instance == null) Debug.LogError("GameManager.Instance is NULL");
 
-        if (GameManager.Instance == null)
-            Debug.LogError("GameManager.Instance is NULL");
+        // Pause 버튼 클릭 이벤트 연결
+        if (OpenPauseButton != null)
+            OpenPauseButton.onClick.AddListener(OpenPause);
+
+        // 처음 PausePanel 숨김
+        if (PausePanel != null)
+            PausePanel.SetActive(false);
     }
 
     void Update()
     {
         UpdateInGameHUD();
+        UpdateTimeBar();
     }
 
+    // ──────────── HUD 갱신 ────────────
     private void UpdateInGameHUD()
     {
         if (GameManager.Instance == null) return;
 
+        float score = GameManager.Instance.GetScore();
+
         if (CurrentScoreText != null)
-            CurrentScoreText.text = $"{GameManager.Instance.GetScore():F0}m";
+            CurrentScoreText.text = $"{score:F0}m";
 
         if (BestScoreText != null)
             BestScoreText.text = $"{GameManager.Instance.GetBestScore():F0}m";
 
-        // timeBar 관련 제거
-        // if (timeBar != null)
-        //     timeBar.fillAmount = GameManager.Instance.GetTimePercent();
+        // 점수 단위마다 타임바 회복
+        int checkpoint = (int)score / scoreInterval;
+        if (checkpoint > lastScoreCheckpoint)
+        {
+            AddTime(addTimePerScore);
+            lastScoreCheckpoint = checkpoint;
+        }
     }
 
-    // ───────────────────────────────
-    //   PAUSE
-    // ───────────────────────────────
+    // ──────────── 타임바 감소 ────────────
+    private void UpdateTimeBar()
+    {
+        if (currentTime <= 0) return;
+
+        currentTime -= Time.deltaTime; // Time.timeScale = 0이면 자동 멈춤
+
+        if (timeSlider != null)
+            timeSlider.value = Mathf.Clamp(currentTime, 0f, maxTime);
+
+        if (currentTime <= 0)
+            ShowGameOver();
+    }
+
+    // ──────────── 타임바 회복 ────────────
+    private void AddTime(float amount)
+    {
+        currentTime += amount;
+        if (currentTime > maxTime) currentTime = maxTime;
+
+        if (timeSlider != null)
+            timeSlider.value = currentTime;
+    }
+
+    // ──────────── Pause ────────────
     public void OpenPause()
     {
         if (PausePanel != null)
             PausePanel.SetActive(true);
+
         Time.timeScale = 0f;
     }
 
@@ -76,6 +126,7 @@ public class UIsSceneInGame : MonoBehaviour
     {
         if (PausePanel != null)
             PausePanel.SetActive(false);
+
         Time.timeScale = 1f;
     }
 
@@ -89,13 +140,13 @@ public class UIsSceneInGame : MonoBehaviour
     {
         if (PausePanel != null)
             PausePanel.SetActive(false);
+
+        ResetTimeBar();
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    // ───────────────────────────────
-    //   GAME OVER
-    // ───────────────────────────────
+    // ──────────── Game Over ────────────
     public void ShowGameOver()
     {
         Time.timeScale = 0f;
@@ -120,5 +171,14 @@ public class UIsSceneInGame : MonoBehaviour
 
         if (GameOverPopup != null)
             GameOverPopup.SetActive(true);
+    }
+
+    // ──────────── 타임바 초기화 ────────────
+    public void ResetTimeBar()
+    {
+        currentTime = maxTime;
+        lastScoreCheckpoint = 0;
+        if (timeSlider != null)
+            timeSlider.value = currentTime;
     }
 }
