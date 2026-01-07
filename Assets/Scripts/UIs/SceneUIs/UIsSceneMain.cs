@@ -35,7 +35,7 @@ public class UIsSceneMain : MonoBehaviour
     {
         SoundManager.Instance.EffectSoundOn(SoundManager.SFXType.Start_Game);
         yield return new WaitForSeconds(soundEffectDelayTime);
-        SceneManager.LoadScene("TestScene");
+        SceneManager.LoadScene("STEPPATH");
     }
 
     // =====================
