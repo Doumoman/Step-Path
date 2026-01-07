@@ -12,6 +12,8 @@ public class PlayerRunState : IPlayerState
 
     public void Enter()
     {
+        p.pendingMushroom = false;
+        p.pendingClimb = false;
         p.PauseAnim(false);
         p.PlayAnim(p.WalkHash);
     }
@@ -39,10 +41,11 @@ public class PlayerRunState : IPlayerState
 
 
         if (!p.pendingMushroom && p.onGround && p.mushroomCD == 0 &&
-    p.DetectMushroomAheadX(p.dir, out float mx))
+    p.DetectMushroomAheadX(p.dir, out float mx, out var kind))
         {
             p.pendingMushroom = true;
             p.pendingMushroomTargetX = mx;
+            p.pendingMushroomKind = kind;
         }
 
         // 4) 지면 샘플 & 이동
@@ -101,14 +104,13 @@ public class PlayerRunState : IPlayerState
         // 버섯 점프 실행 조건: 목표X에 도달/통과
         if (p.pendingMushroom)
         {
-            bool reached = (p.dir > 0) ? (x >= p.pendingMushroomTargetX - tol)
-                                      : (x <= p.pendingMushroomTargetX + tol);
+            bool reached = Mathf.Abs(x - p.pendingMushroomTargetX) <= tol;
 
             if (reached && p.onGround && p.mushroomCD == 0)
             {
                 p.pendingMushroom = false;
 
-                p.StartMushroomJump(p.dir);
+                p.StartMushroomJump(p.dir, p.pendingMushroomKind);
                 p.ChangeState(new PlayerJumpState(p, fsm));
                 return;
             }

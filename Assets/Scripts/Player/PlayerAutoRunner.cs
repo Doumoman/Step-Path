@@ -81,13 +81,23 @@ public class PlayerAutoRunner : MonoBehaviour
     public float jumpHorizSpeedScale = 1.25f;
     public float mushroomJumpDelaySec = 0.25f;
     public bool requireGroundedAtLaunch = true;
+
+    [Header("Big Mushroom Jump")]
+    public LayerMask bigMushroomMask;
+
+    // big 버섯 전용 점프 파라미터 (값만 다르게)
+    public float bigJumpPeakHeightPixels = 96f;
+    [SerializeField, Min(0.05f)] private float bigJumpTimeToApexSec = 0.26f;
+    [Range(0.5f, 3f)] public float bigJumpHorizSpeedScale = 1.35f;
+    public int bigMushroomCooldownFrames = 12;
+
     [Header("Jump Tuning")]
     [SerializeField, Min(0.05f)]
     private float jumpTimeToApexSec = 0.22f;          // 정점까지 걸리는 시간(작을수록 더 빠르게 상승)
     [SerializeField, Range(1f, 6f)]
     private float fallGravityMultiplier = 2.0f;       // 낙하 가속 배수(클수록 더 빨리 떨어짐)
 
-    // ───────── FSM에서 접근해야 하는 런타임 필드들 ─────────
+    #region 런타임 필드
     [HideInInspector] public float pendingJumpTimer = -1f;
     [HideInInspector] public int pendingJumpDir = 1;
     [HideInInspector] public int mushroomCD;
@@ -113,8 +123,13 @@ public class PlayerAutoRunner : MonoBehaviour
     // 상태머신
     private PlayerStateMachine stateMachine;
     // ───────── Mushroom 런타임 ─────────
+    public enum MushroomKind { Normal, Big }
+
+    [HideInInspector] public MushroomKind pendingMushroomKind;
     [HideInInspector] public bool pendingMushroom;       // 예약 여부
     [HideInInspector] public float pendingMushroomTargetX;
+    #endregion
+
     // ───────────────── 캐스트 기준 ─────────────────
     private Vector2 CastSize
     {
@@ -440,34 +455,61 @@ public class PlayerAutoRunner : MonoBehaviour
             return JumpGravityUpPixelsPerSec2 * T;
         }
     }
-    public bool DetectMushroomAheadX(int dirSign, out float centerX)
+    public bool DetectMushroomAheadX(int dirSign, out float centerX, out MushroomKind kind)
     {
         centerX = 0f;
-        if (mushroomMask == 0) return false;
+        kind = MushroomKind.Normal;
 
         float halfX = CastSize.x * 0.5f;
         Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + mushroomProbe * 0.5f), 0f);
         Vector2 size = new Vector2(mushroomProbe, CastSize.y - castSkin * 2f);
 
+        // 큰 버섯 먼저
+        if (bigMushroomMask != 0)
+        {
+            var colBig = Physics2D.OverlapBox(center, size, 0f, bigMushroomMask);
+            if (colBig)
+            {
+                float step = unitPerPixel;
+                centerX = Mathf.Round(colBig.bounds.center.x / step) * step;
+                kind = MushroomKind.Big;
+                return true;
+            }
+        }
+
+        // 그 다음 일반 버섯
+        if (mushroomMask == 0) return false;
+
         var col = Physics2D.OverlapBox(center, size, 0f, mushroomMask);
         if (!col) return false;
 
-        float step = unitPerPixel;
-        centerX = Mathf.Round(col.bounds.center.x / step) * step;
-        return true;
+        {
+            float step = unitPerPixel;
+            centerX = Mathf.Round(col.bounds.center.x / step) * step;
+            kind = MushroomKind.Normal;
+            return true;
+        }
     }
-
-    public void StartMushroomJump(int jumpDir)
+    private float CalcJumpStartVy(float peakPixels, float timeToApexSec)
     {
-        // (높이/정점시간) 기반으로 초기 속도 설정
-        vyPixels = JumpStartVyPixels;
+        float T = Mathf.Max(0.05f, timeToApexSec);
+        float gUp = 2f * peakPixels / (T * T);
+        return gUp * T; // = 2H/T
+    }
+    public void StartMushroomJump(int jumpDir, MushroomKind kind)
+    {
+        float peak = (kind == MushroomKind.Big) ? bigJumpPeakHeightPixels : jumpPeakHeightPixels;
+        float apex = (kind == MushroomKind.Big) ? bigJumpTimeToApexSec : jumpTimeToApexSec;
+        float horizScale = (kind == MushroomKind.Big) ? bigJumpHorizSpeedScale : jumpHorizSpeedScale;
+        int cdFrames = (kind == MushroomKind.Big) ? bigMushroomCooldownFrames : mushroomCooldownFrames;
+
+        vyPixels = CalcJumpStartVy(peak, apex);
 
         onGround = false;
-
         dir = jumpDir;
-        jumpHorizSpeedPixelsPerSec = runSpeedPixelsPerSec * jumpHorizSpeedScale;
+        jumpHorizSpeedPixelsPerSec = runSpeedPixelsPerSec * horizScale;
 
-        mushroomCD = mushroomCooldownFrames;
+        mushroomCD = cdFrames;
     }
     #endregion
 
