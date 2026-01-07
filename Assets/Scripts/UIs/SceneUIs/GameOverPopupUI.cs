@@ -21,7 +21,7 @@ public class GameOverPopupUI : MonoBehaviour
     public void Show()
     {
         if (root != null) root.SetActive(true);
-
+        /*
         var sm = ScoreManager.Instance;
         if (sm == null) return;
 
@@ -33,6 +33,7 @@ public class GameOverPopupUI : MonoBehaviour
 
         // 필요하면 게임 일시정지
         // Time.timeScale = 0f;
+        */
     }
 
     public void Hide()

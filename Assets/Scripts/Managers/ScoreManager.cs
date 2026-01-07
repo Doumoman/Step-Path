@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
-    public static ScoreManager Instance { get; private set; }
 
     private const string PREF_BEST_M = "BEST_SCORE_M";
 
@@ -35,15 +34,7 @@ public class ScoreManager : MonoBehaviour
     public float BestMeters => _bestMeters;
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
         if (unitsPerMeter <= 0f) unitsPerMeter = 1f;
-
         _bestMeters = PlayerPrefs.GetFloat(PREF_BEST_M, 0f);
     }
 

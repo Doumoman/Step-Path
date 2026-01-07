@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Core;
+using UnityEngine.SceneManagement;
 
 // 이 GameManager는 Singleton<T>를 상속받아
 // "게임 내에서 단 하나만 존재하는 전역 매니저" 역할을 함
@@ -67,7 +68,33 @@ public class GameManager : Singleton<GameManager>
 
         UpdateTime();       // 매 프레임 남은 시간 감소 처리
     }
+    public void ResetRunState()
+    {
+        isGameOver = false;
+        currentScore = 0f;
+        currentTime = maxTime;
+    }
+    public void RestartFromClean(string gameplaySceneName, string hubSceneName = "LoadingScene")
+    {
+        Time.timeScale = 1f;
 
+        ResetRunState();
+
+        //허브/빈 씬으로 이동
+        //다음 프레임 또는 씬 로드 완료 후 gameplayScene 로드
+        StartCoroutine(RestartRoutine(gameplaySceneName, hubSceneName));
+    }
+    private System.Collections.IEnumerator RestartRoutine(string gameplaySceneName, string hubSceneName)
+    {
+        // hub로 먼저 이동 (씬 리셋 효과)
+        SceneManager.LoadScene(hubSceneName);
+
+        // 씬 전환 1초 대기 (오브젝트 파괴/초기화 정리)
+        yield return new WaitForSeconds(1f);
+
+        // 실제 게임플레이 씬 진입
+        SceneManager.LoadScene(gameplaySceneName);
+    }
 
     // ───────────────────────────────
     //   TIME HANDLING
@@ -134,6 +161,7 @@ public class GameManager : Singleton<GameManager>
         {
             bestScore = currentScore;
             PlayerPrefs.SetFloat("BestScore", bestScore);
+            PlayerPrefs.Save();
         }
     }
 
@@ -151,7 +179,12 @@ public class GameManager : Singleton<GameManager>
         SaveScore();
         OnGameOver?.Invoke();
     }
-    
+    public void BeginRun()
+    {
+        isGameOver = false;
+        currentTime = maxTime;
+        currentScore = 0f;
+    }
     // 거리 1m 단위 점수 추가
     public void AddScore(int amount)
     {

@@ -10,10 +10,9 @@ public class UIsGameOver : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textBestLabel; 
     [SerializeField] private Button HomeButton;
     [SerializeField] private Button RetryButton;
-
+    private bool _isLoading;
     private void Awake()
     {
-        transform.gameObject.SetActive(false);
     }
 
     private void Start()
@@ -25,27 +24,36 @@ public class UIsGameOver : MonoBehaviour
 
     public void Show()
     {
-        float score = GameManager.Instance.GetScore();
-        bool isBest = GameManager.Instance.IsBestRecord();
+        if (GameManager.Instance == null) return;
 
-        transform.gameObject.SetActive(true);
+        GameManager.Instance.SaveScore();
+
+        float score = GameManager.Instance.GetScore();
+        float best = GameManager.Instance.GetBestScore();
+
+        bool isBest = score >= best;
+
+        gameObject.SetActive(true);
+
         textGameResult.text = $"{score:F0}m";
-        textBestLabel.gameObject.SetActive(isBest);
+
+        // 베스트 라벨 표시
+        if (textBestLabel != null)
+            textBestLabel.gameObject.SetActive(true);
     }
 
     private void OnClick_Retry()
     {
-        StartCoroutine(RestartGame());
-    }
+        if (_isLoading) return;
+        _isLoading = true;
 
-    private IEnumerator RestartGame()
-    {
-        GameManager.Instance.ResetScore();
-        yield return null;
+        Time.timeScale = 1f;
 
-        // 현재 활성화된 씬 이름을 가져와서 다시 로드 가능
-        string sceneName = SceneManager.GetActiveScene().name;
-        SceneManager.LoadScene(sceneName);
+        // 현재 게임 씬 이름
+        string gameplayScene = SceneManager.GetActiveScene().name;
+
+        // "Main"으로 나갔다가 다시 게임씬으로
+        GameManager.Instance.RestartFromClean(gameplaySceneName: gameplayScene, hubSceneName: "LoadingScene");
     }
 
     private void OnClick_Home()

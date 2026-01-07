@@ -7,46 +7,79 @@ public class UIsPause : MonoBehaviour
     [Header("버튼")]
     [SerializeField] private Button HomeButton;
     [SerializeField] private Button RestartButton;
-    [SerializeField] private Button PauseCloseButton;
+    [SerializeField] private Button ResumeButton;
+
+    private bool _isLoading;
 
     private void Awake()
     {
-        // 처음엔 숨겨둠
-        gameObject.SetActive(false);
+        // 중복 방지: 기존 리스너 제거 후 다시 등록
+        if (ResumeButton != null)
+        {
+            ResumeButton.onClick.RemoveAllListeners();
+            ResumeButton.onClick.AddListener(Resume);
+        }
+
+        if (HomeButton != null)
+        {
+            HomeButton.onClick.RemoveAllListeners();
+            HomeButton.onClick.AddListener(OnClickHome);
+        }
+
+        if (RestartButton != null)
+        {
+            RestartButton.onClick.RemoveAllListeners();
+            RestartButton.onClick.AddListener(OnClickRetry);
+        }
     }
 
-    private void Start()
-    {
-        PauseCloseButton.onClick.AddListener(OnClickClose);
-        HomeButton.onClick.AddListener(OnClickHome);
-        RestartButton.onClick.AddListener(OnClickRetry);
-    }
-
-    // ====== 버튼 기능 ======
     public void OnClickClose()
     {
-        // 창 닫기 + 게임 재개
+        Time.timeScale = 1f;
+        gameObject.SetActive(false);
+    }
+    public void Resume()
+    {
+        if (_isLoading) return;
         Time.timeScale = 1f;
         gameObject.SetActive(false);
     }
 
     public void OnClickHome()
     {
-        // 메인으로
+        if (_isLoading) return;
+        _isLoading = true;
+
         Time.timeScale = 1f;
+        gameObject.SetActive(false);
+
         SceneManager.LoadScene("Main");
     }
 
     public void OnClickRetry()
     {
-        // 재시작
+        if (_isLoading) return;
+        _isLoading = true;
+
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        gameObject.SetActive(false);
+
+        string gameplayScene = SceneManager.GetActiveScene().name;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RestartFromClean(gameplaySceneName: gameplayScene, hubSceneName: "LoadingScene");
+        }
+        else
+        {
+            SceneManager.LoadScene(gameplayScene);
+        }
     }
 
-    // ====== 외부에서 호출해서 Pause 열기 ======
     public void OpenPause()
     {
+        if (_isLoading) return;
+
         gameObject.SetActive(true);
         Time.timeScale = 0f;
     }

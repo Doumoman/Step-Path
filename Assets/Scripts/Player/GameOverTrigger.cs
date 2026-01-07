@@ -20,7 +20,7 @@ public class GameOverTrigger : MonoBehaviour
     [SerializeField] private float gaugeSmoothSpeed = 3f; // 값 변화 속도(초당)
 
     [Header("GameOver Popup")]
-    [SerializeField] private GameOverPopupUI gameOverPopup;
+    [SerializeField] private UIsGameOver gameOverPopup;
     private float _lastBestY;
     private float _stallTimer;
     private bool _isGameOver;
@@ -135,19 +135,18 @@ public class GameOverTrigger : MonoBehaviour
         if (_isGameOver) return;
         _isGameOver = true;
 
-        // 플레이어 정지
+        // 점수 저장/최고기록/이벤트/사운드 정리 => GameManager에서 일원화
+        if (GameManager.Instance != null)
+            GameManager.Instance.TriggerGameOver();
+
+        // 플레이어 정지(로컬 처리)
         if (_player != null) _player.SetGameOver();
 
-        // 팝업 표시 + 점수 갱신
+        // UI 표시(표시만 담당)
         if (gameOverPopup != null)
         {
             Debug.Log("게임오버");
             gameOverPopup.Show();
-        }
-        else
-        {
-            if (GameManager.Instance != null)
-                GameManager.Instance.TriggerGameOver();
         }
     }
 
