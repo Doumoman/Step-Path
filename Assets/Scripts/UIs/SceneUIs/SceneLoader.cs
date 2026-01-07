@@ -8,34 +8,40 @@ public class SceneLoader : MonoBehaviour
 {
     public void LoadMainSceneNoChange() // 메인 씬 로드
     {
-        SoundManager.Instance.EffectSoundOn("3"); //효과음 재생
+        SoundManager.Instance.EffectSoundOn(SoundManager.SFXType.Button_Click); //효과음 재생
         SceneManager.LoadScene("Main"); 
         Time.timeScale = 1.0f; // 시간 정상화
     }
-
-    // Update is called once per frame
-    public void LoadInGameScene() // 음악 변경 없이 메인씬 로드
+    
+    public void LoadInGameScene()
     {
-        //GameManager.Instance.SetNowInGame(1);
-        SoundManager.Instance.EffectSoundOn("3");
+        StartCoroutine(StartGameSequence());
+    }
+    
+
+// 씬 전환 + 사운드 시퀀스 코루틴
+    private IEnumerator StartGameSequence()
+    {
+        // 스타트 SFX 재생 후 메인 BGM 페이드 아웃 → 인게임 BGM 페이드 인
+        yield return StartCoroutine(SoundManager.Instance.PlayStartSequence());
+
+        // 인게임 씬 로드
         SceneManager.LoadScene("InGame");
-        SoundManager.Instance.InGameBgmOn();
         Time.timeScale = 1.0f;
     }
-
     public GameObject settingsPopup; // 설정 팝업
 
     // 설정 팝업 열기
     public void OpenSettings()
     {
-        SoundManager.Instance.EffectSoundOn("3");
+        SoundManager.Instance.EffectSoundOn(SoundManager.SFXType.Button_Click);
         settingsPopup.SetActive(true);
     }
 
     // 설정 팝업 닫기
     public void CloseSettings()
     {
-        SoundManager.Instance.EffectSoundOn("3");
+        SoundManager.Instance.EffectSoundOn(SoundManager.SFXType.Button_Click);
         settingsPopup.SetActive(false);
     }
 
