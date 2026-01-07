@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
@@ -14,9 +15,18 @@ public class GameOverTrigger : MonoBehaviour
     public float heightStallLimitSec = 5f;      // 외부에서 수정 가능
     public float heightEpsilon = 0.01f;         // "상승" 판정 최소값(노이즈 방지)
 
+    [Header("UI - Stall Gauge")]
+    [SerializeField] private Slider stallGauge;          // 0~1
+    [SerializeField] private float gaugeSmoothSpeed = 3f; // 값 변화 속도(초당)
+
+    [Header("GameOver Popup")]
+    [SerializeField] private GameOverPopupUI gameOverPopup;
     private float _lastBestY;
     private float _stallTimer;
     private bool _isGameOver;
+
+    private float _gaugeValue = 1f;
+    private float _gaugeTarget = 1f;
 
     private Rigidbody2D rb;
     private PlayerAutoRunner _player;
@@ -36,6 +46,12 @@ public class GameOverTrigger : MonoBehaviour
 
         if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;
+        if (stallGauge != null)
+        {
+            stallGauge.minValue = 0f;
+            stallGauge.maxValue = 1f;
+            stallGauge.value = 1f;
+        }
     }
     private void Start()
     {
@@ -45,6 +61,7 @@ public class GameOverTrigger : MonoBehaviour
         {
             _lastBestY = _playerTr.position.y;
             _stallTimer = 0f;
+            SetGaugeInstant(1f);
         }
     }
     private void LateUpdate()
@@ -68,6 +85,7 @@ public class GameOverTrigger : MonoBehaviour
             // 방금 잡혔으면 기준값 초기화
             _lastBestY = _playerTr.position.y;
             _stallTimer = 0f;
+            SetGaugeInstant(1f);
         }
 
         float y = _playerTr.position.y;
@@ -77,28 +95,60 @@ public class GameOverTrigger : MonoBehaviour
         {
             _lastBestY = y;
             _stallTimer = 0f;
+            _gaugeTarget = 1f;
         }
         else
         {
             _stallTimer += Time.deltaTime;
+
+            float t = Mathf.Clamp01(_stallTimer / Mathf.Max(0.0001f, heightStallLimitSec));
+            _gaugeTarget = 1f - t;
+
             if (_stallTimer >= heightStallLimitSec)
             {
                 TriggerGameOver();
+                return;
             }
         }
+        SmoothGauge();
+    }
+    private void SmoothGauge()
+    {
+        if (stallGauge == null) return;
+
+        _gaugeValue = Mathf.MoveTowards(
+            _gaugeValue,
+            _gaugeTarget,
+            gaugeSmoothSpeed * Time.deltaTime
+        );
+
+        stallGauge.value = _gaugeValue;
+    }
+    private void SetGaugeInstant(float v)
+    {
+        _gaugeValue = v;
+        _gaugeTarget = v;
+        if (stallGauge != null) stallGauge.value = v;
     }
     private void TriggerGameOver()
     {
         if (_isGameOver) return;
         _isGameOver = true;
 
-        Debug.Log("게임오버 (Height Stall)");
+        // 플레이어 정지
+        if (_player != null) _player.SetGameOver();
 
-        if (GameManager.Instance != null)
-            GameManager.Instance.TriggerGameOver();
-
-        if (_player != null)
-            _player.SetGameOver();
+        // 팝업 표시 + 점수 갱신
+        if (gameOverPopup != null)
+        {
+            Debug.Log("게임오버");
+            gameOverPopup.Show();
+        }
+        else
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.TriggerGameOver();
+        }
     }
 
     private void CachePlayer()
