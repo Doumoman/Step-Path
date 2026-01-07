@@ -568,6 +568,51 @@ MonoBehaviour:
   minX: -0.59
   maxX: 0.59
   minY: -999
+--- !u!1 &534028772
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 534028774}
+  - component: {fileID: 534028773}
+  m_Layer: 0
+  m_Name: UIGlobalSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &534028773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534028772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a90870583506c40c2ad7a59542c9c263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inGameUIPrefab: {fileID: 658933879155175225, guid: 5eac6fedcd1db42c4afd430629925ec7, type: 3}
+--- !u!4 &534028774
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534028772}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 581.00336, y: 324.1289, z: -4.545525}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &848079714
 GameObject:
   m_ObjectHideFlags: 0
@@ -2245,6 +2290,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 365749268}
+  - {fileID: 534028774}
   - {fileID: 1757359527}
   - {fileID: 1585818237}
   - {fileID: 2143938699}
