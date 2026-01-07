@@ -37,6 +37,7 @@ public class ItemManager : MonoBehaviour
     private void Start()
     {
         SumOfFreq(itemDatas);
+        //TestProbability(itemDatas);
         SpawnRandomItemImage();
         
     }
@@ -201,5 +202,29 @@ public class ItemManager : MonoBehaviour
         return 0;
     }
 
-    
+    //확률 테스트
+    /*
+    void TestProbability(List<ItemData> itemlist)
+    {
+        int trialCount = 10000; // 1만 번 시도
+        int[] results = new int[itemlist.Count]; // 결과 카운트용 배열
+
+        // 1만 번 뽑기 실행
+        for (int i = 0; i < trialCount; i++)
+        {
+            int pickedIndex = RandomDraw(itemlist);
+            results[pickedIndex]++;
+        }
+
+        // 결과 출력
+        Debug.Log($"=== 총 {trialCount}회 시뮬레이션 결과 ===");
+        for (int i = 0; i < itemlist.Count; i++)
+        {
+            float ratio = (float)results[i] / trialCount * 100f; // 실제 나온 확률
+            float expectedRatio = (float)itemlist[i].itemFrequency / sum * 100f; // 기획 의도 확률
+
+            Debug.Log($"아이템[{i}]: {results[i]}회 당첨 ({ratio:F2}%) / 목표 확률: {expectedRatio:F2}%");
+        }
+    }
+    */
 }

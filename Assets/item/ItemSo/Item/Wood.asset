@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: wood
   rerollCost: 3
-  itemFrequency: 3
+  itemFrequency: 10
   eachLogic: {fileID: 11400000, guid: b0edc2608ff4dfb46aa0406788e91f32, type: 2}
   itemDelegate: {fileID: 0}
   isoriginal: 0
