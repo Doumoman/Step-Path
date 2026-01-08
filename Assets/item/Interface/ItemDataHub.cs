@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
-using UnityEditor.Analytics;
-using UnityEditor.Media;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.AI;
 using UnityEngine.UI;
 
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.Analytics;
+using UnityEditor.Media;
+using UnityEditor.Rendering;
+#endif
 public sealed class ItemDataHub
 {
     public readonly ItemController mono;

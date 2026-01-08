@@ -1,11 +1,13 @@
 using NUnit.Framework.Constraints;
 using System.Collections;
 using Unity.VisualScripting;
+using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.Rendering;
-using UnityEngine;
 using static UnityEditor.Progress;
-
+#endif
 
 
 

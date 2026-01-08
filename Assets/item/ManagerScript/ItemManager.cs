@@ -2,10 +2,11 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using UnityEngine.Tilemaps;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEngine.Tilemaps;
-
+#endif
 public class ItemManager : MonoBehaviour
 {
     [SerializeField] ItemPrepabDelegate prefab;

@@ -1,6 +1,9 @@
 using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.Experimental.GraphView;
+#endif
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "Items/Item Logic/New Water Logic")]
 public class Water_L : ItemLogic

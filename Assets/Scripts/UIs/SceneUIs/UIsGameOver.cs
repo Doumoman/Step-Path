@@ -36,7 +36,7 @@ public class UIsGameOver : MonoBehaviour
         gameObject.SetActive(true);
 
         textGameResult.text = $"{score:F0}m";
-
+        textBestLabel.text = $"{best:F0}m";
         // 베스트 라벨 표시
         if (textBestLabel != null)
             textBestLabel.gameObject.SetActive(true);
