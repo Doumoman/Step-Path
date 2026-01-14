@@ -2569,7 +2569,7 @@ MonoBehaviour:
   secondSlotsprite:
   - {fileID: 5774506809615752826, guid: d00243c42f1091741b91030c1913d1df, type: 3}
   - {fileID: -3599059414226342452, guid: 40d4e34d7e51d244988c2b38b67f3f4f, type: 3}
-  - {fileID: 1414351481063667712, guid: ed80c145962030546956ff63166a4bd7, type: 3}
+  - {fileID: -5409847850790781356, guid: d89063ab4907fea448264198439039cd, type: 3}
   - {fileID: 1123706183361393910, guid: 2bb5fe5f6d6613c4282da5670a5a8435, type: 3}
   - {fileID: -9186604704178889077, guid: 6c3c1b78d0b22ba4cb2cd6d6cb5d4fa6, type: 3}
   - {fileID: 6709277255714258841, guid: ac5d27ee359956d42b7d4e834db11f6c, type: 3}
@@ -3458,17 +3458,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1982850833}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.35, y: 1.35, z: 1.35}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 855658526}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -230.00002, y: -705.6667}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 398, y: 648.01}
+  m_SizeDelta: {x: 592.59, y: 1284}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &75228934475207164
 RectTransform:

@@ -524,16 +524,18 @@ public sealed class CraftingState : IItemState
             if (ctx.data.itemName == "wood")
             {
                 machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+                prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
                 prefabCreate.Createitemimage();
             }
             else
             {
                 placed_ctx.sm.ChangeState(new DestroyedState(placed_ctx, placed_ctx.sm, placed_ctx.pd));
                 machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+                prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
             }
 
 
-            prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
+            
             return;
         }
         else // 조합 불가인 경우 
