@@ -95,7 +95,12 @@ public sealed class DraggingState : IItemState
             }
             else
             {
-                if (ctx.image.gameObject.layer == 24) { machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate)); prefabCreate.DeletitemStack(); prefabCreate.Createitemimage(); }
+                if (ctx.image.Data.itemName == "water") 
+                { 
+                    machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+                    prefabCreate.DeletitemStack();
+                    prefabCreate.Createitemimage(); 
+                }
                 machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
             }    
             return;
@@ -306,7 +311,7 @@ public sealed class DraggingState : IItemState
                 }
             }
         }
-        else if (ctx.image.gameObject.layer == 24) // 물
+        else if (ctx.image.Data.itemName == "water") // 물
         {
             if (hititem == null && hitGroundCenter == null)
             {
@@ -318,7 +323,6 @@ public sealed class DraggingState : IItemState
             {
                 IsPlaceable = true;
                 CraftCheck = true;
-                Debug.Log("조합 가능");
                 return;
             }
             else
@@ -357,7 +361,6 @@ public sealed class DraggingState : IItemState
             {
                 IsPlaceable = false;
                 CraftCheck = true;
-                Debug.Log("조합 가능");
                 return;
             }
             else
@@ -445,9 +448,6 @@ public sealed class PlacedState : IItemState
             prefabCreate.CreateSimpleitem();
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
         }
-        
-
-        
     }
 
     public void Update()
@@ -472,7 +472,10 @@ public sealed class PlacedState : IItemState
 
     public void Exit()
     {
-        if(ctx.data.itemName != "cloud" || ctx.image != null) prefabCreate.Createitemimage();
+        if (ctx.data.itemName != "cloud" || ctx.image != null)
+        {
+            prefabCreate.Createitemimage();
+        }
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
@@ -511,18 +514,14 @@ public sealed class CraftingState : IItemState
         itemName = ctx.data.itemName;
         if(itemName != "water" && itemName != "wood") { machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate)); return; }
         craftitemName = ctx.data.eachLogic.CraftingCheck(placed_ctx, ref IsCraftable);
-        return;
         
-    }
 
-    public void Update()
-    {
         if (IsCraftable) // 조합되는 경우. 
         {
             placed_ctx.mono.Grid.craftedPos = placed_ctx.transform.position;
             placed_ctx.mono.Grid.crafteditemName = craftitemName;
             // 원래 placed되어 있던 프리팹 destroy로 전달. 
-            if(ctx.data.itemName == "wood")
+            if (ctx.data.itemName == "wood")
             {
                 machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
                 prefabCreate.Createitemimage();
@@ -540,10 +539,14 @@ public sealed class CraftingState : IItemState
         else // 조합 불가인 경우 
         {
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
-            prefabCreate.DeletitemStack();
-            prefabCreate.Createitemimage();
             return;
         }
+
+    }
+
+    public void Update()
+    {
+        
     }
 
     public void Exit()

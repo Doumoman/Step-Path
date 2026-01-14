@@ -3,6 +3,10 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
+using Unity.VisualScripting;
+
+
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -18,12 +22,15 @@ public class ItemManager : MonoBehaviour
     [SerializeField] public Transform Ground_item;
     [SerializeField] public TileBase groundTile;
     [SerializeField] public GameObject player;
+    [SerializeField] public Image targetimage;
     public List<GameObject> itemPrefabs;
     public List<GameObject> itemimages;
     public List<GameObject> Crafteditems;
     public List<ItemData> itemDatas;
-    private Queue<int> itemnumstack = new Queue<int>();
+    public List<Sprite> secondSlotsprite;
+    public Queue<int> itemnumstack = new Queue<int>();
     int sum = 0;
+    int secondslot = -1;
     
 
     void Awake()
@@ -40,7 +47,10 @@ public class ItemManager : MonoBehaviour
         SumOfFreq(itemDatas);
         //TestProbability(itemDatas);
         SpawnRandomItemImage();
-        
+        secondslot = RandomDraw(itemDatas);
+        itemnumstack.Enqueue(secondslot);
+        DisplaySecondSlot();
+        PrintQueueState();
     }
 
     // Update is called once per frame
@@ -64,6 +74,10 @@ public class ItemManager : MonoBehaviour
     {
         int num = RandomDraw(itemDatas);
         itemnumstack.Enqueue(num);
+        if (secondslot != -1) secondslot = num;
+
+        num = itemnumstack.Peek();
+        
         if (itemimages == null || itemimages.Count == 0)
         {
             Debug.LogWarning("itemPrefabs 목록이 비어있습니다!");
@@ -71,6 +85,17 @@ public class ItemManager : MonoBehaviour
         }
         GameObject imageToSpawn = Instantiate(itemimages[num], imageContainer, false);
 
+        if (secondslot != -1) DisplaySecondSlot();
+        PrintQueueState();
+
+    }
+
+    void DisplaySecondSlot()
+    {
+        if(secondslot >= 3 && secondslot <= 4) targetimage.transform.localScale = new Vector3(0.8f, 0.4f, 0.8f);
+        else targetimage.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+
+        targetimage.sprite = secondSlotsprite[secondslot];
     }
 
     void Spawnitem()
@@ -94,6 +119,7 @@ public class ItemManager : MonoBehaviour
             GameObject itemspawn;
         if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, Ground_item);
         else itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
+        PrintQueueState();
     }
 
     void SpawnCrafteditem()
@@ -127,6 +153,7 @@ public class ItemManager : MonoBehaviour
                 return;
             }
         }
+        PrintQueueState();
     }
 
     void SpawnGrounditem()
@@ -180,6 +207,7 @@ public class ItemManager : MonoBehaviour
     void Deletitemstack()
     {
         itemnumstack.Dequeue();
+        //PrintQueueState();
     }
 
     void SumOfFreq(List<ItemData> itemlist)
@@ -228,4 +256,16 @@ public class ItemManager : MonoBehaviour
         }
     }
     */
+
+    void PrintQueueState()
+    {
+        if (itemnumstack.Count == 0)
+        {
+            Debug.Log("큐가 비어있습니다. (Empty)");
+            return;
+        }
+
+        // 예시 출력: [Front] 1, 2, 3, 4 [Back]
+        Debug.Log($"[큐 상태] Front(앞) -> {string.Join(", ", itemnumstack)} <- Back(뒤)");
+    }
 }
