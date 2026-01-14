@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cbbc9fc50e1725488677ee745a26b65, type: 3}
-  m_Name: Rock
+  m_Name: Mushroom
   m_EditorClassIdentifier: 
-  itemName: rock
+  itemName: mushroom
   rerollCost: 3
   itemFrequency: 10
-  eachLogic: {fileID: 11400000, guid: baa1fc5710dc25f4c9dc5e7d13896929, type: 2}
-  itemDelegate: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
+  eachLogic: {fileID: 11400000, guid: c404330bb610c1c45baf9853c89efb7b, type: 2}
+  itemDelegate: {fileID: 0}
   isoriginal: 1

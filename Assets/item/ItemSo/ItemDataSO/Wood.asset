@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cbbc9fc50e1725488677ee745a26b65, type: 3}
-  m_Name: Spaceship
+  m_Name: Wood
   m_EditorClassIdentifier: 
-  itemName: spaceship
+  itemName: wood
   rerollCost: 3
   itemFrequency: 5
-  eachLogic: {fileID: 11400000, guid: 5197ee523d6d6e24ea0c4efdf9655c7b, type: 2}
+  eachLogic: {fileID: 11400000, guid: b0edc2608ff4dfb46aa0406788e91f32, type: 2}
   itemDelegate: {fileID: 0}
-  isoriginal: 1
+  isoriginal: 0
