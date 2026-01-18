@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9028460586504716554}
   - component: {fileID: 6113041996946588828}
   - component: {fileID: 6062496761595069791}
-  m_Layer: 6
+  m_Layer: 30
   m_Name: Stairs_item
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7647054886370508402, guid: 438d8410e04316e4f9ab15929ff7f82e, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7925569215541386451, guid: 438d8410e04316e4f9ab15929ff7f82e, type: 3}
       propertyPath: m_LocalScale.x

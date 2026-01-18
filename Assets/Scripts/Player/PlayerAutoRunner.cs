@@ -8,14 +8,15 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField] private Animator anim;
     [SerializeField] private SpriteRenderer sr;
     [SerializeField] private int animLayer = 0;
-
+    public SpriteRenderer Sprite => sr;
+    [HideInInspector] public bool overrideFlip;
     public const string ANIM_WALK = "Walk";
     public const string ANIM_IDLE = "Idle";
     public const string ANIM_CLIMB = "Climb";
     public const string ANIM_JUMP = "Jump";
     public const string ANIM_FALL = "Fall";
-
-    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash;
+    public const string ANIM_STAIRCLIMB = "StairClimb";
+    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash;
 
     [Header("Pixel")]
     public int pixelsPerUnit = 16;
@@ -70,6 +71,15 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField, Min(0f)] private float groundProbeUnits = 0.40f;
     [SerializeField, Range(0.3f, 1f)] private float groundCastWidthScale = 0.85f; // 바닥 판정 BoxCast 폭 축소(모서리 오판정 감소)
     [SerializeField, Range(0f, 1f)] private float minGroundNormalY = 0.5f;       // 바닥으로 인정할 노말 y(0.5면 대략 60도 이상을 바닥으로 인정)
+
+    [Header("Stairs")]
+    [Header("Stairs")]
+    public LayerMask stairsMask;
+    [SerializeField, Min(0.01f)] public float stairsProbe = 0.12f;
+    [SerializeField, Min(0.01f)] public float stairsRiseUnits = 1.0f;
+    [SerializeField, Range(0.1f, 1.5f)] public float stairsShapeEase = 1.0f;
+    [SerializeField] public bool invertStairsDirection = false;
+    [SerializeField, Min(0f)] public float stairsCooldownSec = 0.2f;
 
 
     [Header("Mushroom Jump")]
@@ -128,10 +138,20 @@ public class PlayerAutoRunner : MonoBehaviour
     [HideInInspector] public MushroomKind pendingMushroomKind;
     [HideInInspector] public bool pendingMushroom;       // 예약 여부
     [HideInInspector] public float pendingMushroomTargetX;
+
+
+    // ───────── Stair 런타임 ─────────
+    [HideInInspector] public int stairsCD;
+    [HideInInspector] public bool pendingStairs;
+    [HideInInspector] public float pendingStairsTargetX;
+    [HideInInspector] public Vector2 stairStart;   // (x,y) : 선분의 시작(월드)
+    [HideInInspector] public Vector2 stairEnd;     // (x,y) : 선분의 끝(월드)
+    [HideInInspector] public float stairSlope;     // dy/dx
+    [HideInInspector] public int stairMoveDir;     // +1 또는 -1 (계단 진행 방향)
     #endregion
 
     // ───────────────── 캐스트 기준 ─────────────────
-    private Vector2 CastSize
+    public Vector2 CastSize
     {
         get
         {
@@ -161,6 +181,7 @@ public class PlayerAutoRunner : MonoBehaviour
         _climbHash = Animator.StringToHash(ANIM_CLIMB);
         _jumpHash = Animator.StringToHash(ANIM_JUMP);
         _fallHash = Animator.StringToHash(ANIM_FALL);
+        _stairclimbHash = Animator.StringToHash(ANIM_STAIRCLIMB);
 
         stateMachine = new PlayerStateMachine();
     }
@@ -175,11 +196,13 @@ public class PlayerAutoRunner : MonoBehaviour
         if (reverseCD > 0) reverseCD--;
         if (mushroomCD > 0) mushroomCD--;
         if (climbCD > 0) climbCD--;
+        if (stairsCD > 0) stairsCD--;
         stateMachine.Update();
     }
     void LateUpdate()
     {
-        if (sr) sr.flipX = (dir > 0);
+        if (sr && !overrideFlip)
+            sr.flipX = (dir > 0);
     }
     public void ChangeState(IPlayerState newState)
     {
@@ -218,6 +241,7 @@ public class PlayerAutoRunner : MonoBehaviour
     public int ClimbHash => _climbHash;
     public int JumpHash => _jumpHash;
     public int FallHash => _fallHash;
+    public int StairClimbHash => _stairclimbHash;
 
     #region 사다리 로직
     public bool DetectClimbableAhead(int dirSign, out Collider2D col, out float centerX, out float targetCenterY)
@@ -513,6 +537,114 @@ public class PlayerAutoRunner : MonoBehaviour
     }
     #endregion
 
+    #region 계단 로직
+    public bool DetectStairsAhead(int dirSign, out Collider2D col, out float enterX)
+    {
+        col = null; enterX = 0f;
+        if (stairsCD > 0) return false;
+        if (stairsMask == 0) return false;
+
+        float halfX = CastSize.x * 0.5f;
+
+        // 앞에 얇은 박스
+        Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + stairsProbe * 0.5f), 0f);
+        Vector2 size = new Vector2(stairsProbe, CastSize.y - castSkin * 2f);
+
+        col = Physics2D.OverlapBox(center, size, 0f, stairsMask);
+        if (!col) return false;
+
+        // 계단이 PolygonCollider2D라고 가정
+        var poly = col as PolygonCollider2D;
+        if (!poly) return false;
+
+        // 월드 좌표로 변환된 점들
+        int n = poly.points.Length;
+        if (n < 2) return false;
+
+        Vector2[] w = new Vector2[n];
+        Transform t = poly.transform;
+        for (int i = 0; i < n; i++)
+            w[i] = t.TransformPoint(poly.points[i]);
+
+        // bottom/top 후보 찾기 (y 기준)
+        float minY = w[0].y, maxY = w[0].y;
+        for (int i = 1; i < n; i++)
+        {
+            if (w[i].y < minY) minY = w[i].y;
+            if (w[i].y > maxY) maxY = w[i].y;
+        }
+
+        float epsY = unitPerPixel * 2f; // 2px 정도를 같은 높이로 취급
+                                        // bottom: minY 근처 점들 중 좌/우 극값
+        Vector2 bL = w[0], bR = w[0];
+        bool bInit = false;
+
+        // top: maxY 근처 점들 중 좌/우 극값
+        Vector2 tL = w[0], tR = w[0];
+        bool tInit = false;
+
+        for (int i = 0; i < n; i++)
+        {
+            if (Mathf.Abs(w[i].y - minY) <= epsY)
+            {
+                if (!bInit) { bL = bR = w[i]; bInit = true; }
+                else
+                {
+                    if (w[i].x < bL.x) bL = w[i];
+                    if (w[i].x > bR.x) bR = w[i];
+                }
+            }
+
+            if (Mathf.Abs(w[i].y - maxY) <= epsY)
+            {
+                if (!tInit) { tL = tR = w[i]; tInit = true; }
+                else
+                {
+                    if (w[i].x < tL.x) tL = w[i];
+                    if (w[i].x > tR.x) tR = w[i];
+                }
+            }
+        }
+
+        if (!bInit || !tInit) return false;
+
+        bool flipX = false;
+        var sr = col.GetComponentInParent<SpriteRenderer>();
+        if (sr) flipX ^= sr.flipX;
+        if (col.transform.lossyScale.x < 0f) flipX ^= true;
+        flipX ^= invertStairsDirection;
+
+        // "오른쪽으로 올라가는 계단"을 기본으로 보고,
+        // flip이면 "왼쪽으로 올라가는 계단"으로 인식
+        bool ascendRight = !flipX;
+
+        Vector2 start = ascendRight ? bL : bR; // 아래 시작점
+        Vector2 end = ascendRight ? tR : tL; // 위 끝점
+        // 진행 방향
+        int moveDir = (end.x >= start.x) ? +1 : -1;
+        if (moveDir != dirSign) return false;
+
+        stairStart = start;
+        stairEnd = end;
+
+        float dx = (end.x - start.x);
+        if (Mathf.Abs(dx) < 0.0001f) return false;
+
+        stairStart = start;
+        stairEnd = end;
+        stairMoveDir = moveDir;
+
+        // 진입 목표 X(계단 시작쪽 x 근처로 맞추기)
+        enterX = Mathf.Round(start.x / unitPerPixel) * unitPerPixel;
+
+        return true;
+    }
+    public void StartStairsCooldown()
+    {
+        if (stairsCooldownSec <= 0f) { stairsCD = 0; return; }
+        stairsCD = Mathf.CeilToInt(stairsCooldownSec / Mathf.Max(0.0001f, Time.deltaTime));
+    }
+    #endregion
     public bool DetectWallAhead(int dirSign)
     {
         if (reverseOnMask == 0) return false;

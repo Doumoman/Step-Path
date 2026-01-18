@@ -28,7 +28,13 @@ public class PlayerRunState : IPlayerState
             p.pendingClimbTargetX = cx;
             p.pendingClimbTargetCenterY = targetCY;
         }
-        // 1) 벽 감지 → 방향 반전
+        // 계단 감지
+        if (!p.pendingStairs && p.onGround && p.stairsCD == 0 && p.DetectStairsAhead(p.dir, out var stairCol, out float sx))
+        {
+            p.pendingStairs = true;
+            p.pendingStairsTargetX = sx;
+        }
+        // 벽 감지 → 방향 반전
         if ((p.onGround || p.reverseAlsoInAir) &&
             p.DetectWallAhead(p.dir) &&
             p.reverseCD == 0)
@@ -37,18 +43,18 @@ public class PlayerRunState : IPlayerState
             p.reverseCD = p.reverseCooldownFrames;
             p.pendingClimb = false;
             p.pendingMushroom = false;
+            p.pendingStairs = false;
         }
 
-
-        if (!p.pendingMushroom && p.onGround && p.mushroomCD == 0 &&
-    p.DetectMushroomAheadX(p.dir, out float mx, out var kind))
+        // 버섯 감지
+        if (!p.pendingMushroom && p.onGround && p.mushroomCD == 0 &&p.DetectMushroomAheadX(p.dir, out float mx, out var kind))
         {
             p.pendingMushroom = true;
             p.pendingMushroomTargetX = mx;
             p.pendingMushroomKind = kind;
         }
 
-        // 4) 지면 샘플 & 이동
+        // 지면 샘플 & 이동
         if (p.SampleGroundY(p.transform.position, out float groundY))
         {
             if (!p.onGround)
@@ -112,6 +118,18 @@ public class PlayerRunState : IPlayerState
 
                 p.StartMushroomJump(p.dir, p.pendingMushroomKind);
                 p.ChangeState(new PlayerJumpState(p, fsm));
+                return;
+            }
+        }
+
+        if (p.pendingStairs)
+        {
+            bool reached = Mathf.Abs(x - p.pendingStairsTargetX) <= tol;
+            if (reached && p.onGround && p.stairsCD == 0)
+            {
+                p.pendingStairs = false;
+                p.onGround = false; // 계단은 자체적으로 y를 올릴 거라 일단 공중 처리
+                p.ChangeState(new PlayerStairClimbState(p, fsm));
                 return;
             }
         }
@@ -299,7 +317,7 @@ public class PlayerStairClimbState : IPlayerState
 {
     private readonly PlayerAutoRunner p;
     private readonly PlayerStateMachine fsm;
-
+    private bool prevFlipX;
     public PlayerStairClimbState(PlayerAutoRunner player, PlayerStateMachine machine)
     {
         p = player; fsm = machine;
@@ -307,15 +325,101 @@ public class PlayerStairClimbState : IPlayerState
 
     public void Enter()
     {
-        // TODO: 계단 시작 세팅
+        p.vyPixels = 0f;
+        p.PauseAnim(false);
+        p.PlayAnim(p.StairClimbHash); // 계단 전용 애니 없으면 걷기로
+        var sr = p.Sprite;
+        if (sr)
+        {
+            prevFlipX = sr.flipX;
+            p.overrideFlip = true;
+            sr.flipX = !sr.flipX;
+        }
     }
 
     public void Tick()
     {
-        // TODO: 계단 이동 로직
+        float dt = Time.deltaTime;
+
+        // 계단 진행: x를 앞으로 움직이고, y는 선형식으로 맞춘다
+        float dx = p.runSpeedPixelsPerSec * p.unitPerPixel * p.stairMoveDir * dt;
+
+        // 수평 이동은 기존 캐스트로 막힘 처리(벽/천장 등)
+        float dummyLockedY = p.lockedY;
+        p.MoveHorizontalWithCast(dx, ref dummyLockedY);
+
+        float x = p.transform.position.x;
+        float minX = Mathf.Min(p.stairStart.x, p.stairEnd.x);
+        float maxX = Mathf.Max(p.stairStart.x, p.stairEnd.x);
+        float cx = Mathf.Clamp(x, minX, maxX);
+
+        float denom = (p.stairEnd.x - p.stairStart.x);
+        float t = (Mathf.Abs(denom) < 0.0001f) ? 0f : (cx - p.stairStart.x) / denom;
+        t = Mathf.Clamp01(t);
+
+        float yLine = Mathf.Lerp(p.stairStart.y, p.stairEnd.y, t);
+
+        //“원본 선분의 총 상승량”
+        float rawRise = (p.stairEnd.y - p.stairStart.y);
+
+        //“원하는 총 상승량” (항상 +stairsRiseUnits 만큼 올라가게)
+        //    rawRise가 0이면(수평) 방어.
+        float scale = 1f;
+        if (Mathf.Abs(rawRise) > 0.0001f)
+        {
+            // end에서 정확히 start + stairsRiseUnits 되도록 스케일
+            scale = p.stairsRiseUnits / rawRise;
+        }
+        // 진행감만 조절하고 싶으면(선택) t를 가공 (형태만 바뀌고 최종상승량은 고정)
+        float te = (p.stairsShapeEase == 1f) ? t : Mathf.Pow(t, 1f / p.stairsShapeEase);
+        // y를 “정규화 스케일”로 변환 (끝에서는 정확히 +stairsRiseUnits)
+        float yScaled = p.stairStart.y + (Mathf.Lerp(p.stairStart.y, p.stairEnd.y, te) - p.stairStart.y) * scale;
+
+        float halfH = p.CastSize.y * 0.5f;
+        float targetCenterY = yScaled + halfH;
+
+        // y 스냅(픽셀 스냅 적용)
+        var pos = p.transform.position;
+        pos.y = Mathf.Round(targetCenterY / p.unitPerPixel) * p.unitPerPixel;
+        p.transform.position = pos;
+
+        // 끝 도달 체크
+        float tol = p.EnterXTolUnits;
+        bool finished =
+            (p.stairMoveDir > 0) ? (p.transform.position.x >= p.stairEnd.x - tol)
+                                 : (p.transform.position.x <= p.stairEnd.x + tol);
+
+        if (finished)
+        {
+            // 계단 끝에서 바닥 스냅 후 Run 복귀
+            p.StartStairsCooldown();
+
+            if (p.SampleGroundY(p.transform.position, out float gy))
+            {
+                p.lockedY = gy;
+                p.onGround = true;
+                p.vyPixels = 0f;
+                p.SnapYToLocked();
+
+                p.reverseCD = p.reverseCooldownFrames; // 끝에서 즉시 반전 방지(원하면 제거)
+                p.ChangeState(new PlayerRunState(p, fsm));
+            }
+            else
+            {
+                p.ChangeState(new PlayerFallState(p, fsm));
+            }
+        }
     }
 
-    public void Exit() { }
+    public void Exit() 
+    {
+        var sr = p.Sprite;
+        if (sr)
+        {
+            sr.flipX = prevFlipX;
+            p.overrideFlip = false;
+        }
+    }
 }
 public class PlayerLiftingState : IPlayerState
 {

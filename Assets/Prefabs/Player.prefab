@@ -219,7 +219,7 @@ MonoBehaviour:
   animLayer: 0
   pixelsPerUnit: 16
   runSpeedPixelsPerSec: 32
-  climbSpeedPixelsPerSec: 24
+  enterXTolerancePixels: 2
   gravityPixelsPerSec2: 480
   maxFallSpeedPixelsPerSec: 360
   airYSubDiv: 2
@@ -231,7 +231,12 @@ MonoBehaviour:
   ladderMask:
     serializedVersion: 2
     m_Bits: 0
+  ladderProbe: 0.12
+  climbEnterDelaySec: 0.12
+  climbSpeedPixelsPerSec: 24
   ladderTopExtra: 0.2
+  climbCooldownSec: 1
+  climbCD: 0
   reverseOnMask:
     serializedVersion: 2
     m_Bits: 256
@@ -245,6 +250,14 @@ MonoBehaviour:
   groundProbeUnits: 0.4
   groundCastWidthScale: 0.85
   minGroundNormalY: 0.5
+  stairsMask:
+    serializedVersion: 2
+    m_Bits: 1073741824
+  stairsProbe: 0.12
+  stairsRiseUnits: 1
+  stairsShapeEase: 1
+  invertStairsDirection: 0
+  stairsCooldownSec: 0.2
   mushroomMask:
     serializedVersion: 2
     m_Bits: 0
@@ -254,6 +267,13 @@ MonoBehaviour:
   jumpHorizSpeedScale: 1.25
   mushroomJumpDelaySec: 0.25
   requireGroundedAtLaunch: 1
+  bigMushroomMask:
+    serializedVersion: 2
+    m_Bits: 0
+  bigJumpPeakHeightPixels: 96
+  bigJumpTimeToApexSec: 0.26
+  bigJumpHorizSpeedScale: 1.35
+  bigMushroomCooldownFrames: 12
   jumpTimeToApexSec: 0.5
   fallGravityMultiplier: 1
   pendingJumpTimer: -1
@@ -268,12 +288,21 @@ MonoBehaviour:
   reverseCD: 0
   dir: 1
   lastHorizontalBlocked: 0
-  pendingClimbTimer: -1
-  pendingClimbCol: {fileID: 0}
-  pendingClimbCenterX: 0
+  pendingClimb: 0
+  pendingClimbTargetX: 0
   pendingClimbTargetCenterY: 0
   climbCenterX: 0
   climbTargetCenterY: 0
+  pendingMushroomKind: 0
+  pendingMushroom: 0
+  pendingMushroomTargetX: 0
+  stairsCD: 0
+  pendingStairs: 0
+  pendingStairsTargetX: 0
+  stairStart: {x: 0, y: 0}
+  stairEnd: {x: 0, y: 0}
+  stairSlope: 0
+  stairMoveDir: 0
 --- !u!95 &5413457656056095683
 Animator:
   serializedVersion: 7

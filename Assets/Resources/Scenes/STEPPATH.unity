@@ -510,9 +510,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 855658526}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -103.700005, y: -751.6667}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -103.700005, y: 115}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &138834261
@@ -1810,7 +1810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraTransform: {fileID: 365749268}
   offset: {x: 0, y: -2.9, z: 0}
-  heightStallLimitSec: 30
+  heightStallLimitSec: 300
   heightEpsilon: 0.1
   stallGauge: {fileID: 1235969601}
   gaugeSmoothSpeed: 3
@@ -2011,6 +2011,10 @@ PrefabInstance:
       value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: stairsRiseUnits
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: groundCheckDepth
       value: 0.1
       objectReference: {fileID: 0}
@@ -2037,6 +2041,10 @@ PrefabInstance:
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: mushroomMask.m_Bits
       value: 4194304
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: stairsVerticalScale
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: bigJumpTimeToApexSec
