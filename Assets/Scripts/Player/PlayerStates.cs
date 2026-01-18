@@ -14,6 +14,8 @@ public class PlayerRunState : IPlayerState
     {
         p.pendingMushroom = false;
         p.pendingClimb = false;
+        p.pendingStairs = false;
+        p.pendingRocket = false;
         p.PauseAnim(false);
         p.PlayAnim(p.WalkHash);
     }
@@ -34,6 +36,18 @@ public class PlayerRunState : IPlayerState
             p.pendingStairs = true;
             p.pendingStairsTargetX = sx;
         }
+        // 로켓 감지 → 목표X 저장(한 번만)
+        if (!p.pendingRocket && p.onGround && p.rocketCD == 0 &&
+            p.DetectRocketAhead(p.dir, out var rocketCol, out var rx, out var targetcenterY))
+        {
+            p.pendingRocket = true;
+            p.pendingRocketTargetX = rx;
+
+            // LiftingState로 넘길 값 저장(진입 시점에 세팅해도 되지만 여기서 저장해둠)
+            p.rocketCenterX = rx;
+            p.rocketStartCenterY = p.transform.position.y;
+            p.rocketTargetCenterY = targetcenterY;
+        }
         // 벽 감지 → 방향 반전
         if ((p.onGround || p.reverseAlsoInAir) &&
             p.DetectWallAhead(p.dir) &&
@@ -44,6 +58,7 @@ public class PlayerRunState : IPlayerState
             p.pendingClimb = false;
             p.pendingMushroom = false;
             p.pendingStairs = false;
+            p.pendingRocket = false;
         }
 
         // 버섯 감지
@@ -130,6 +145,25 @@ public class PlayerRunState : IPlayerState
                 p.pendingStairs = false;
                 p.onGround = false; // 계단은 자체적으로 y를 올릴 거라 일단 공중 처리
                 p.ChangeState(new PlayerStairClimbState(p, fsm));
+                return;
+            }
+        }
+        if (p.pendingRocket)
+        {
+            bool reached = Mathf.Abs(x - p.pendingRocketTargetX) <= tol;
+
+            if (reached && p.onGround && p.rocketCD == 0)
+            {
+                p.pendingRocket = false;
+
+                // X 정렬 후 진입(상태에서 X 고정)
+                p.SnapXTo(p.rocketCenterX);
+
+                p.onGround = false;
+                p.vyPixels = 0f;
+                p.pixelAccum = Vector2.zero;
+
+                p.ChangeState(new PlayerLiftingState(p, fsm));
                 return;
             }
         }
@@ -433,12 +467,53 @@ public class PlayerLiftingState : IPlayerState
 
     public void Enter()
     {
-        // TODO: 로켓/승강기 시작 세팅
+        p.vyPixels = 0f;
+        p.pixelAccum = Vector2.zero;
+        p.onGround = false;
+        p.SnapXTo(p.rocketCenterX);
+
+        p.PauseAnim(false);
+        p.PlayAnim(p.RocketHash);
     }
 
     public void Tick()
     {
-        // TODO: 위로 올라가는 로직
+        // X는 계속 고정 (드리프트 방지)
+        p.SnapXTo(p.rocketCenterX);
+
+        float dt = Time.deltaTime;
+
+        // Y만 상승
+        float dy = p.rocketLiftSpeedPixelsPerSec * p.unitPerPixel * dt;
+        p.MoveVerticalWithCast(dy);
+
+        // 목표 높이 도달 체크
+        float eps = p.unitPerPixel; // 1px 여유
+        if (p.transform.position.y >= p.rocketTargetCenterY - eps)
+        {
+            var pos = p.transform.position;
+            pos.y = p.rocketTargetCenterY;
+            p.transform.position = pos;
+
+            p.StartRocketCooldown();
+
+            // 상승 종료 후: 바닥이 있으면 Run, 없으면 Fall
+            if (p.SampleGroundY(p.transform.position, out float groundY))
+            {
+                p.lockedY = groundY;
+                p.onGround = true;
+                p.vyPixels = 0f;
+                p.SnapYToLocked();
+
+                p.reverseCD = p.reverseCooldownFrames;
+                p.ChangeState(new PlayerRunState(p, fsm));
+            }
+            else
+            {
+                p.PlayAnim(p.WalkHash);
+                p.ChangeState(new PlayerFallState(p, fsm));
+            }
+        }
     }
 
     public void Exit() { }

@@ -16,7 +16,8 @@ public class PlayerAutoRunner : MonoBehaviour
     public const string ANIM_JUMP = "Jump";
     public const string ANIM_FALL = "Fall";
     public const string ANIM_STAIRCLIMB = "StairClimb";
-    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash;
+    public const string ANIM_ROCKET = "Rocket";
+    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash, _rocketHash;
 
     [Header("Pixel")]
     public int pixelsPerUnit = 16;
@@ -81,6 +82,17 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField] public bool invertStairsDirection = false;
     [SerializeField, Min(0f)] public float stairsCooldownSec = 0.2f;
 
+    [Header("Rocket Lift")]
+    public LayerMask rocketMask;
+    [SerializeField, Min(0.01f)] public float rocketProbe = 0.12f;
+    // 올라가는 속도 (px/s)
+    [SerializeField, Min(1f)] public float rocketLiftSpeedPixelsPerSec = 64f;
+    // 얼마나 올릴지(월드 유닛). "고정 상승" 모드
+    [SerializeField, Min(0f)] public float rocketRiseUnits = 3.0f;
+    // 또는 로켓 콜라이더 top까지 올리고 싶으면 사용(선택)
+    [SerializeField] public bool rocketUseColliderTop = false;
+    [SerializeField, Min(0f)] public float rocketTopExtra = 0.05f;
+    [SerializeField, Min(0f)] public float rocketCooldownSec = 0.2f;
 
     [Header("Mushroom Jump")]
     public LayerMask mushroomMask;
@@ -148,6 +160,14 @@ public class PlayerAutoRunner : MonoBehaviour
     [HideInInspector] public Vector2 stairEnd;     // (x,y) : 선분의 끝(월드)
     [HideInInspector] public float stairSlope;     // dy/dx
     [HideInInspector] public int stairMoveDir;     // +1 또는 -1 (계단 진행 방향)
+
+    // ───────── Rocket 런타임 ─────────
+    [HideInInspector] public int rocketCD;
+    [HideInInspector] public bool pendingRocket;
+    [HideInInspector] public float pendingRocketTargetX;
+    [HideInInspector] public float rocketCenterX;
+    [HideInInspector] public float rocketStartCenterY;
+    [HideInInspector] public float rocketTargetCenterY;
     #endregion
 
     // ───────────────── 캐스트 기준 ─────────────────
@@ -182,7 +202,7 @@ public class PlayerAutoRunner : MonoBehaviour
         _jumpHash = Animator.StringToHash(ANIM_JUMP);
         _fallHash = Animator.StringToHash(ANIM_FALL);
         _stairclimbHash = Animator.StringToHash(ANIM_STAIRCLIMB);
-
+        _rocketHash = Animator.StringToHash(ANIM_ROCKET);
         stateMachine = new PlayerStateMachine();
     }
 
@@ -197,6 +217,7 @@ public class PlayerAutoRunner : MonoBehaviour
         if (mushroomCD > 0) mushroomCD--;
         if (climbCD > 0) climbCD--;
         if (stairsCD > 0) stairsCD--;
+        if (rocketCD > 0) rocketCD--;
         stateMachine.Update();
     }
     void LateUpdate()
@@ -242,6 +263,7 @@ public class PlayerAutoRunner : MonoBehaviour
     public int JumpHash => _jumpHash;
     public int FallHash => _fallHash;
     public int StairClimbHash => _stairclimbHash;
+    public int RocketHash => _rocketHash;
 
     #region 사다리 로직
     public bool DetectClimbableAhead(int dirSign, out Collider2D col, out float centerX, out float targetCenterY)
@@ -643,6 +665,49 @@ public class PlayerAutoRunner : MonoBehaviour
     {
         if (stairsCooldownSec <= 0f) { stairsCD = 0; return; }
         stairsCD = Mathf.CeilToInt(stairsCooldownSec / Mathf.Max(0.0001f, Time.deltaTime));
+    }
+    #endregion
+
+    #region 로켓 로직
+    public void StartRocketCooldown()
+    {
+        if (rocketCooldownSec <= 0f) { rocketCD = 0; return; }
+        rocketCD = Mathf.CeilToInt(rocketCooldownSec / Mathf.Max(0.0001f, Time.deltaTime));
+    }
+    public bool DetectRocketAhead(int dirSign, out Collider2D col, out float centerX, out float targetCenterY)
+    {
+        col = null; centerX = 0f; targetCenterY = 0f;
+        if (rocketCD > 0) return false;
+        if (rocketMask == 0) return false;
+
+        float halfX = CastSize.x * 0.5f;
+
+        // 앞쪽 얇은 박스로 감지
+        Vector2 center = (Vector2)transform.position + new Vector2(dirSign * (halfX + rocketProbe * 0.5f), 0f);
+        Vector2 size = new Vector2(rocketProbe, CastSize.y - castSkin * 2f);
+
+        col = Physics2D.OverlapBox(center, size, 0f, rocketMask);
+        if (!col) return false;
+
+        float step = unitPerPixel;
+        centerX = Mathf.Round(col.bounds.center.x / step) * step;
+
+        float halfH = CastSize.y * 0.5f;
+
+        if (rocketUseColliderTop)
+        {
+            // 로켓 콜라이더 top까지
+            float topY = col.bounds.max.y + rocketTopExtra;
+            targetCenterY = topY + halfH;
+        }
+        else
+        {
+            // 고정 상승량
+            targetCenterY = transform.position.y + rocketRiseUnits;
+        }
+
+        targetCenterY = Mathf.Round(targetCenterY / step) * step;
+        return true;
     }
     #endregion
     public bool DetectWallAhead(int dirSign)

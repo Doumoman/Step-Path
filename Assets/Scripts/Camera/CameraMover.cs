@@ -106,15 +106,27 @@ public class CameraMover : MonoBehaviour
 
     public void OnPlayerStateChanged(IPlayerState newState)
     {
-        bool isVerticalChanging =
+        bool isLockHeightState =
             newState is PlayerFallState ||
             newState is PlayerLadderClimbState ||
-            newState is PlayerStairClimbState ||
-            newState is PlayerLiftingState;
+            newState is PlayerStairClimbState;
 
-        if (isVerticalChanging)
+        if (isLockHeightState)
         {
             lockHeight = true;
+
+            if (heightAlignRoutine != null)
+            {
+                StopCoroutine(heightAlignRoutine);
+                heightAlignRoutine = null;
+            }
+            return;
+        }
+
+        if (newState is PlayerLiftingState)
+        {
+            lockHeight = false;
+
             if (heightAlignRoutine != null)
             {
                 StopCoroutine(heightAlignRoutine);
