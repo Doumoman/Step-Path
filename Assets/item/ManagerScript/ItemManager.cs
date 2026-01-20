@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 using System.Net.Sockets;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -17,6 +18,7 @@ public class ItemManager : MonoBehaviour
     [SerializeField] Grid grid;
     [SerializeField] GridData gridData;
     [SerializeField] Tilemap groundtilemap;
+    [SerializeField] Button rerollbutton;
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
     [SerializeField] public Transform Ground_item;
@@ -31,6 +33,9 @@ public class ItemManager : MonoBehaviour
     public Queue<int> itemnumstack = new Queue<int>();
     int sum = 0;
     int secondslot = -1;
+    //현재 배치 오브젝트
+    private GameObject currentitem;
+    private ItemDataHub currentctx;
     
 
     void Awake()
@@ -44,6 +49,7 @@ public class ItemManager : MonoBehaviour
 
     private void Start()
     {
+        rerollbutton.onClick.AddListener(Reroll);
         SumOfFreq(itemDatas);
         //TestProbability(itemDatas);
         SpawnRandomItemImage();
@@ -84,6 +90,9 @@ public class ItemManager : MonoBehaviour
             return;
         }
         GameObject imageToSpawn = Instantiate(itemimages[num], imageContainer, false);
+        currentitem = imageToSpawn;
+        ImageController c = currentitem.GetComponent<ImageController>();
+        currentctx = c.ctx;
 
         if (secondslot != -1) DisplaySecondSlot();
         PrintQueueState();
@@ -99,6 +108,26 @@ public class ItemManager : MonoBehaviour
         PrintQueueState();
     }
 
+    void Reroll()
+    {
+        Debug.Log("리롤");
+        currentctx.sm.ChangeState(new BackgroundState(currentctx, currentctx.sm, currentctx.pd));
+        currentctx.sm.ChangeState(new DestroyedState(currentctx, currentctx.sm, currentctx.pd));
+        Deletitemstack();
+        SpawnRandomItemImage();
+    }
+
+    public void OnButtonEnter()
+    {
+        currentctx.Onbutton = true;
+    }
+
+    public void OnButtonExit()
+    {
+        currentctx.Onbutton = false;
+    }
+
+    
     void Spawnitem()
     {
         int id = itemnumstack.Dequeue();

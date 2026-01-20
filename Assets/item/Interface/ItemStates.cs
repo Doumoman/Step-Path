@@ -33,8 +33,12 @@ public sealed class BackgroundState : IItemState
     {
         if (Input.GetMouseButtonDown(0))
         {
-            machine.ChangeState(new DraggingState(ctx, machine, prefabCreate));
-            return;
+            if(ctx.Onbutton == false)
+            {
+                machine.ChangeState(new DraggingState(ctx, machine, prefabCreate));
+                return;
+            }
+            else return;
             
         }
     }
@@ -541,6 +545,8 @@ public sealed class CraftingState : IItemState
         else // 조합 불가인 경우 
         {
             machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
+            prefabCreate.DeletitemStack();
+            prefabCreate.Createitemimage();
             return;
         }
 

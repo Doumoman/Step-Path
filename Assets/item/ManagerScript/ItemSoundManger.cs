@@ -29,15 +29,15 @@ public class ItemSoundManger : MonoBehaviour
 
     void PlayVineSound()
     {
-        if(itemSoundData.vinegrowing != null) audioS.PlayOneShot(itemSoundData.vinegrowing);
+        if(itemSoundData.vinegrowing != null && audioS != null) audioS.PlayOneShot(itemSoundData.vinegrowing);
     }
 
     void PlayTileSound()
     {
-        if (itemSoundData.tileplacing != null) audioS.PlayOneShot(itemSoundData.tileplacing);
+        if (itemSoundData.tileplacing != null && audioS != null) audioS.PlayOneShot(itemSoundData.tileplacing);
     }
     void PlayCloudSound()
     {
-        if (itemSoundData.cloudfading != null) audioS.PlayOneShot(itemSoundData.cloudfading);
+        if (itemSoundData.cloudfading != null && audioS != null) audioS.PlayOneShot(itemSoundData.cloudfading);
     }
 }

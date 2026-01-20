@@ -31,6 +31,7 @@ public sealed class ItemDataHub
     public bool IsPlaceable; // 설치가능여부
     public bool IsObjecthere; // 설치할 위치의 오브젝트 위치 여부
     public bool IsCraftable; // 조합 가능 여부
+    public bool Onbutton = false;
 
     
 
