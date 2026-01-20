@@ -1,5 +1,6 @@
 using NUnit.Framework.Constraints;
 using System.Collections;
+using UnityEngine.Tilemaps;
 using Unity.VisualScripting;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -60,11 +61,13 @@ public sealed class DraggingState : IItemState
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
     readonly Transform item;
+    Tilemap gt;
     bool CraftCheck;
     bool IsPlaceable;
     bool groundcheck;
     ItemDataHub placed_ctx;
     Vector2 originalscale;
+    Vector3Int currentcellpos;
     int x, y;
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
@@ -73,6 +76,7 @@ public sealed class DraggingState : IItemState
         groundcheck = ctx.image.gameObject.layer >= 26;
         originalscale = ctx.rect.sizeDelta;
         ctx.data.isoriginal = true;
+        gt = ctx.grid.ground;
     }
 
     public void Update()
@@ -236,7 +240,8 @@ public sealed class DraggingState : IItemState
         Vector3 cellCenterPos;
         Vector3 cellCenterPosGround;
         Vector3 cellCenterPositem;
-        
+        currentcellpos = cellPos;
+
         if(groundcheck)
         {
 
@@ -265,7 +270,9 @@ public sealed class DraggingState : IItemState
         
 
         ItemController con;
+        ItemController con1;
         string name;
+        string hititemName;
 
         if (hitGroundCenter != null)
         {
@@ -275,9 +282,17 @@ public sealed class DraggingState : IItemState
         }
         else name = null;
 
+        if (hititem != null)
+        {
+            con1 = hititem.GetComponent<ItemController>();
+            if (con1 != null) hititemName = con1.Data.itemName;
+            else hititemName = null;
+        }
+        else hititemName = null;
+
         if (groundcheck)
         {
-            if (name == "wood" && ctx.image.gameObject.layer == 27)
+            if (name == "wood" && ctx.image.Data.itemName == "wood") // 기본 땅의 경우
             {
                 if (hititem == null && hitGroundCenter == null && cellPos.y % 4 == 0)
                 {
@@ -287,8 +302,8 @@ public sealed class DraggingState : IItemState
                 }
                 else if (hititem == null && hitGroundCenter != null && cellPos.y % 4 == 0)
                 {
-                    IsPlaceable = true;
-                    CraftCheck = true;
+                    
+                    StairsCheck();
                     return;
                 }
                 else
@@ -325,9 +340,17 @@ public sealed class DraggingState : IItemState
             }
             else if (hititem != null && hitGroundCenter == null)
             {
-                IsPlaceable = true;
-                CraftCheck = true;
-                return;
+                if(hititemName == "mushroom" || hititemName == "sprout")
+                {
+                    IsPlaceable = true;
+                    CraftCheck = true;
+                }
+                else
+                {
+                    IsPlaceable = false;
+                    CraftCheck = false;
+                }
+                    return;
             }
             else
             {
@@ -431,6 +454,55 @@ public sealed class DraggingState : IItemState
             else placed_ctx = null;
         }
         else placed_ctx = null;
+    }
+
+    void StairsCheck()
+    {
+        int layerMask = LayerMask.GetMask("ground");
+        Vector3Int pos = currentcellpos;
+        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
+        Vector3Int checkleft = new Vector3Int(pos.x - 3, pos.y + 4, 0);
+        Vector3Int checkleft1 = new Vector3Int(pos.x - 4, pos.y + 4, 0);
+
+        Vector3Int checkright = new Vector3Int(pos.x + 3, pos.y + 4, 0);
+        Vector3Int checkright1 = new Vector3Int(pos.x + 4, pos.y + 4, 0);
+
+        Vector3 cellleftpos  = ctx.map.GetCellCenterWorld(checkleft); //cellleftpos.x += 2.225f; cellleftpos.y += 3.035f;
+        Vector3 cellrightpos = ctx.map.GetCellCenterWorld(checkright); //cellrightpos.x += 2.225f; cellrightpos.y += 3.035f;
+        Collider2D hititemleft = Physics2D.OverlapBox(cellleftpos, boxSize, 0f, layerMask);
+        Collider2D hititemright = Physics2D.OverlapBox(cellrightpos, boxSize, 0f, layerMask);
+
+        string leftname = null;
+        string rightname = null;
+        if (hititemleft != null)
+        {
+           ItemController con = hititemleft.GetComponent<ItemController>();
+            leftname = con.ctx.data.name;
+        }
+        if (hititemright != null)
+        {
+            ItemController con = hititemright.GetComponent<ItemController>();
+            rightname = con.ctx.data.name;
+        }
+
+
+        Debug.Log($"검사 위치 left = ({cellleftpos.x},{cellleftpos.y}), right = ({cellrightpos.x},{cellrightpos.y})");
+        CraftCheck = false;
+        IsPlaceable = false;
+        if (gt.HasTile(checkleft) || gt.HasTile(checkleft1) || leftname == "wood")
+        {
+            ctx.grid.stairsLeftcheck = true;
+            CraftCheck = true;
+            IsPlaceable = true;
+        }
+        if (gt.HasTile(checkright) || gt.HasTile(checkright1) || rightname == "wood")
+        {
+            ctx.grid.stairsRightcheck = true;
+            CraftCheck = true;
+            IsPlaceable = true;
+        }
+
+        return;
     }
     
 }

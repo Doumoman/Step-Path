@@ -22,4 +22,8 @@ public class GridData : ScriptableObject
     public TileBase gTile;
     [System.NonSerialized]
     public Vector3 playerpos;
+    [System.NonSerialized]
+    public bool stairsRightcheck = false;
+    [System.NonSerialized]
+    public bool stairsLeftcheck = false;
 }

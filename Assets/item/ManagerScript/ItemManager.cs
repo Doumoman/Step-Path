@@ -172,7 +172,16 @@ public class ItemManager : MonoBehaviour
                 itemspawn = Instantiate(Crafteditems[i], gridData.craftedPos, Quaternion.identity, itemContainer);
                 if (i == 2)
                 {
-                    if (itemspawn.transform.position.x < gridData.playerpos.x)
+                    if(gridData.stairsLeftcheck && gridData.stairsRightcheck)
+                    {
+                        if (itemspawn.transform.position.x < gridData.playerpos.x)
+                        {
+                            Vector3 saveScale = itemspawn.transform.localScale;
+                            saveScale.x *= -1;
+                            itemspawn.transform.localScale = saveScale;
+                        }
+                    }
+                    else if (gridData.stairsLeftcheck && !gridData.stairsRightcheck)
                     {
                         Vector3 saveScale = itemspawn.transform.localScale;
                         saveScale.x *= -1;
