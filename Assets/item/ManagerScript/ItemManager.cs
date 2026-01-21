@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using Unity.VisualScripting;
+using System.Collections;
+
 
 
 #if UNITY_EDITOR
@@ -36,6 +38,7 @@ public class ItemManager : MonoBehaviour
     //현재 배치 오브젝트
     private GameObject currentitem;
     private ItemDataHub currentctx;
+    private bool canReroll = true;
     
 
     void Awake()
@@ -110,11 +113,25 @@ public class ItemManager : MonoBehaviour
 
     void Reroll()
     {
+        if(!canReroll) return;
         Debug.Log("리롤");
         currentctx.sm.ChangeState(new BackgroundState(currentctx, currentctx.sm, currentctx.pd));
         currentctx.sm.ChangeState(new DestroyedState(currentctx, currentctx.sm, currentctx.pd));
         Deletitemstack();
         SpawnRandomItemImage();
+
+        StartCoroutine(Rerolltime(3f));
+    }
+
+    IEnumerator Rerolltime(float rerollcost)
+    {
+        canReroll = false;
+        rerollbutton.interactable = false;
+
+        yield return new WaitForSeconds(rerollcost);    
+
+        canReroll = true;
+        rerollbutton.interactable=true;
     }
 
     public void OnButtonEnter()
