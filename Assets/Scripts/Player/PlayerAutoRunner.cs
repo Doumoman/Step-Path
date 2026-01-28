@@ -19,6 +19,18 @@ public class PlayerAutoRunner : MonoBehaviour
     public const string ANIM_ROCKET = "Rocket";
     private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash, _rocketHash;
 
+    [Header("Speed By Height")]
+    [SerializeField] private bool useHeightSpeed = true;
+    [SerializeField] private float baseHeightY = 0f;
+
+    [SerializeField, Min(0.01f)] private float heightStepUnits = 5f;
+
+    [SerializeField] private float speedAddPerStepPixels = 2f;
+
+    [SerializeField] private float minRunSpeedPixels = 10f;
+    [SerializeField] private float maxRunSpeedPixels = 20f;
+
+    private float _baseRunSpeedPixels;
     [Header("Pixel")]
     public int pixelsPerUnit = 16;
     public float runSpeedPixelsPerSec = 40f;
@@ -192,7 +204,7 @@ public class PlayerAutoRunner : MonoBehaviour
     void Awake()
     {
         unitPerPixel = 1f / Mathf.Max(1, pixelsPerUnit);
-
+        _baseRunSpeedPixels = runSpeedPixelsPerSec;
         if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
         if (!anim) anim = GetComponent<Animator>();
 
@@ -219,6 +231,14 @@ public class PlayerAutoRunner : MonoBehaviour
         if (stairsCD > 0) stairsCD--;
         if (rocketCD > 0) rocketCD--;
         stateMachine.Update();
+        if (useHeightSpeed)
+        {
+            float h = transform.position.y - baseHeightY;
+            int step = Mathf.Max(0, Mathf.FloorToInt(h / Mathf.Max(0.0001f, heightStepUnits)));
+
+            float speed = _baseRunSpeedPixels + step * speedAddPerStepPixels;
+            runSpeedPixelsPerSec = Mathf.Clamp(speed, minRunSpeedPixels, maxRunSpeedPixels);
+        }
     }
     void LateUpdate()
     {
