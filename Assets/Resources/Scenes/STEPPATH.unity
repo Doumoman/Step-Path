@@ -1015,10 +1015,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1531521708}
-  backgroundPrefab: {fileID: 1981519630474644478, guid: 039b07adf07d5b248a6f0bdaad3ce245, type: 3}
-  firstSpawnY: 4.3
+  backgroundPrefab1: {fileID: 1981519630474644478, guid: 039b07adf07d5b248a6f0bdaad3ce245, type: 3}
+  betweenPrefab12: {fileID: 244609292769127595, guid: 72e2ee5b8a577c24a9b84c111ebb0776, type: 3}
+  betweenSize12: 4.08
+  backgroundPrefab2: {fileID: 8702995800028777901, guid: 557a09fb7bc063740a6f59eeae42b79f, type: 3}
+  betweenPrefab23: {fileID: 2270891646263653174, guid: 3312cd5617767e945b2cab92cc249131, type: 3}
+  betweenSize23: 4.08
+  backgroundPrefab3: {fileID: 160008897359041501, guid: 2a8b3d37e3f21a54ead009f5095ff65d, type: 3}
+  stage2StartPlayerY: 100
+  stage3StartPlayerY: 200
+  firstSpawnBottomY: 0.6
   stepY: 11.2
   keepCount: 2
+  spawnAheadMarginY: 8
+  cullBelowSteps: 3
   sortingOrder: -99
   sortingLayerName: 
 --- !u!1 &432214016
@@ -2057,6 +2067,10 @@ PrefabInstance:
       value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: heightStepUnits
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: stairsRiseUnits
       value: 1.1
       objectReference: {fileID: 0}
@@ -2079,6 +2093,14 @@ PrefabInstance:
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: ladderProbeHeight
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: maxRunSpeedPixels
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: minRunSpeedPixels
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: rocketMask.m_Bits
@@ -2118,11 +2140,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: runSpeedPixelsPerSec
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: enterXTolerancePixels
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: speedAddPerStepPixels
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: bigJumpHorizSpeedScale
