@@ -180,6 +180,7 @@ public class PlayerAutoRunner : MonoBehaviour
     [HideInInspector] public float rocketCenterX;
     [HideInInspector] public float rocketStartCenterY;
     [HideInInspector] public float rocketTargetCenterY;
+    [HideInInspector] public Collider2D pendingRocketCol;
     #endregion
 
     // ───────────────── 캐스트 기준 ─────────────────

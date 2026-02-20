@@ -43,6 +43,8 @@ public class PlayerRunState : IPlayerState
             p.pendingRocket = true;
             p.pendingRocketTargetX = rx;
 
+            p.pendingRocketCol = rocketCol;
+
             // LiftingState로 넘길 값 저장(진입 시점에 세팅해도 되지만 여기서 저장해둠)
             p.rocketCenterX = rx;
             p.rocketStartCenterY = p.transform.position.y;
@@ -59,6 +61,7 @@ public class PlayerRunState : IPlayerState
             p.pendingMushroom = false;
             p.pendingStairs = false;
             p.pendingRocket = false;
+            p.pendingRocketCol = null;
         }
 
         // 버섯 감지
@@ -155,6 +158,14 @@ public class PlayerRunState : IPlayerState
             if (reached && p.onGround && p.rocketCD == 0)
             {
                 p.pendingRocket = false;
+
+                if (p.pendingRocketCol != null)
+                {
+                    // Destroy 방식
+                    GameObject.Destroy(p.pendingRocketCol.gameObject);
+
+                    p.pendingRocketCol = null;
+                }
 
                 // X 정렬 후 진입(상태에서 X 고정)
                 p.SnapXTo(p.rocketCenterX);
