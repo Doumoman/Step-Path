@@ -70,6 +70,7 @@ public sealed class DraggingState : IItemState
     Vector3Int currentcellpos;
     int x, y;
 
+
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
     public void Enter()
     {
@@ -86,11 +87,20 @@ public sealed class DraggingState : IItemState
         TrackingMouse(ctx, x, y);
         IsitPlaceable(ctx);
         OnPoint(ctx);
+
+
         if (Input.GetMouseButtonUp(0)) 
         {
    
             OffPoint(ctx);
             Movectx(ctx);
+
+            if (ItemManager.instance.buttonhandler.isHovering)
+            {
+                ItemManager.instance.Reroll();
+                return;
+            }
+
             if (IsPlaceable && CraftCheck)
             {
                 ctx.isound.PlaytileP();

@@ -21,6 +21,7 @@ public class ItemManager : MonoBehaviour
     [SerializeField] GridData gridData;
     [SerializeField] Tilemap groundtilemap;
     [SerializeField] Button rerollbutton;
+    [SerializeField] public ButtonHandler buttonhandler;
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
     [SerializeField] public Transform Ground_item;
@@ -39,6 +40,8 @@ public class ItemManager : MonoBehaviour
     private GameObject currentitem;
     private ItemDataHub currentctx;
     private bool canReroll = true;
+
+    public static ItemManager instance;
     
 
     void Awake()
@@ -46,8 +49,17 @@ public class ItemManager : MonoBehaviour
         gridData.currentGrid = grid;
         gridData.ground = groundtilemap;
         gridData.gTile = groundTile;
-        
-        
+
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+
     }
 
     private void Start()
@@ -111,7 +123,7 @@ public class ItemManager : MonoBehaviour
         PrintQueueState();
     }
 
-    void Reroll()
+     public void Reroll()
     {
         if(!canReroll) return;
         Debug.Log("리롤");
