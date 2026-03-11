@@ -15,3 +15,7 @@ MonoBehaviour:
   cloudfading: {fileID: 8300000, guid: d22060e62defa5d4690fed575cc58ba0, type: 3}
   tileplacing: {fileID: 8300000, guid: bb93516a8f7fd664f96d77597fd3f194, type: 3}
   vinegrowing: {fileID: 8300000, guid: 02c61d7253330f949920912962067fa6, type: 3}
+  waterpour: {fileID: 8300000, guid: 172ee20f6cf3a1c42b2ddef6a178e06d, type: 3}
+  mushroomgrow: {fileID: 8300000, guid: dc5ca4cddbbce894981bbaf7f34e7823, type: 3}
+  staircomplete: {fileID: 8300000, guid: 5c3757231a0136c459c2a61496e64329, type: 3}
+  tileplacing_fail: {fileID: 8300000, guid: a523f6e5d8d36a242b062cf04c25a5c0, type: 3}

@@ -19,6 +19,10 @@ public class ItemSoundManger : MonoBehaviour
         itemSoundData.vineG += PlayVineSound;
         itemSoundData.cloudF += PlayCloudSound;
         itemSoundData.tileP += PlayTileSound;
+        itemSoundData.waterP += PlayWaterPourSound;
+        itemSoundData.mushroomG += PlayMushroomGrowSound;
+        itemSoundData.stairC += PlayStairCompleteSound;
+        itemSoundData.tileP_fail += PlayTilePlacing_fail;
     }
 
     // Update is called once per frame
@@ -39,5 +43,25 @@ public class ItemSoundManger : MonoBehaviour
     void PlayCloudSound()
     {
         if (itemSoundData.cloudfading != null && audioS != null) audioS.PlayOneShot(itemSoundData.cloudfading);
+    }
+
+    void PlayWaterPourSound()
+    {
+        if (itemSoundData.tileplacing != null && audioS != null) audioS.PlayOneShot(itemSoundData.waterpour);
+    }
+
+    void PlayMushroomGrowSound()
+    {
+        if (itemSoundData.tileplacing != null && audioS != null) audioS.PlayOneShot(itemSoundData.mushroomgrow);
+    }
+
+    void PlayStairCompleteSound()
+    {
+        if (itemSoundData.tileplacing != null && audioS != null) audioS.PlayOneShot(itemSoundData.staircomplete);
+    }
+
+    void PlayTilePlacing_fail()
+    {
+        if (itemSoundData.tileplacing != null && audioS != null) audioS.PlayOneShot(itemSoundData.tileplacing_fail);
     }
 }

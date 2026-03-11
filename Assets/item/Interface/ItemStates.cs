@@ -113,12 +113,15 @@ public sealed class DraggingState : IItemState
             }
             else
             {
-                if (ctx.image.Data.itemName == "water") 
+                //TODO: 물일 경우 예외처리하는지 확인 필요
+                /*if (ctx.image.Data.itemName == "water") 
                 { 
                     machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
                     prefabCreate.DeletitemStack();
                     prefabCreate.Createitemimage(); 
                 }
+                */
+                ctx.isound.PlayTileP_fail();
                 machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
             }    
             return;

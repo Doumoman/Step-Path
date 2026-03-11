@@ -15,7 +15,12 @@ public class Water_L : ItemLogic
         else if (ctx.data == null) Debug.LogError("🚨 비상! ctx.data(SO)가 비어있습니다!");
         string itemName = ctx.data.itemName;
 
-        if (itemName == "mushroom") { craft = true; return "bigmushroom";  }
+        if (itemName == "mushroom") 
+        {
+            craft = true;
+            ctx.isound.PlayMushroomG();
+            return "bigmushroom"; 
+        }
         else if (itemName == "sprout") 
         {
             craft = true;
