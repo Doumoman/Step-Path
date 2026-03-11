@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: spaceship
   rerollCost: 3
-  itemFrequency: 300
+  itemFrequency: 5
   eachLogic: {fileID: 11400000, guid: 5197ee523d6d6e24ea0c4efdf9655c7b, type: 2}
   itemDelegate: {fileID: 0}
   isoriginal: 1
