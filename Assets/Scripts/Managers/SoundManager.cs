@@ -38,11 +38,21 @@ public class SoundManager : Singleton<SoundManager>
         GameOver
     }
     private Dictionary<SFXType, AudioClip> sfxClips = new Dictionary<SFXType, AudioClip>();
-
+    private Dictionary<string, List<AudioClip>> playerSFX = new Dictionary<string, List<AudioClip>>();
     // =====================
     // Awake: 초기화
     // =====================
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void InitOnGameStart()
+    {
+        var instance = Instance;
+    }
+
     protected override void Awake()
+    {
+        base.Awake();
+    }
+    protected override void AfterAwake()
     {
         base.Awake();
 
@@ -101,7 +111,36 @@ public class SoundManager : Singleton<SoundManager>
 
         Debug.Log("[SoundManager] SFX 로드 완료: " + sfxClips.Count + "개");
     }
+    private void LoadPlayerSFX()
+    {
+        playerSFX.Clear();
 
+        string basePath = "Sound/SFX/character";
+
+        string[] folders =
+        {
+        "Climb_Vine",
+        "Walk_Step",
+        "Hit_Obstacle"
+    };
+
+        foreach (var folder in folders)
+        {
+            string path = basePath + "/" + folder;
+
+            AudioClip[] clips = Resources.LoadAll<AudioClip>(path);
+
+            if (clips.Length > 0)
+            {
+                playerSFX[folder] = new List<AudioClip>(clips);
+                Debug.Log($"[SoundManager] {folder} 로드 완료: {clips.Length}개");
+            }
+            else
+            {
+                Debug.LogWarning($"[SoundManager] {folder} 사운드 없음");
+            }
+        }
+    }
     // =====================
     // SFX 재생
     // =====================
@@ -126,6 +165,23 @@ public class SoundManager : Singleton<SoundManager>
             audioSourceSFX.Stop();
     }
 
+    public void PlayPlayerSound(string type)
+    {
+        if (!playerSFX.ContainsKey(type))
+        {
+            Debug.LogWarning("[SoundManager] Player SFX 없음: " + type);
+            return;
+        }
+
+        List<AudioClip> clips = playerSFX[type];
+
+        if (clips.Count == 0) return;
+
+        AudioClip clip = clips[Random.Range(0, clips.Count)];
+
+        audioSourceSFX.volume = currentSFXVolume;
+        audioSourceSFX.PlayOneShot(clip);
+    }
     // =====================
     // BGM 페이드 인
     // =====================

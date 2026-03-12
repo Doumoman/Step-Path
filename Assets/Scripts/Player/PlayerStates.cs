@@ -4,7 +4,8 @@ public class PlayerRunState : IPlayerState
 {
     private readonly PlayerAutoRunner p;
     private readonly PlayerStateMachine fsm;
-
+    private float walkSoundTimer;
+    private const float walkSoundInterval = 0.3f;
     public PlayerRunState(PlayerAutoRunner player, PlayerStateMachine machine)
     {
         p = player; fsm = machine;
@@ -18,11 +19,22 @@ public class PlayerRunState : IPlayerState
         p.pendingRocket = false;
         p.PauseAnim(false);
         p.PlayAnim(p.WalkHash);
+        walkSoundTimer = 0f;
     }
 
     public void Tick()
     {
+        // 걷는 사운드 재생
+        if (p.onGround)
+        {
+            walkSoundTimer += Time.deltaTime;
 
+            if (walkSoundTimer >= walkSoundInterval)
+            {
+                walkSoundTimer = 0f;
+                SoundManager.Instance.PlayPlayerSound("Walk_Step");
+            }
+        }
         // 덩쿨/사다리 감지 → 목표X 저장(한 번만)
         if (!p.pendingClimb && p.DetectClimbableAhead(p.dir, out var col, out var cx, out var targetCY))
         {
@@ -254,7 +266,8 @@ public class PlayerLadderClimbState : IPlayerState
 {
     private readonly PlayerAutoRunner p;
     private readonly PlayerStateMachine fsm;
-
+    private float climbSoundTimer;
+    private const float climbSoundInterval = 0.3f;
     public PlayerLadderClimbState(PlayerAutoRunner player, PlayerStateMachine machine)
     {
         p = player; fsm = machine;
@@ -267,6 +280,7 @@ public class PlayerLadderClimbState : IPlayerState
 
         p.PauseAnim(false);
         p.PlayAnim(p.ClimbHash);
+        climbSoundTimer = 0f;
     }
 
     public void Tick()
@@ -276,6 +290,15 @@ public class PlayerLadderClimbState : IPlayerState
 
         float dt = Time.deltaTime;
         float dy = p.climbSpeedPixelsPerSec * p.unitPerPixel * dt;
+
+        // 클라임 사운드 주기 재생
+        climbSoundTimer += dt;
+        if (climbSoundTimer >= climbSoundInterval)
+        {
+            climbSoundTimer = 0f;
+            SoundManager.Instance.PlayPlayerSound("Climb_Vine");
+        }
+
 
         // 위로 이동(천장/타일 충돌은 groundMask로 처리됨)
         p.MoveVerticalWithCast(dy);
