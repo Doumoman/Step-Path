@@ -5,7 +5,7 @@ public class PlayerRunState : IPlayerState
     private readonly PlayerAutoRunner p;
     private readonly PlayerStateMachine fsm;
     private float walkSoundTimer;
-    private const float walkSoundInterval = 0.3f;
+    private const float walkSoundInterval = 0.1f;
     public PlayerRunState(PlayerAutoRunner player, PlayerStateMachine machine)
     {
         p = player; fsm = machine;
@@ -348,6 +348,7 @@ public class PlayerJumpState : IPlayerState
     {
         p.PauseAnim(false);
         p.PlayAnim(p.JumpHash);
+        SoundManager.Instance.PlayObjectSound("Mushroom_Bounce");
     }
 
     public void Tick()

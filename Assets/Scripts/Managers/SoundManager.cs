@@ -182,6 +182,21 @@ public class SoundManager : Singleton<SoundManager>
         audioSourceSFX.volume = currentSFXVolume;
         audioSourceSFX.PlayOneShot(clip);
     }
+    public void PlayObjectSound(string clipName)
+    {
+        string path = "Sound/SFX/object/" + clipName;
+
+        AudioClip clip = Resources.Load<AudioClip>(path);
+
+        if (clip == null)
+        {
+            Debug.LogWarning("[SoundManager] Object SFX 없음: " + path);
+            return;
+        }
+
+        audioSourceSFX.volume = currentSFXVolume;
+        audioSourceSFX.PlayOneShot(clip);
+    }
     // =====================
     // BGM 페이드 인
     // =====================
