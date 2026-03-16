@@ -82,8 +82,13 @@ public sealed class DraggingState : IItemState
 
     public void Update()
     {
-        if (groundcheck) x = y = 1;
+        if (groundcheck)
+        {
+            if (ctx.data.itemName == "cloud") { x = 2; y = 1;}
+            else x = y = 1;
+        }
         else x = y = 2;
+
         TrackingMouse(ctx, x, y);
         IsitPlaceable(ctx);
         OnPoint(ctx);
@@ -118,11 +123,15 @@ public sealed class DraggingState : IItemState
                 { 
                     machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
                     prefabCreate.DeletitemStack();
-                    prefabCreate.Createitemimage(); 
+                    prefabCreate.Createitemimage();
+                    ctx.isound.PlayWaterP();
                 }
-                
-                ctx.isound.PlayTileP_fail();
-                machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
+                else
+                {
+                    ctx.isound.PlayTileP_fail();
+                    machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
+                }
+                    
             }    
             return;
         }
@@ -179,7 +188,10 @@ public sealed class DraggingState : IItemState
         ctx.rect.position = snappedScreenPos;
 
         if (groundcheck)
-            ResizeImageToGrid(ctx, 1, 1);
+        {
+            if(ctx.data.itemName == "cloud") ResizeImageToGrid(ctx, 2, 1);
+            else ResizeImageToGrid(ctx, 1, 1);
+        }
         else
             ResizeImageToGrid(ctx, 2, 2);
         return;
