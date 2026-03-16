@@ -25,8 +25,8 @@ public sealed class BackgroundState : IItemState
     public void Enter()
     {
         ctx.rect.anchoredPosition = ctx.spawnL;
-        ctx.rect.localScale = new Vector3(2.45f, 2.45f, 2.45f);
-        
+        if(ctx.data.itemName == "wood") ctx.rect.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        else ctx.rect.localScale = new Vector3(2.45f, 2.45f, 2.45f);
 
     }
 
@@ -113,14 +113,14 @@ public sealed class DraggingState : IItemState
             }
             else
             {
-                //TODO: 물일 경우 예외처리하는지 확인 필요
-                /*if (ctx.image.Data.itemName == "water") 
+                
+                if (ctx.image.Data.itemName == "water") 
                 { 
                     machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
                     prefabCreate.DeletitemStack();
                     prefabCreate.Createitemimage(); 
                 }
-                */
+                
                 ctx.isound.PlayTileP_fail();
                 machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
             }    
@@ -169,12 +169,13 @@ public sealed class DraggingState : IItemState
         // Z축은 0으로 고정
         finalWorldPos.z = 0;
 
-            
+        if (groundcheck) finalWorldPos.y -= 0.125f;
+
         // 5. 월드 -> UI 스크린 좌표 변환 및 적용
         Vector3 snappedScreenPos = Camera.main.WorldToScreenPoint(finalWorldPos);
+
+
         
-
-
         ctx.rect.position = snappedScreenPos;
 
         if (groundcheck)
@@ -499,7 +500,7 @@ public sealed class DraggingState : IItemState
         }
 
 
-        Debug.Log($"검사 위치 left = ({cellleftpos.x},{cellleftpos.y}), right = ({cellrightpos.x},{cellrightpos.y})");
+        //Debug.Log($"검사 위치 left = ({cellleftpos.x},{cellleftpos.y}), right = ({cellrightpos.x},{cellrightpos.y})");
         CraftCheck = false;
         IsPlaceable = false;
         if (gt.HasTile(checkleft) || gt.HasTile(checkleft1) || leftname == "wood")
@@ -561,7 +562,7 @@ public sealed class PlacedState : IItemState
 
     public void Exit()
     {
-        if (ctx.data.itemName != "cloud" || ctx.image != null)
+        if (ctx.image != null)
         {
             prefabCreate.Createitemimage();
         }
@@ -613,14 +614,15 @@ public sealed class CraftingState : IItemState
             if (ctx.data.itemName == "wood")
             {
                 machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
-                prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
+                prefabCreate.CreateCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
                 prefabCreate.Createitemimage();
             }
             else
             {
                 placed_ctx.sm.ChangeState(new DestroyedState(placed_ctx, placed_ctx.sm, placed_ctx.pd));
                 machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
-                prefabCreate.OnCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
+                prefabCreate.CreateCrafteditem();// 해당 위치에 규격에 맞춰서 조합된 아이템 프리팹 생성
+                prefabCreate.Createitemimage();
             }
 
 
