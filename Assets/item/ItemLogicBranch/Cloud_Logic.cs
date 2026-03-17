@@ -13,15 +13,15 @@ public class Cloud_L : ItemLogic
         ctx.data.forcloudsoundcheck = true;
         int count = 0;
         Vector3Int pos = ctx.grid.positioncell;
-        Vector3Int left = new Vector3Int(pos.x - 1, pos.y - 1, 0);
+        Vector3Int left = new Vector3Int(pos.x - 2, pos.y - 1, 0);
         Vector3Int right = new Vector3Int(pos.x + 1, pos.y - 1, 0);
         Tilemap gt = ctx.grid.ground;
         bool check = gt.HasTile(left);
 
         while (!check)
         {
-            if (count > 10) break;
-            left.x -= 1;
+            if (count > 5) break;
+            left.x -= 2;
             check = gt.HasTile(left);
             count++;
         }
@@ -29,8 +29,8 @@ public class Cloud_L : ItemLogic
         count = 0;
         while (!check)
         {
-            if (count > 10) break;
-            right.x += 1;
+            if (count > 5) break;
+            right.x += 2;
             check = gt.HasTile(right);
             count++;
         }

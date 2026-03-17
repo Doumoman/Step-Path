@@ -170,13 +170,23 @@ public class ItemManager : MonoBehaviour
         Vector3 spawnpos;
         
 
-        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.125f; }
-        else if(itemDatas[id].itemName == "rock" || itemDatas[id].itemName == "sprout") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.02f; }
+        if (itemDatas[id].itemName == "wood") 
+        {
+            spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.125f;
+        }
+        else if (itemDatas[id].itemName == "cloud")
+        {
+            spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.125f;
+        }
+        else if (itemDatas[id].itemName == "rock" || itemDatas[id].itemName == "sprout") { spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.02f; }
         else { spawnpos = grid.CellToWorld(gridData.positioncell); }
 
 
             GameObject itemspawn;
-        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud") itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, Ground_item);
+        if (itemDatas[id].itemName == "wood" || itemDatas[id].itemName == "cloud")
+        {
+            itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, Ground_item);
+        }     
         else itemspawn = Instantiate(itemPrefabs[id], spawnpos, Quaternion.identity, itemContainer);
         PrintQueueState();
     }
@@ -254,21 +264,21 @@ public class ItemManager : MonoBehaviour
         GameObject itemspawn;
         Vector3 spawnpos;
         Vector3Int realpos;
-        Vector3Int createpos = gridData.groundLposleft; createpos.x++;
-        while (createpos.x < gridData.positioncell.x - 1)
+        Vector3Int createpos = gridData.groundLposleft; createpos.x += 2;
+        while (createpos.x < gridData.positioncell.x)
         {
-            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f;
+            realpos = new Vector3Int(createpos.x, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.y -= 0.125f;
             itemspawn = Instantiate(itemPrefabs[4], spawnpos, Quaternion.identity, Ground_item);
-            createpos.x++;
+            createpos.x += 2;
         }
-        createpos = gridData.groundLposright; createpos.x--;
+        createpos = gridData.groundLposright; createpos.x -= 2;
         while (createpos.x > gridData.positioncell.x - 1)
         {
             realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.062f;
+            spawnpos = grid.CellToWorld(realpos); spawnpos.y -= 0.125f;
             itemspawn = Instantiate(itemPrefabs[4], spawnpos, Quaternion.identity, Ground_item);
-            createpos.x--;
+            createpos.x -= 2;
         }
         return;
     }

@@ -444,6 +444,8 @@ public sealed class DraggingState : IItemState
         if (groundcheck)
         {
             cellPos.y++;
+            if (ctx.data.itemName == "cloud" && cellPos.x % 2 == 0) 
+                cellPos.x++;
             ctx.image.Grid.positioncell = cellPos;
             cellPos.y--;
             cellCenterPositem = ctx.map.GetCellCenterWorld(cellPos);
