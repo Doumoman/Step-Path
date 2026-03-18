@@ -355,6 +355,13 @@ public class PlayerJumpState : IPlayerState
     {
         float dt = Time.deltaTime;
 
+        // 점프 중 벽 충돌 → 방향 반전
+        if (p.DetectWallAhead(p.dir) && p.reverseCD == 0)
+        {
+            p.dir *= -1;
+            p.reverseCD = p.reverseCooldownFrames;
+        }
+
         float dx = p.jumpHorizSpeedPixelsPerSec * p.unitPerPixel * p.dir * dt;
         float dy = p.vyPixels * p.unitPerPixel * dt;
 
