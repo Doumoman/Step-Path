@@ -113,6 +113,7 @@ public class ItemManager : MonoBehaviour
         else targetimage.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
         targetimage.sprite = secondSlotsprite[secondslot];
+        targetimage.preserveAspect = true;
         PrintQueueState();
     }
 
