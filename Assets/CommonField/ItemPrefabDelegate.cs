@@ -12,6 +12,7 @@ public class ItemPrepabDelegate : ScriptableObject
     public Action Dequeueitem;
     public Action Grounditem;
     public Action Clouditem;
+    public Action Rerollitem;
 
 
 
@@ -43,5 +44,10 @@ public class ItemPrepabDelegate : ScriptableObject
     public void CreateCloudL()
     {
         Clouditem?.Invoke();
+    }
+
+    public void Rerolltheitem()
+    {
+        Rerollitem?.Invoke();
     }
 }

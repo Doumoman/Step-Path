@@ -100,9 +100,9 @@ public sealed class DraggingState : IItemState
             OffPoint(ctx);
             Movectx(ctx);
 
-            if (ItemManager.instance.buttonhandler.isHovering)
+            if (ctx.grid.buttonHandler.isHovering)
             {
-                ItemManager.instance.Reroll();
+                prefabCreate.Rerolltheitem();
                 return;
             }
 

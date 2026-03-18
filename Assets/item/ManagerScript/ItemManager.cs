@@ -41,7 +41,7 @@ public class ItemManager : MonoBehaviour
     private ItemDataHub currentctx;
     private bool canReroll = true;
 
-    public static ItemManager instance;
+
     
 
     void Awake()
@@ -49,16 +49,7 @@ public class ItemManager : MonoBehaviour
         gridData.currentGrid = grid;
         gridData.ground = groundtilemap;
         gridData.gTile = groundTile;
-
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-
+        gridData.buttonHandler = buttonhandler;
 
     }
 
@@ -88,6 +79,7 @@ public class ItemManager : MonoBehaviour
         prefab.Dequeueitem += Deletitemstack;
         prefab.Grounditem += SpawnGrounditem;
         prefab.Clouditem += SpawnClouditem;
+        prefab.Rerollitem += Reroll;
     }
 
 
@@ -163,6 +155,12 @@ public class ItemManager : MonoBehaviour
         if(itemPrefabs == null || itemPrefabs.Count == 0)
         {
             Debug.LogWarning("itemPrefabs 목록이 비어있습니다!");
+            return;
+        }
+
+        if(player == null)
+        {
+            Debug.Log("플레이어 없음");
             return;
         }
         gridData.playerpos = player.transform.position;

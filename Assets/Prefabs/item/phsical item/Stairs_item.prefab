@@ -111,6 +111,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9028460586504716554}
     m_Modifications:
+    - target: {fileID: 6001388609037809617, guid: 438d8410e04316e4f9ab15929ff7f82e, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 7647054886370508402, guid: 438d8410e04316e4f9ab15929ff7f82e, type: 3}
       propertyPath: m_Name
       value: Stairs_item (1)

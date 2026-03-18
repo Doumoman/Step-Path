@@ -23,6 +23,8 @@ public class GridData : ScriptableObject
     [System.NonSerialized]
     public Vector3 playerpos;
     [System.NonSerialized]
+    public ButtonHandler buttonHandler;
+    [System.NonSerialized]
     public bool stairsRightcheck = false;
     [System.NonSerialized]
     public bool stairsLeftcheck = false;
