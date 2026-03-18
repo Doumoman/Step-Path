@@ -8,8 +8,11 @@ public class Mushroom_L : ItemLogic
 {
     public override string CraftingCheck(ItemDataHub ctx, ref bool Craft) { return null; }
 
-    public override void PlacedItemLogic(ItemDataHub ctx)
+    public override void PlacedItemLogic(ItemDataHub ctx, bool outofcamera)
     {
-        return;
+        if (outofcamera)
+            ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
+        else
+            return;
     }
 }

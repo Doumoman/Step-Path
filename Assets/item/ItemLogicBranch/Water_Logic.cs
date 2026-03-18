@@ -30,7 +30,7 @@ public class Water_L : ItemLogic
         else { craft = false; return null; }
     }
 
-    public override void PlacedItemLogic(ItemDataHub ctx)
+    public override void PlacedItemLogic(ItemDataHub ctx, bool outofcamera)
     {
         return;
     }

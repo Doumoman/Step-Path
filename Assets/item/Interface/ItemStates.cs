@@ -3,6 +3,8 @@ using System.Collections;
 using UnityEngine.Tilemaps;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
+
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -60,7 +62,6 @@ public sealed class DraggingState : IItemState
     readonly ItemDataHub ctx;
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
-    readonly Transform item;
     Tilemap gt;
     bool CraftCheck;
     bool IsPlaceable;
@@ -541,6 +542,7 @@ public sealed class PlacedState : IItemState
     readonly ItemStateMachine machine;
     readonly ItemPrepabDelegate prefabCreate;
     bool ok = false;
+    bool outofcamera = false;
 
 
     public PlacedState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p; }
@@ -561,7 +563,7 @@ public sealed class PlacedState : IItemState
             if (ctx == null || ctx.data == null || ctx.data.eachLogic == null) return;
             else 
             { 
-                ctx.data.eachLogic.PlacedItemLogic(ctx);
+                ctx.data.eachLogic.PlacedItemLogic(ctx, outofcamera);
                 ok = true;
                 if (ctx.data.itemName == "cloud") ctx.mono.StartCoroutine(DestroyCloud(ctx));
             }
@@ -569,7 +571,8 @@ public sealed class PlacedState : IItemState
         
         if (ctx.data.itemName != "cloud" && ctx.data.itemName != "wood")
         {
-            ctx.data.eachLogic.PlacedItemLogic(ctx);
+            outofcamera = OutOfCamera(ctx);
+            ctx.data.eachLogic.PlacedItemLogic(ctx, outofcamera);
         }
 
     }
@@ -598,6 +601,19 @@ public sealed class PlacedState : IItemState
         
         ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
         
+    }
+
+    bool OutOfCamera(ItemDataHub ctx)
+    {
+        // 내 실제 월드 좌표를 0~1 사이의 화면 비율 좌표로 변환
+        Vector3 viewPos = Camera.main.WorldToViewportPoint(ctx.transform.position);
+
+        if (viewPos.y < -0.01f || viewPos.y > 1.01f)
+        {
+            return true;
+        }
+
+        return false;
     }
 
 }

@@ -7,7 +7,7 @@ using UnityEngine.Tilemaps;
 public class Cloud_L : ItemLogic
 {
     public override string CraftingCheck(ItemDataHub ctx, ref bool Craft) { return null; }
-    public override void PlacedItemLogic(ItemDataHub ctx)
+    public override void PlacedItemLogic(ItemDataHub ctx, bool none)
     {
         if (ctx.data.isoriginal == false) return;
         ctx.data.forcloudsoundcheck = true;

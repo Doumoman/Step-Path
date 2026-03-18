@@ -16,9 +16,16 @@ public class Wood_L : ItemLogic
     }
 
 
-    public override void PlacedItemLogic(ItemDataHub ctx) 
+    public override void PlacedItemLogic(ItemDataHub ctx, bool outofcamera) 
     {
-        if (ctx.data.isoriginal == false) return;
+        if (ctx.data.isoriginal == false)
+        {
+            if (outofcamera)
+                ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
+            return;
+        }
+
+        
         int count = 0;
         Vector3Int pos = ctx.grid.positioncell;
         Vector3Int left = new Vector3Int(pos.x - 1, pos.y - 1, 0);
@@ -57,6 +64,7 @@ public class Wood_L : ItemLogic
         ctx.data.isoriginal = false;
         ctx.pd.CreateGroundL();
 
+        
         return; 
     }
 
