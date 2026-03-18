@@ -19,3 +19,4 @@ MonoBehaviour:
   mushroomgrow: {fileID: 8300000, guid: dc5ca4cddbbce894981bbaf7f34e7823, type: 3}
   staircomplete: {fileID: 8300000, guid: 5c3757231a0136c459c2a61496e64329, type: 3}
   tileplacing_fail: {fileID: 8300000, guid: a523f6e5d8d36a242b062cf04c25a5c0, type: 3}
+  Rerollitem: {fileID: 8300000, guid: 1e64dbec1ea864d7fb48999cb7338518, type: 3}

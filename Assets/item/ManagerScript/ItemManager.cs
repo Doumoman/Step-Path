@@ -21,6 +21,7 @@ public class ItemManager : MonoBehaviour
     [SerializeField] GridData gridData;
     [SerializeField] Tilemap groundtilemap;
     [SerializeField] Button rerollbutton;
+    [SerializeField] itemSound soundData;
     [SerializeField] public ButtonHandler buttonhandler;
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
@@ -123,7 +124,7 @@ public class ItemManager : MonoBehaviour
         currentctx.sm.ChangeState(new DestroyedState(currentctx, currentctx.sm, currentctx.pd));
         Deletitemstack();
         SpawnRandomItemImage();
-
+        soundData.PlayRerolltheitem();
         StartCoroutine(Rerolltime(3f));
     }
 

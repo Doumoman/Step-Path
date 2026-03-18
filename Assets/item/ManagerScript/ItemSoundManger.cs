@@ -23,6 +23,7 @@ public class ItemSoundManger : MonoBehaviour
         itemSoundData.mushroomG += PlayMushroomGrowSound;
         itemSoundData.stairC += PlayStairCompleteSound;
         itemSoundData.tileP_fail += PlayTilePlacing_fail;
+        itemSoundData.rerollitem += PlayRerollitem;
     }
 
     // Update is called once per frame
@@ -63,5 +64,11 @@ public class ItemSoundManger : MonoBehaviour
     void PlayTilePlacing_fail()
     {
         if (itemSoundData.tileplacing != null && audioS != null) audioS.PlayOneShot(itemSoundData.tileplacing_fail);
+    }
+
+    void PlayRerollitem()
+    {
+        if (itemSoundData.rerollitem != null && audioS != null) audioS.PlayOneShot(itemSoundData.Rerollitem);
+        Debug.Log("리롤 사운드 Shot");
     }
 }

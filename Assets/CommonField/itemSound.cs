@@ -18,6 +18,8 @@ public class itemSound : ScriptableObject
     public AudioClip staircomplete;
     [Header("아이템 배치 실패")]
     public AudioClip tileplacing_fail;
+    [Header("아이템 리롤")]
+    public AudioClip Rerollitem;
 
 
     [System.NonSerialized]
@@ -30,6 +32,7 @@ public class itemSound : ScriptableObject
     public Action mushroomG;
     public Action stairC;
     public Action tileP_fail;
+    public Action rerollitem;
 
     public void PlaycloudF()
     {
@@ -66,4 +69,8 @@ public class itemSound : ScriptableObject
         tileP_fail.Invoke();
     }
 
+    public void PlayRerolltheitem()
+    {
+        rerollitem?.Invoke();
+    }
 }
