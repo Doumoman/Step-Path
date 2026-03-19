@@ -16,10 +16,13 @@ public class SoundManager : Singleton<SoundManager>
     // BGM Clips
     // =====================
     private AudioClip bgmMain;
-    private AudioClip bgmInGame;
+    private AudioClip bgmInGame1;
+    private AudioClip bgmInGame12;
+    private AudioClip bgmInGame2;
+    private AudioClip bgmInGame3;
     private AudioClip gameOver;
-    private AudioClip ending;
-
+    private AudioClip bgmEnding;
+    private Dictionary<string, AudioClip> bgmClips = new Dictionary<string, AudioClip>();
     // =====================
     // 볼륨
     // =====================
@@ -90,10 +93,21 @@ public class SoundManager : Singleton<SoundManager>
     // =====================
     private void LoadBGM()
     {
-        bgmMain = Resources.Load<AudioClip>("Sound/BGM/BGM_Play_001");
-        bgmInGame = Resources.Load<AudioClip>("Sound/BGM/BGM_Play_001");
-        //gameOver = Resources.Load<AudioClip>("Sound/BGM/GameOver");
-        //ending = Resources.Load<AudioClip>("Sound/BGM/BGM_Ending");
+        bgmMain = Resources.Load<AudioClip>("Sound/BGM/BGM_Main");
+        bgmInGame1 = Resources.Load<AudioClip>("Sound/BGM/BGM_Play1");
+        bgmInGame12 = Resources.Load<AudioClip>("Sound/BGM/BGM_Play1-2");
+        bgmInGame2 = Resources.Load<AudioClip>("Sound/BGM/BGM_Play2");
+        bgmInGame3 = Resources.Load<AudioClip>("Sound/BGM/BGM_Play3");
+        bgmEnding = Resources.Load<AudioClip>("Sound/BGM/BGM_Play_Ending");
+
+        bgmClips.Clear();
+
+        bgmClips["Main"] = bgmMain;
+        bgmClips["Play1"] = bgmInGame1;
+        bgmClips["Play1-2"] = bgmInGame12;
+        bgmClips["Play2"] = bgmInGame2;
+        bgmClips["Play3"] = bgmInGame3;
+        bgmClips["Ending"] = bgmEnding;
     }
 
     // =====================
@@ -239,7 +253,6 @@ public class SoundManager : Singleton<SoundManager>
         audioSourceBGM.volume = 0f;
         audioSourceBGM.Stop();
     }
-
     // =====================
     // 게임 시작 시 메인 BGM → 스타트 SFX → 인게임 BGM
     // =====================
@@ -253,7 +266,24 @@ public class SoundManager : Singleton<SoundManager>
         yield return new WaitForSeconds(0.5f);
 
         // 인게임 BGM 페이드 인
-        yield return StartCoroutine(FadeInBGM(bgmInGame, 1f));
+        yield return StartCoroutine(FadeInBGM(bgmInGame1, 1f));
+    }
+
+    public void PlayBgm(string bgmName)
+    {
+        if (!bgmClips.TryGetValue(bgmName, out AudioClip clip) || clip == null)
+        {
+            Debug.LogWarning("[SoundManager] BGM 없음: " + bgmName);
+            return;
+        }
+
+        StartCoroutine(PlayBgmCoroutine(clip));
+    }
+
+    private IEnumerator PlayBgmCoroutine(AudioClip clip)
+    {
+        yield return StartCoroutine(FadeOutBGM(1f));
+        yield return StartCoroutine(FadeInBGM(clip, 1f));
     }
 
     // =====================

@@ -82,6 +82,7 @@ public class BackGroundSpawner : MonoBehaviour
         {
             _stage2Triggered = true;
             SpawnBetweenAtNext(betweenPrefab12, betweenSize12);
+            SoundManager.Instance.PlayBgm("Play2");
             _stage = Stage.S2;
         }
 
@@ -89,6 +90,7 @@ public class BackGroundSpawner : MonoBehaviour
         {
             _stage3Triggered = true;
             SpawnBetweenAtNext(betweenPrefab23, betweenSize23);
+            SoundManager.Instance.PlayBgm("Play3");
             _stage = Stage.S3;
         }
 
