@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 831720d3433a2a247be855b023f14e0a
+guid: 37b1bc086af768443b4c51f32bb8abdc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1604443050267842622
-    second: "\u1112\u1161\u1103\u1161\u11AB \u1104\u1161\u11BC \u110B\u1167\u11BC\u110B\u1167\u11A8_0"
+      213: -6254492736260258189
+    second: "\u1105\u1169\u110F\u1166\u11BA\u1107\u1161\u11AF\u1109\u11615_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 12
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\u1112\u1161\u1103\u1161\u11AB \u1104\u1161\u11BC \u110B\u1167\u11BC\u110B\u1167\u11A8_0"
+      name: "\u1105\u1169\u110F\u1166\u11BA\u1107\u1161\u11AF\u1109\u11615_0"
       rect:
         serializedVersion: 2
-        x: 0
+        x: 2
         y: 0
-        width: 256
-        height: 64
+        width: 29
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2c7e076eb8fdbb9e0800000000000000
-      internalID: -1604443050267842622
+      spriteID: 37642fc7ef39339a0800000000000000
+      internalID: -6254492736260258189
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\u1112\u1161\u1103\u1161\u11AB \u1104\u1161\u11BC \u110B\u1167\u11BC\u110B\u1167\u11A8_0": -1604443050267842622
+      "\u1105\u1169\u110F\u1166\u11BA\u1107\u1161\u11AF\u1109\u11615_0": -6254492736260258189
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
