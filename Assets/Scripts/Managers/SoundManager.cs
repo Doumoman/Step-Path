@@ -42,6 +42,7 @@ public class SoundManager : Singleton<SoundManager>
     }
     private Dictionary<SFXType, AudioClip> sfxClips = new Dictionary<SFXType, AudioClip>();
     private Dictionary<string, List<AudioClip>> playerSFX = new Dictionary<string, List<AudioClip>>();
+    private Dictionary<string, AudioClip> itemSFX = new Dictionary<string, AudioClip>();
     // =====================
     // Awake: 초기화
     // =====================
@@ -75,6 +76,7 @@ public class SoundManager : Singleton<SoundManager>
         // 리소스 로드
         LoadBGM();
         LoadAllSFX();
+        LoadItemSFX();
     }
 
     // =====================
@@ -155,6 +157,25 @@ public class SoundManager : Singleton<SoundManager>
             }
         }
     }
+    private void LoadItemSFX()
+    {
+        itemSFX.Clear();
+
+        // item 폴더 내의 사운드 로드 (하나만 있어도 배열 형태로 가져옴)
+        AudioClip[] clips = Resources.LoadAll<AudioClip>("Sound/item");
+
+        if (clips.Length > 0)
+        {
+            // 첫 번째(유일한) 사운드의 '파일 이름'을 Key 값으로 저장
+            itemSFX[clips[0].name] = clips[0];
+            Debug.Log($"[SoundManager] Item SFX 로드 완료: {clips[0].name}");
+        }
+        else
+        {
+            Debug.LogWarning("[SoundManager] item 폴더에 사운드 없음!");
+        }
+    }
+
     // =====================
     // SFX 재생
     // =====================
@@ -211,6 +232,21 @@ public class SoundManager : Singleton<SoundManager>
         audioSourceSFX.volume = currentSFXVolume;
         audioSourceSFX.PlayOneShot(clip);
     }
+
+    public void PlayItemSound(string clipName)
+    {
+        // 딕셔너리에 해당 파일명의 사운드가 있는지 확인
+        if (!itemSFX.ContainsKey(clipName))
+        {
+            Debug.LogWarning("[SoundManager] Item SFX 없음: " + clipName);
+            return;
+        }
+
+        // 볼륨 설정 후 재생 (기존 작동 방식과 완벽히 동일)
+        audioSourceSFX.volume = currentSFXVolume;
+        audioSourceSFX.PlayOneShot(itemSFX[clipName]);
+    }
+
     // =====================
     // BGM 페이드 인
     // =====================
