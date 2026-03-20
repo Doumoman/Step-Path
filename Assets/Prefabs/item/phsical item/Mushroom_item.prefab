@@ -105,6 +105,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3554454586546123347}
     m_Modifications:
+    - target: {fileID: -881943514371534891, guid: 778a883ce0c324942908fe06d8da77b9, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6001388609037809617, guid: 778a883ce0c324942908fe06d8da77b9, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 7647054886370508402, guid: 778a883ce0c324942908fe06d8da77b9, type: 3}
       propertyPath: m_Name
       value: Mushroom_item

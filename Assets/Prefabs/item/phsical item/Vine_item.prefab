@@ -105,6 +105,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6394588555424577716}
     m_Modifications:
+    - target: {fileID: 6001388609037809617, guid: fb78aa4f845f6df4499641567a0f7fae, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 7647054886370508402, guid: fb78aa4f845f6df4499641567a0f7fae, type: 3}
       propertyPath: m_Name
       value: Vine_item_ren

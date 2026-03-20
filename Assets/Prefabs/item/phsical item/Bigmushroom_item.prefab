@@ -109,6 +109,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6001388609037809617, guid: 9f6f1e94a90745d4da7ce10320b580f8, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 7647054886370508402, guid: 9f6f1e94a90745d4da7ce10320b580f8, type: 3}
       propertyPath: m_Name
       value: Bigmushroom_item
