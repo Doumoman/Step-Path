@@ -640,6 +640,7 @@ public sealed class CraftingState : IItemState
         {
             placed_ctx.mono.Grid.craftedPos = placed_ctx.transform.position;
             placed_ctx.mono.Grid.crafteditemName = craftitemName;
+            if (placed_ctx.mono.Grid.crafteditemName == "bigmushroom") placed_ctx.mono.Grid.craftedPos.y -= 0.07f;
             // 원래 placed되어 있던 프리팹 destroy로 전달. 
             if (ctx.data.itemName == "wood")
             {
