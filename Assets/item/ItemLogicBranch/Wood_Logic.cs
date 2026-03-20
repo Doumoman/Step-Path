@@ -18,12 +18,13 @@ public class Wood_L : ItemLogic
 
     public override void PlacedItemLogic(ItemDataHub ctx, bool outofcamera) 
     {
-        if (ctx.data.isoriginal == false)
+        if (outofcamera)
         {
-            if (outofcamera)
-                ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
+            ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
             return;
         }
+        if (ctx.data.isoriginal == false)
+            return;
 
         
         int count = 0;
@@ -61,8 +62,7 @@ public class Wood_L : ItemLogic
 
         ctx.grid.groundLposleft = left;
         ctx.grid.groundLposright = right;
-        ctx.data.isoriginal = false;
-        ctx.pd.CreateGroundL();
+        ctx.pd.CreateGroundL(ctx);
 
         
         return; 

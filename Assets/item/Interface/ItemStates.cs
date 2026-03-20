@@ -77,7 +77,6 @@ public sealed class DraggingState : IItemState
     {
         groundcheck = ctx.image.gameObject.layer >= 26;
         originalscale = ctx.rect.sizeDelta;
-        ctx.data.isoriginal = true;
         gt = ctx.grid.ground;
     }
 
@@ -115,6 +114,7 @@ public sealed class DraggingState : IItemState
             else if (IsPlaceable && !CraftCheck)
             {
                 SoundManager.Instance.PlayItemSound("Tile_Place");
+                if (groundcheck) ctx.data.isoriginal = true;
                 machine.ChangeState(new PlacedState(ctx, machine, prefabCreate));
             }
             else
@@ -569,7 +569,7 @@ public sealed class PlacedState : IItemState
             }
         }
         
-        if (ctx.data.itemName != "cloud" && ctx.data.itemName != "wood")
+        if (ctx.data.itemName != "cloud" )
         {
             outofcamera = OutOfCamera(ctx);
             ctx.data.eachLogic.PlacedItemLogic(ctx, outofcamera);

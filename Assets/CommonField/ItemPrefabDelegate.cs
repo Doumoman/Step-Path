@@ -36,9 +36,10 @@ public class ItemPrepabDelegate : ScriptableObject
         Dequeueitem?.Invoke();
     }
 
-    public void CreateGroundL()
+    public void CreateGroundL(ItemDataHub ctx)
     {
         Grounditem?.Invoke();
+        ctx.data.isoriginal = false;
     }
 
     public void CreateCloudL()

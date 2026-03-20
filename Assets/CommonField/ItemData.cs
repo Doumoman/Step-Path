@@ -21,7 +21,7 @@ public class ItemData : ScriptableObject
     public ItemPrepabDelegate itemDelegate;
 
     [Header("재귀 중복 체크")]
-    public bool isoriginal = true;
+    public bool isoriginal = false;
 
     [System.NonSerialized]
     public bool forcloudsoundcheck = true;
