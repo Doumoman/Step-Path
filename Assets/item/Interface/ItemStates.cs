@@ -109,12 +109,12 @@ public sealed class DraggingState : IItemState
 
             if (IsPlaceable && CraftCheck)
             {
-                ctx.isound.PlaytileP();
+                SoundManager.Instance.PlayItemSound("Tile_Place");
                 machine.ChangeState(new CraftingState(ctx, machine, prefabCreate, placed_ctx));
             }
             else if (IsPlaceable && !CraftCheck)
             {
-                ctx.isound.PlaytileP();
+                SoundManager.Instance.PlayItemSound("Tile_Place");
                 machine.ChangeState(new PlacedState(ctx, machine, prefabCreate));
             }
             else
@@ -125,11 +125,11 @@ public sealed class DraggingState : IItemState
                     machine.ChangeState(new DestroyedState(ctx, machine, prefabCreate));
                     prefabCreate.DeletitemStack();
                     prefabCreate.Createitemimage();
-                    ctx.isound.PlayWaterP();
+                    SoundManager.Instance.PlayItemSound("Water_Pour");
                 }
                 else
                 {
-                    ctx.isound.PlayTileP_fail();
+                    SoundManager.Instance.PlayItemSound("Tile_Place_Fail");
                     machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
                 }
                     
@@ -595,7 +595,7 @@ public sealed class PlacedState : IItemState
         yield return new WaitForSeconds(5f);
         if (ctx.data.forcloudsoundcheck)
         {
-            ctx.isound.PlaycloudF();
+            SoundManager.Instance.PlayItemSound("Cloud_Fade");
             ctx.data.forcloudsoundcheck = false;
         }
         

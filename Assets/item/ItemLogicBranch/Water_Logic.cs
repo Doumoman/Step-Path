@@ -18,13 +18,13 @@ public class Water_L : ItemLogic
         if (itemName == "mushroom") 
         {
             craft = true;
-            ctx.isound.PlayMushroomG();
+            SoundManager.Instance.PlayItemSound("Mushroom_Grow");
             return "bigmushroom"; 
         }
         else if (itemName == "sprout") 
         {
             craft = true;
-            ctx.isound.PlayvineG();
+            SoundManager.Instance.PlayItemSound("Vine_Grow");
             return "vine"; 
         }
         else { craft = false; return null; }

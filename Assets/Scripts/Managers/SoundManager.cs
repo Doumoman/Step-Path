@@ -166,9 +166,12 @@ public class SoundManager : Singleton<SoundManager>
 
         if (clips.Length > 0)
         {
-            // 첫 번째(유일한) 사운드의 '파일 이름'을 Key 값으로 저장
-            itemSFX[clips[0].name] = clips[0];
-            Debug.Log($"[SoundManager] Item SFX 로드 완료: {clips[0].name}");
+            foreach (AudioClip clip in clips)
+            {
+                itemSFX[clip.name] = clip;
+            }
+
+            Debug.Log($"[SoundManager] Item SFX 로드 완료: 총 {clips.Length}개");
         }
         else
         {
