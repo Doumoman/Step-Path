@@ -209,6 +209,7 @@ public class ItemManager : MonoBehaviour
             if (gridData.crafteditemName == c.Data.itemName)
             {
                 itemspawn = Instantiate(Crafteditems[i], gridData.craftedPos, Quaternion.identity, itemContainer);
+
                 if (i == 2)
                 {
                     if(gridData.stairsLeftcheck && gridData.stairsRightcheck)
