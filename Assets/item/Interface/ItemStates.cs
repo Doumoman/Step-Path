@@ -27,8 +27,7 @@ public sealed class BackgroundState : IItemState
     public void Enter()
     {
         ctx.rect.anchoredPosition = ctx.spawnL;
-        if(ctx.data.itemName == "wood") ctx.rect.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-        else ctx.rect.localScale = new Vector3(2.45f, 2.45f, 2.45f);
+        ctx.rect.localScale = new Vector3(2.45f, 2.45f, 2.45f);
 
     }
 
@@ -84,8 +83,7 @@ public sealed class DraggingState : IItemState
     {
         if (groundcheck)
         {
-            if (ctx.data.itemName == "cloud") { x = 2; y = 1;}
-            else x = y = 1;
+            x = 2; y = 1;
         }
         else x = y = 2;
 
@@ -190,8 +188,7 @@ public sealed class DraggingState : IItemState
 
         if (groundcheck)
         {
-            if(ctx.data.itemName == "cloud") ResizeImageToGrid(ctx, 2, 1);
-            else ResizeImageToGrid(ctx, 1, 1);
+            ResizeImageToGrid(ctx, 2, 1);
         }
         else
             ResizeImageToGrid(ctx, 2, 2);
@@ -367,10 +364,14 @@ public sealed class DraggingState : IItemState
             }
             else if (hititem != null && hitGroundCenter == null)
             {
-                if(hititemName == "mushroom" || hititemName == "sprout")
+                if(hititemName == "mushroom")
                 {
                     IsPlaceable = true;
                     CraftCheck = true;
+                }
+                else if(hititemName == "sprout")
+                {
+                    VineCheck();
                 }
                 else
                 {
@@ -445,7 +446,7 @@ public sealed class DraggingState : IItemState
         if (groundcheck)
         {
             cellPos.y++;
-            if (ctx.data.itemName == "cloud" && cellPos.x % 2 == 0) 
+            if (cellPos.x % 2 == 0) 
                 cellPos.x++;
             ctx.image.Grid.positioncell = cellPos;
             cellPos.y--;
@@ -534,6 +535,19 @@ public sealed class DraggingState : IItemState
         return;
     }
     
+    void VineCheck()
+    {
+        Vector3Int pos = currentcellpos;
+        Vector3Int checkup = new Vector3Int(pos.x, pos.y + 3, 0);
+        CraftCheck = false;
+        IsPlaceable = false;
+        if (gt.HasTile(checkup))
+        {
+            CraftCheck = true;
+            IsPlaceable = true;
+        }
+        return;
+    }
 }
 
 public sealed class PlacedState : IItemState

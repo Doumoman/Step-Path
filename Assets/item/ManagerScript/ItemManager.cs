@@ -172,7 +172,7 @@ public class ItemManager : MonoBehaviour
 
         if (itemDatas[id].itemName == "wood") 
         {
-            spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.x -= 0.125f; spawnpos.y -= 0.125f;
+            spawnpos = grid.CellToWorld(gridData.positioncell); spawnpos.y -= 0.125f;
         }
         else if (itemDatas[id].itemName == "cloud")
         {
@@ -241,21 +241,21 @@ public class ItemManager : MonoBehaviour
         GameObject itemspawn;
         Vector3 spawnpos;
         Vector3Int realpos;
-        Vector3Int createpos = gridData.groundLposleft; createpos.x++;
-        while(createpos.x < gridData.positioncell.x - 1)
+        Vector3Int createpos = gridData.groundLposleft; createpos.x += 2;
+        while(createpos.x < gridData.positioncell.x)
         {
-            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.125f;
+            realpos = new Vector3Int(createpos.x, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.y -= 0.125f;
             itemspawn = Instantiate(itemPrefabs[3], spawnpos, Quaternion.identity, Ground_item);
-            createpos.x++;
+            createpos.x += 2;
         }
         createpos = gridData.groundLposright; createpos.x--;
         while (createpos.x > gridData.positioncell.x - 1)
         {
-            realpos = new Vector3Int(createpos.x + 1, createpos.y + 1, 0);
-            spawnpos = grid.CellToWorld(realpos); spawnpos.x -= 0.125f; spawnpos.y -= 0.125f;
+            realpos = new Vector3Int(createpos.x, createpos.y + 1, 0);
+            spawnpos = grid.CellToWorld(realpos); spawnpos.y -= 0.125f;
             itemspawn = Instantiate(itemPrefabs[3], spawnpos, Quaternion.identity, Ground_item);
-            createpos.x--;
+            createpos.x -= 2;
         }
         return;
     }
