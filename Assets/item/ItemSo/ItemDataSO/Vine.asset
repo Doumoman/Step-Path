@@ -17,3 +17,4 @@ MonoBehaviour:
   itemFrequency: 3
   eachLogic: {fileID: 11400000, guid: f10221d47046fa24b933a829190f97f7, type: 2}
   itemDelegate: {fileID: 11400000, guid: 33b781bb36bb6ef4695782207968bf0b, type: 2}
+  isoriginal: 0
