@@ -125,7 +125,7 @@ public class ItemManager : MonoBehaviour
         currentctx.sm.ChangeState(new DestroyedState(currentctx, currentctx.sm, currentctx.pd));
         Deletitemstack();
         SpawnRandomItemImage();
-        soundData.PlayRerolltheitem();
+        SoundManager.Instance.PlayItemSound("Slot_Replace");
         StartCoroutine(Rerolltime(3f));
     }
 
