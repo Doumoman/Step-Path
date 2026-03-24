@@ -135,21 +135,29 @@ public class GameOverTrigger : MonoBehaviour
         if (_isGameOver) return;
         _isGameOver = true;
 
-        // 점수 저장/최고기록/이벤트/사운드 정리 => GameManager에서 일원화
+        // 점수 저장 / 상태 전환 등은 즉시 처리
         if (GameManager.Instance != null)
             GameManager.Instance.TriggerGameOver();
 
-        // 플레이어 정지(로컬 처리)
-        if (_player != null) _player.SetGameOver();
-
-        // UI 표시(표시만 담당)
+        // 플레이어 애니메이션 끝난 뒤 팝업 표시
+        if (_player != null)
+        {
+            _player.SetGameOver(OnPlayerGameOverAnimationFinished);
+        }
+        else
+        {
+            // 플레이어가 없으면 바로 팝업
+            OnPlayerGameOverAnimationFinished();
+        }
+    }
+    private void OnPlayerGameOverAnimationFinished()
+    {
         if (gameOverPopup != null)
         {
-            Debug.Log("게임오버");
+            Debug.Log("게임오버 팝업 표시");
             gameOverPopup.Show();
         }
     }
-
     private void CachePlayer()
     {
         // 태그 기반으로 찾고 PlayerAutoRunner 캐싱

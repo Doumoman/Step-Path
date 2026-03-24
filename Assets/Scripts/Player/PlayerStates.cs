@@ -565,7 +565,7 @@ public class PlayerGameOverState : IPlayerState
 {
     private readonly PlayerAutoRunner p;
     private readonly PlayerStateMachine fsm;
-
+    private bool _finished;
     public PlayerGameOverState(PlayerAutoRunner player, PlayerStateMachine machine)
     {
         p = player; fsm = machine;
@@ -573,22 +573,47 @@ public class PlayerGameOverState : IPlayerState
 
     public void Enter()
     {
-        // 이동/누적값/속도 전부 정지
+        // 이동/누적값/속도 정지
         p.vyPixels = 0f;
         p.pixelAccum = Vector2.zero;
+        p.onGround = false;
 
-        // 벽반전/버섯 같은 예약/쿨다운도 정지시키고 싶으면 초기화
+        // 각종 예약/쿨다운 정리
         p.pendingJumpTimer = -1f;
         p.reverseCD = 0;
         p.mushroomCD = 0;
+        p.climbCD = 0;
+        p.stairsCD = 0;
+        p.rocketCD = 0;
 
-        // 애니메이션 멈춤(원하면 Idle 재생 후 멈추도록 바꿔도 됨)
-        p.PauseAnim(true);
+        p.pendingClimb = false;
+        p.pendingMushroom = false;
+        p.pendingStairs = false;
+        p.pendingRocket = false;
+        p.pendingRocketCol = null;
+
+        // 중요: 멈추지 말고 게임오버 애니 재생
+        p.PauseAnim(false);
+        p.PlayAnim(p.GameOverHash, true);
+
+        _finished = false;
     }
 
     public void Tick()
     {
-        // 아무것도 하지 않음 = 완전 정지
+        if (_finished) return;
+        if (p.Animator == null) return;
+
+        AnimatorStateInfo stateInfo = p.Animator.GetCurrentAnimatorStateInfo(0);
+
+        // GameOver 상태가 실제로 재생 중이고, 1회 재생이 끝났으면 콜백 실행
+        if (!p.Animator.IsInTransition(0) &&
+            stateInfo.shortNameHash == p.GameOverHash &&
+            stateInfo.normalizedTime >= 1f)
+        {
+            _finished = true;
+            p.InvokeGameOverAnimationFinished();
+        }
     }
 
     public void Exit()

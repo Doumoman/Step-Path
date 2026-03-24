@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -17,7 +18,9 @@ public class PlayerAutoRunner : MonoBehaviour
     public const string ANIM_FALL = "Fall";
     public const string ANIM_STAIRCLIMB = "StairClimb";
     public const string ANIM_ROCKET = "Rocket";
-    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash, _rocketHash;
+    public const string ANIM_GAMEOVER = "GameOver";
+    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash, _rocketHash, _gameOverHash;
+    private Action _onGameOverAnimationFinished;
 
     [Header("Speed By Height")]
     [SerializeField] private bool useHeightSpeed = true;
@@ -131,6 +134,12 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField, Range(1f, 6f)]
     private float fallGravityMultiplier = 2.0f;       // 낙하 가속 배수(클수록 더 빨리 떨어짐)
 
+    [Header("Game Over")]
+    [SerializeField] private LayerMask monsterLayerMask;
+    [SerializeField] private UIsGameOver gameOverPopup;
+
+    private bool _isGameOverRequested;
+
     #region 런타임 필드
     [HideInInspector] public float pendingJumpTimer = -1f;
     [HideInInspector] public int pendingJumpDir = 1;
@@ -216,6 +225,7 @@ public class PlayerAutoRunner : MonoBehaviour
         _fallHash = Animator.StringToHash(ANIM_FALL);
         _stairclimbHash = Animator.StringToHash(ANIM_STAIRCLIMB);
         _rocketHash = Animator.StringToHash(ANIM_ROCKET);
+        _gameOverHash = Animator.StringToHash(ANIM_GAMEOVER);
         stateMachine = new PlayerStateMachine();
     }
 
@@ -256,10 +266,37 @@ public class PlayerAutoRunner : MonoBehaviour
             CameraMover.Instance.OnPlayerStateChanged(newState);
         }
     }
-    public void SetGameOver()
+    public void SetGameOver(Action onAnimationFinished = null)
     {
+        _onGameOverAnimationFinished = onAnimationFinished;
         ChangeState(new PlayerGameOverState(this, stateMachine));
     }
+
+    public void InvokeGameOverAnimationFinished()
+    {
+        Action callback = _onGameOverAnimationFinished;
+        _onGameOverAnimationFinished = null;
+        callback?.Invoke();
+    }
+    public void RequestGameOver()
+    {
+        if (_isGameOverRequested)
+            return;
+
+        _isGameOverRequested = true;
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.TriggerGameOver();
+
+        SetGameOver(OnGameOverAnimationFinished);
+    }
+
+    private void OnGameOverAnimationFinished()
+    {
+        if (gameOverPopup != null)
+            gameOverPopup.Show();
+    }
+
     // ───────────────── 애니메이션 로직 ──────────────────
     public void PlayAnim(int stateHash, bool restart = false)
     {
@@ -285,7 +322,8 @@ public class PlayerAutoRunner : MonoBehaviour
     public int FallHash => _fallHash;
     public int StairClimbHash => _stairclimbHash;
     public int RocketHash => _rocketHash;
-
+    public int GameOverHash => _gameOverHash;
+    public Animator Animator => anim;
     #region 사다리 로직
     public bool DetectClimbableAhead(int dirSign, out Collider2D col, out float centerX, out float targetCenterY)
     {
@@ -740,6 +778,17 @@ public class PlayerAutoRunner : MonoBehaviour
         Vector2 size = new Vector2(wallProbe, CastSize.y - castSkin * 2f);
 
         return Physics2D.OverlapBox(center, size, 0f, reverseOnMask) != null;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (_isGameOverRequested)
+            return;
+
+        if (((1 << other.gameObject.layer) & monsterLayerMask) != 0)
+        {
+            RequestGameOver();
+        }
     }
 
 #if UNITY_EDITOR

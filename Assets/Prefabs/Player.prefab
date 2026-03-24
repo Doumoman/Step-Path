@@ -217,6 +217,13 @@ MonoBehaviour:
   anim: {fileID: 5413457656056095683}
   sr: {fileID: 3743330799335780109}
   animLayer: 0
+  overrideFlip: 0
+  useHeightSpeed: 1
+  baseHeightY: 0
+  heightStepUnits: 5
+  speedAddPerStepPixels: 2
+  minRunSpeedPixels: 10
+  maxRunSpeedPixels: 20
   pixelsPerUnit: 16
   runSpeedPixelsPerSec: 32
   enterXTolerancePixels: 2
@@ -258,6 +265,15 @@ MonoBehaviour:
   stairsShapeEase: 1
   invertStairsDirection: 0
   stairsCooldownSec: 0.2
+  rocketMask:
+    serializedVersion: 2
+    m_Bits: 0
+  rocketProbe: 0.12
+  rocketLiftSpeedPixelsPerSec: 64
+  rocketRiseUnits: 3
+  rocketUseColliderTop: 0
+  rocketTopExtra: 0.05
+  rocketCooldownSec: 0.2
   mushroomMask:
     serializedVersion: 2
     m_Bits: 0
@@ -276,6 +292,10 @@ MonoBehaviour:
   bigMushroomCooldownFrames: 12
   jumpTimeToApexSec: 0.5
   fallGravityMultiplier: 1
+  monsterLayerMask:
+    serializedVersion: 2
+    m_Bits: 2147483648
+  gameOverPopup: {fileID: 0}
   pendingJumpTimer: -1
   pendingJumpDir: 1
   mushroomCD: 0
@@ -303,6 +323,13 @@ MonoBehaviour:
   stairEnd: {x: 0, y: 0}
   stairSlope: 0
   stairMoveDir: 0
+  rocketCD: 0
+  pendingRocket: 0
+  pendingRocketTargetX: 0
+  rocketCenterX: 0
+  rocketStartCenterY: 0
+  rocketTargetCenterY: 0
+  pendingRocketCol: {fileID: 0}
 --- !u!95 &5413457656056095683
 Animator:
   serializedVersion: 7
