@@ -109,7 +109,7 @@ public class ItemManager : MonoBehaviour
 
     void DisplaySecondSlot()
     {
-        if(secondslot >= 3 && secondslot <= 4) targetimage.transform.localScale = new Vector3(0.8f, 0.4f, 0.8f);
+        if(secondslot == 3) targetimage.transform.localScale = new Vector3(0.8f, 0.4f, 0.8f);
         else targetimage.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
         targetimage.sprite = secondSlotsprite[secondslot];

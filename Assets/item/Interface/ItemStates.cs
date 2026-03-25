@@ -69,6 +69,7 @@ public sealed class DraggingState : IItemState
     Vector2 originalscale;
     Vector3Int currentcellpos;
     int x, y;
+ 
 
 
     public DraggingState(ItemDataHub c, ItemStateMachine m, ItemPrepabDelegate p) { ctx = c; machine = m; prefabCreate = p;}
@@ -77,6 +78,7 @@ public sealed class DraggingState : IItemState
         groundcheck = ctx.image.gameObject.layer >= 26;
         originalscale = ctx.rect.sizeDelta;
         gt = ctx.grid.ground;
+        
     }
 
     public void Update()
@@ -87,9 +89,11 @@ public sealed class DraggingState : IItemState
         }
         else x = y = 2;
 
+        ctx.image.transform.SetParent(ctx.folder.transform, false);
         TrackingMouse(ctx, x, y);
         IsitPlaceable(ctx);
         OnPoint(ctx);
+        
 
 
         if (Input.GetMouseButtonUp(0)) 
@@ -286,9 +290,10 @@ public sealed class DraggingState : IItemState
 
 
         Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
-
+        Vector3 cellCenterPositemG = cellCenterPositem;
+        cellCenterPositemG.x -= 0.125f;
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
-        Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
+        Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositemG, boxSize, 0f, lowerLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
 
         
@@ -371,7 +376,7 @@ public sealed class DraggingState : IItemState
                 }
                 else if(hititemName == "sprout")
                 {
-                    VineCheck();
+                    VineCheck(hititem);
                 }
                 else
                 {
@@ -535,13 +540,14 @@ public sealed class DraggingState : IItemState
         return;
     }
     
-    void VineCheck()
+    void VineCheck(Collider2D hititme)
     {
-        Vector3Int pos = currentcellpos;
-        Vector3Int checkup = new Vector3Int(pos.x, pos.y + 3, 0);
+        Vector3Int pos = ctx.map.WorldToCell(hititme.transform.position);
+        Vector3Int checkup1 = new Vector3Int(pos.x, pos.y - 1, 0);
+        Vector3Int checkup2 = new Vector3Int(pos.x - 1, pos.y - 1, 0);
         CraftCheck = false;
         IsPlaceable = false;
-        if (gt.HasTile(checkup))
+        if (gt.HasTile(checkup1) || gt.HasTile(checkup2))
         {
             CraftCheck = true;
             IsPlaceable = true;

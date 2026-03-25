@@ -35,6 +35,7 @@ public class ImageController : MonoBehaviour
         ctx = new ItemDataHub(this);
         root.PushState(new BackgroundState(ctx, root, Prefab));
         _initialized = true;
+        ctx.folder = GameObject.Find("itemDraggingState");
 
         
     }
