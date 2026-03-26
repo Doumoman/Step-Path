@@ -133,6 +133,7 @@ public sealed class DraggingState : IItemState
                 {
                     SoundManager.Instance.PlayItemSound("Tile_Place_Fail");
                     machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
+                    ctx.image.transform.SetParent(ctx.itemContainerfolder.transform, false);
                 }
                     
             }    
@@ -493,7 +494,7 @@ public sealed class DraggingState : IItemState
 
     void StairsCheck()
     {
-        int layerMask = LayerMask.GetMask("ground");
+        int layerMask = LayerMask.GetMask("Ground");
         Vector3Int pos = currentcellpos;
         Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
         Vector3Int checkleft = new Vector3Int(pos.x - 3, pos.y + 4, 0);
@@ -512,12 +513,12 @@ public sealed class DraggingState : IItemState
         if (hititemleft != null)
         {
            ItemController con = hititemleft.GetComponent<ItemController>();
-            leftname = con.ctx.data.name;
+            if(con != null) leftname = con.ctx.data.name;
         }
         if (hititemright != null)
         {
             ItemController con = hititemright.GetComponent<ItemController>();
-            rightname = con.ctx.data.name;
+            if (con != null) rightname = con.ctx.data.name;
         }
 
 
@@ -543,11 +544,19 @@ public sealed class DraggingState : IItemState
     void VineCheck(Collider2D hititme)
     {
         Vector3Int pos = ctx.map.WorldToCell(hititme.transform.position);
-        Vector3Int checkup1 = new Vector3Int(pos.x, pos.y - 1, 0);
-        Vector3Int checkup2 = new Vector3Int(pos.x - 1, pos.y - 1, 0);
+        Vector3Int checkup1 = new Vector3Int(pos.x, pos.y + 3, 0);
+        Vector3Int checkup2 = new Vector3Int(pos.x - 1, pos.y + 3, 0);
+
+        int layerMask = LayerMask.GetMask("Ground");
+        Vector2 boxSize = (Vector2)ctx.map.cellSize * 0.4f;
+        Vector3 overlapPos1 = ctx.map.GetCellCenterWorld(checkup1); 
+        Vector3 overlapPos2 = ctx.map.GetCellCenterWorld(checkup2); 
+        Collider2D hitground1 = Physics2D.OverlapBox(overlapPos1, boxSize, 0f, layerMask);
+        Collider2D hitground2 = Physics2D.OverlapBox(overlapPos2, boxSize, 0f, layerMask);
+
         CraftCheck = false;
         IsPlaceable = false;
-        if (gt.HasTile(checkup1) || gt.HasTile(checkup2))
+        if (gt.HasTile(checkup1) || gt.HasTile(checkup2) || hitground1 != null || hitground2 != null)
         {
             CraftCheck = true;
             IsPlaceable = true;
