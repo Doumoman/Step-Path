@@ -1071,8 +1071,8 @@ MonoBehaviour:
   betweenPrefab23: {fileID: 2270891646263653174, guid: 3312cd5617767e945b2cab92cc249131, type: 3}
   betweenSize23: 4.08
   backgroundPrefab3: {fileID: 160008897359041501, guid: 2a8b3d37e3f21a54ead009f5095ff65d, type: 3}
-  stage2StartPlayerY: 100
-  stage3StartPlayerY: 200
+  stage2StartPlayerY: 50
+  stage3StartPlayerY: 100
   firstSpawnBottomY: 0.6
   stepY: 11.2
   keepCount: 2
@@ -2981,6 +2981,55 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7aee1c1db87d3c24e8bbf724f0b0dbca, type: 2}
   - {fileID: 11400000, guid: 0f184433daf8a0e43a04a5c59086ccbd, type: 2}
   - {fileID: 11400000, guid: 480a690f21d8e7a4badb3f6405d696a1, type: 2}
+  stage1Patterns:
+  - {fileID: 11400000, guid: b67387897c1c5b04abdfe74e9dd4b8f6, type: 2}
+  - {fileID: 11400000, guid: a6bdffc589607d34ba76a6049092359b, type: 2}
+  - {fileID: 11400000, guid: 0ac7f9a54ee4f224f9518571b2684335, type: 2}
+  - {fileID: 11400000, guid: 4c78cbaf9dfc84245a19d1501339a5ee, type: 2}
+  - {fileID: 11400000, guid: 4f10e4754c8199340b7112735beb50d5, type: 2}
+  - {fileID: 11400000, guid: fd84adecd03221744b090505b702698d, type: 2}
+  - {fileID: 11400000, guid: f6dc70a0ddfc7694081852d844f78e44, type: 2}
+  - {fileID: 11400000, guid: cc9ae8f5b0035ee48bd050e9fc9a8408, type: 2}
+  - {fileID: 11400000, guid: 15d3966565001fd4e9f02d2c16108de9, type: 2}
+  - {fileID: 11400000, guid: 1959cbf6dac97e34a825183cca1cf33b, type: 2}
+  - {fileID: 11400000, guid: 3eab1d697af6b6841a9950e29f8ee119, type: 2}
+  - {fileID: 11400000, guid: 8078c0f809d07bf43b2a24642f272208, type: 2}
+  - {fileID: 11400000, guid: 7aee1c1db87d3c24e8bbf724f0b0dbca, type: 2}
+  - {fileID: 11400000, guid: 0f184433daf8a0e43a04a5c59086ccbd, type: 2}
+  - {fileID: 11400000, guid: 480a690f21d8e7a4badb3f6405d696a1, type: 2}
+  stage2Patterns:
+  - {fileID: 11400000, guid: c8928c774d19f5d409f0a3ee5c9c27f8, type: 2}
+  - {fileID: 11400000, guid: 9502f68bc343b36459259934e9876f64, type: 2}
+  - {fileID: 11400000, guid: 940a2cb87e5c5874bbb6db50ea5f4954, type: 2}
+  - {fileID: 11400000, guid: f8705e54fd9f185429e4042cbe8d159f, type: 2}
+  - {fileID: 11400000, guid: f5c3939c576beec41a06a82bb2bfb74f, type: 2}
+  - {fileID: 11400000, guid: b2450722427a4cc4894da555c415eb43, type: 2}
+  - {fileID: 11400000, guid: 9fb78cd668cd7e941af57cef3a07f7e6, type: 2}
+  - {fileID: 11400000, guid: 8edacd2cbe0b82d48b33b4151e554bbb, type: 2}
+  - {fileID: 11400000, guid: ae6484da8c5d9df4f87e61962b609f5a, type: 2}
+  - {fileID: 11400000, guid: 5e9f6839a0482dc41b6e4375eb93d695, type: 2}
+  - {fileID: 11400000, guid: cd5576a5c90f9964bb31be689aadc6e0, type: 2}
+  - {fileID: 11400000, guid: 9fd842cee5a56ec49ac95bdcb5e89136, type: 2}
+  - {fileID: 11400000, guid: 767098d2f1c73e347adc8d9ff611b125, type: 2}
+  - {fileID: 11400000, guid: 5fe195a587540fd46a9be56c4c055fbd, type: 2}
+  - {fileID: 11400000, guid: 096de07c203c3574d876dd819f61719e, type: 2}
+  stage3Patterns:
+  - {fileID: 11400000, guid: 22d1422e61f3c6b4ea0f5e729d8026c8, type: 2}
+  - {fileID: 11400000, guid: 04c1d932fb88feb42bca07daba1da925, type: 2}
+  - {fileID: 11400000, guid: 60af359f9009eeb4d8f519c0cb6f05e1, type: 2}
+  - {fileID: 11400000, guid: fb409ce28ca85f743b829e422a02c54c, type: 2}
+  - {fileID: 11400000, guid: b94d67b85e57e6b4f8cf6ef3a6050e1a, type: 2}
+  - {fileID: 11400000, guid: f1ae9f68be1a5af469f33669b475aa6f, type: 2}
+  - {fileID: 11400000, guid: fc7d4ba4a4effd648a86a09a789df07b, type: 2}
+  - {fileID: 11400000, guid: 7431c9294bf77f74a83f671f4dfffa0e, type: 2}
+  - {fileID: 11400000, guid: a9194fe48d50ef64fbb83726761d1bab, type: 2}
+  - {fileID: 11400000, guid: 7c3ed3de0e586384b894484c894adf64, type: 2}
+  - {fileID: 11400000, guid: 39db4031fe3b810498c6a3bdbd951042, type: 2}
+  - {fileID: 11400000, guid: 2cf7a8c0f8358cb47ad64a365d528f68, type: 2}
+  - {fileID: 11400000, guid: 7fcc01bb8b1b52340a260fb8d0dff5fa, type: 2}
+  - {fileID: 11400000, guid: 031b798168ec39643b38b8a3eb9fdb2b, type: 2}
+  - {fileID: 11400000, guid: c6ec69aaf5da4b54e91b953943146a43, type: 2}
+  backgroundSpawner: {fileID: 414796374}
   cellOffsets: []
   clearBeforeSpawn: 0
   createMissingLayers: 1

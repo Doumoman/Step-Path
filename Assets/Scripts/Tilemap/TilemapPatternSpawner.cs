@@ -19,6 +19,15 @@ public class TilemapPatternSpawner : MonoBehaviour
 
     [Header("패턴 스폰")]
     public TilemapPatternAsset[] patterns;      // 여러 패턴을 넣어둔다.
+    [Header("챕터별 패턴")]
+    public TilemapPatternAsset[] stage1Patterns;
+    public TilemapPatternAsset[] stage2Patterns;
+    public TilemapPatternAsset[] stage3Patterns;
+
+    [Header("배경 스포너 참조")]
+    public BackGroundSpawner backgroundSpawner;
+    private BackGroundSpawner.Stage _appliedStage = BackGroundSpawner.Stage.S1;
+
     public Vector3Int[] cellOffsets;            // patterns와 길이 맞추면 각자 오프셋 적용
     public bool clearBeforeSpawn = false;       // 스폰 전에 싹 비우기
     public bool createMissingLayers = true;     // 패턴에 필요한 레이어 Tilemap 자동 생성
@@ -82,9 +91,14 @@ public class TilemapPatternSpawner : MonoBehaviour
 
     void Awake()
     {
+        if (backgroundSpawner != null)
+            ApplyStagePatterns(backgroundSpawner.CurrentStage);
+        else
+            patterns = stage1Patterns;
+
         if (patterns == null) patterns = new TilemapPatternAsset[0];
 
-        EnsureGridAndLayers(); // Grid/Tilemap 준비(+콜라이더 정책 적용)
+        EnsureGridAndLayers();
 
         if (useChunkStreaming)
         {
@@ -112,6 +126,15 @@ public class TilemapPatternSpawner : MonoBehaviour
 
     void Update()
     {
+        if (backgroundSpawner != null)
+        {
+            var currentStage = backgroundSpawner.CurrentStage;
+            if (currentStage != _appliedStage)
+            {
+                ApplyStagePatterns(currentStage);
+            }
+        }
+
         if (!useChunkStreaming || !_grid || !player) return;
 
         var basePattern = ChunkBasePattern;
@@ -131,7 +154,23 @@ public class TilemapPatternSpawner : MonoBehaviour
     }
 
     // ===================== 내부 구현: 공통 =====================
+    void ApplyStagePatterns(BackGroundSpawner.Stage stage)
+    {
+        switch (stage)
+        {
+            case BackGroundSpawner.Stage.S1:
+                patterns = stage1Patterns;
+                break;
+            case BackGroundSpawner.Stage.S2:
+                patterns = stage2Patterns;
+                break;
+            case BackGroundSpawner.Stage.S3:
+                patterns = stage3Patterns;
+                break;
+        }
 
+        _appliedStage = stage;
+    }
     void EnsureGridAndLayers()
     {
         // 1) GridRoot 확보(없으면 생성). Rigidbody는 옵션으로만 추가.

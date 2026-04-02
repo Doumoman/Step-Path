@@ -46,7 +46,8 @@ public class BackGroundSpawner : MonoBehaviour
     // =========================
     // 내부 상태
     // =========================
-    private enum Stage { S1, S2, S3 }
+    public enum Stage { S1, S2, S3 }
+    public Stage CurrentStage => _stage;
     private Stage _stage = Stage.S1;
 
     private bool _stage2Triggered;
