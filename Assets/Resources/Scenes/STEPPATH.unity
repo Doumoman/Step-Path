@@ -2192,6 +2192,10 @@ PrefabInstance:
       value: 1.1
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: climbCooldownSec
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: groundCheckDepth
       value: 0.1
       objectReference: {fileID: 0}
