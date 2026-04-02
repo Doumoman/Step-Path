@@ -20,6 +20,8 @@ public class BackGroundSpawner : MonoBehaviour
     [Header("Stage Switch (Player Height)")]
     [SerializeField] private float stage2StartPlayerY = 20f;
     [SerializeField] private float stage3StartPlayerY = 40f;
+    public float Stage2StartPlayerY => stage2StartPlayerY;
+    public float Stage3StartPlayerY => stage3StartPlayerY;
 
     [Header("Spawn Settings")]
     [Tooltip("첫 배경의 하단(bounds.min.y)이 위치할 월드 Y")]
