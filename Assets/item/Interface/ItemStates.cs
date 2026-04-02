@@ -377,7 +377,8 @@ public sealed class DraggingState : IItemState
                 }
                 else if(hititemName == "sprout")
                 {
-                    VineCheck(hititem);
+                    CraftCheck = true;
+                    IsPlaceable = true;
                 }
                 else
                 {
@@ -541,6 +542,7 @@ public sealed class DraggingState : IItemState
         return;
     }
     
+    /* Vine 위쪽 땅 존재여부에 따른 생성 조건 설정 함수
     void VineCheck(Collider2D hititme)
     {
         Vector3Int pos = ctx.map.WorldToCell(hititme.transform.position);
@@ -563,6 +565,7 @@ public sealed class DraggingState : IItemState
         }
         return;
     }
+    */
 }
 
 public sealed class PlacedState : IItemState
