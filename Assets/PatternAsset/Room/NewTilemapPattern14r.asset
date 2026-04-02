@@ -1,0 +1,227 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 726d6d78512866649b384ed11dc2dec7, type: 3}
+  m_Name: NewTilemapPattern14r
+  m_EditorClassIdentifier: 
+  origin: {x: -8, y: -20, z: 0}
+  size: {x: 16, y: 1, z: 1}
+  cells:
+  - layer: Ground
+    pos: {x: -8, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: -7, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: 97c77de0cf72a3643aef8c3e955f72e5, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: -2, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: 1b7a804941d089d4ab212fbc7de36fe1, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: -1, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: 0, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: 1, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: 2, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: 3, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: 4, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: c4af43f475ef39847b4da86b245f4f8e, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - layer: Ground
+    pos: {x: 5, y: -20, z: 0}
+    tile: {fileID: 11400000, guid: 97c77de0cf72a3643aef8c3e955f72e5, type: 2}
+    transform:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
