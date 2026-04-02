@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: mushroom
   rerollCost: 3
-  itemFrequency: 300
+  itemFrequency: 10
   eachLogic: {fileID: 11400000, guid: c404330bb610c1c45baf9853c89efb7b, type: 2}
   itemDelegate: {fileID: 0}
   isoriginal: 1
