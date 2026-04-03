@@ -258,9 +258,14 @@ public sealed class DraggingState : IItemState
     //배치 가능 여부 판단
     public void IsitPlaceable(ItemDataHub ctx)
     {
+        int n = 28;
         int targetLayerIndex = LayerMask.NameToLayer("item");
         int higherLayerMask = ~0 << (targetLayerIndex + 1);
         int lowerLayerMask = (1 << targetLayerIndex) - 1;
+
+        int lowerThanN = (1 << n) - 1;
+        int forGLayerMask = higherLayerMask & lowerThanN;
+
         Vector3 mouseScreenPos = Input.mousePosition;
         mouseScreenPos.z = -Camera.main.transform.position.z; // 카메라와의 거리 (보통 10)
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
@@ -295,6 +300,7 @@ public sealed class DraggingState : IItemState
         cellCenterPositemG.x -= 0.125f;
         Collider2D hitGround = Physics2D.OverlapBox(cellCenterPosGround, boxSize, 0f, LayerMask.GetMask("Ground"));
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositemG, boxSize, 0f, lowerLayerMask);
+        Collider2D forGgroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, forGLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
 
         
@@ -312,6 +318,14 @@ public sealed class DraggingState : IItemState
         }
         else name = null;
 
+        if (forGgroundCenter != null)
+        {
+            con1 = forGgroundCenter.GetComponent<ItemController>();
+            if (con1 != null) name = con1.Data.itemName;
+            else hititemName = null;
+        }
+        else hititemName = null;
+
         if (hititem != null)
         {
             con1 = hititem.GetComponent<ItemController>();
@@ -324,13 +338,13 @@ public sealed class DraggingState : IItemState
         {
             if (name == "wood" && ctx.image.Data.itemName == "wood") // 기본 땅의 경우
             {
-                if (hititem == null && hitGroundCenter == null && cellPos.y % 4 == 0)
+                if (forGgroundCenter == null && hitGroundCenter == null && cellPos.y % 4 == 0)
                 {
                     IsPlaceable = true;
                     CraftCheck = false;
                     return;
                 }
-                else if (hititem == null && hitGroundCenter != null && cellPos.y % 4 == 0)
+                else if (forGgroundCenter == null && hitGroundCenter != null && cellPos.y % 4 == 0)
                 {
                     
                     StairsCheck();
@@ -343,9 +357,9 @@ public sealed class DraggingState : IItemState
                     return;
                 }
             }
-            else
+            else // 구름
             {
-                if (hititem == null && hitGroundCenter == null && cellPos.y % 4 == 0)
+                if (forGgroundCenter == null && hitGroundCenter == null && cellPos.y % 4 == 0)
                 {
                     IsPlaceable = true;
                     CraftCheck = false;
