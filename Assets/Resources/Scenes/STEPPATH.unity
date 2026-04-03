@@ -2192,6 +2192,10 @@ PrefabInstance:
       value: 1.1
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
+      propertyPath: climbCooldownSec
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: groundCheckDepth
       value: 0.1
       objectReference: {fileID: 0}
@@ -3029,6 +3033,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7fcc01bb8b1b52340a260fb8d0dff5fa, type: 2}
   - {fileID: 11400000, guid: 031b798168ec39643b38b8a3eb9fdb2b, type: 2}
   - {fileID: 11400000, guid: c6ec69aaf5da4b54e91b953943146a43, type: 2}
+  stageChangeDelayY: 20
   backgroundSpawner: {fileID: 414796374}
   cellOffsets: []
   clearBeforeSpawn: 0

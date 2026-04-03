@@ -24,6 +24,9 @@ public class TilemapPatternSpawner : MonoBehaviour
     public TilemapPatternAsset[] stage2Patterns;
     public TilemapPatternAsset[] stage3Patterns;
 
+    [Header("타일맵 챕터 전환 지연")]
+    [SerializeField] private float stageChangeDelayY = 25f;
+
     [Header("배경 스포너 참조")]
     public BackGroundSpawner backgroundSpawner;
     private BackGroundSpawner.Stage _appliedStage = BackGroundSpawner.Stage.S1;
@@ -126,12 +129,12 @@ public class TilemapPatternSpawner : MonoBehaviour
 
     void Update()
     {
-        if (backgroundSpawner != null)
+        if (backgroundSpawner != null && player != null)
         {
-            var currentStage = backgroundSpawner.CurrentStage;
-            if (currentStage != _appliedStage)
+            var delayedStage = GetDelayedTilemapStage();
+            if (delayedStage != _appliedStage)
             {
-                ApplyStagePatterns(currentStage);
+                ApplyStagePatterns(delayedStage);
             }
         }
 
@@ -170,6 +173,21 @@ public class TilemapPatternSpawner : MonoBehaviour
         }
 
         _appliedStage = stage;
+    }
+    BackGroundSpawner.Stage GetDelayedTilemapStage()
+    {
+        if (backgroundSpawner == null || player == null)
+            return BackGroundSpawner.Stage.S1;
+
+        float y = player.position.y;
+
+        if (y >= backgroundSpawner.Stage3StartPlayerY + stageChangeDelayY)
+            return BackGroundSpawner.Stage.S3;
+
+        if (y >= backgroundSpawner.Stage2StartPlayerY + stageChangeDelayY)
+            return BackGroundSpawner.Stage.S2;
+
+        return BackGroundSpawner.Stage.S1;
     }
     void EnsureGridAndLayers()
     {
