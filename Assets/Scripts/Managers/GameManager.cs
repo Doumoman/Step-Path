@@ -62,7 +62,7 @@ public class GameManager : Singleton<GameManager>
 
     private void Update()
     {
-        if (isGameOver) return;
+        if (isGameOver || isCleared) return; // isCleared 조건 0423 추가
 
         _input.OnUpdate();  // 매 프레임 입력 업데이트
 
@@ -71,6 +71,7 @@ public class GameManager : Singleton<GameManager>
     public void ResetRunState()
     {
         isGameOver = false;
+        isCleared = false;      // 0423 추가
         currentScore = 0f;
         currentTime = maxTime;
     }
@@ -189,8 +190,26 @@ public class GameManager : Singleton<GameManager>
     public void AddScore(int amount)
     {
         currentScore += amount;
+        CheckClearCondition(currentScore); //0423 추가 - 거리 누적할 때 자동 체크
     }
+    // 0423 추가
+    private void CheckClearCondition(float distance)
+    {
+        if (isCleared || isGameOver) return;
 
+        if (distance >= goalDistance)
+        {
+            isCleared = true;
+            SaveScore();
+            OnGameClear?.Invoke();
+        }
+    }
+    // ─── ENDING (클리어 조건) ─── 0423 추가
+    private float goalDistance = 300f;
+    private bool isCleared = false;
+    public bool IsCleared => isCleared;
+
+    public Action OnGameClear;    // 클리어 이벤트 (OnGameOver와 별도)
 }
 
 
