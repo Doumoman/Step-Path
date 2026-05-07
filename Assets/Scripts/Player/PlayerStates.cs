@@ -173,8 +173,13 @@ public class PlayerRunState : IPlayerState
 
                 if (p.pendingRocketCol != null)
                 {
-                    // Destroy 방식
-                    GameObject.Destroy(p.pendingRocketCol.gameObject);
+                    Debug.Log("Rocket interaction target: " + p.pendingRocketCol.gameObject.name);
+
+                    // Destroy 대신 일단 비활성화 테스트
+                    p.pendingRocketCol.enabled = false;
+
+                    var sr = p.pendingRocketCol.GetComponentInParent<SpriteRenderer>();
+                    if (sr != null) sr.enabled = false;
 
                     p.pendingRocketCol = null;
                 }

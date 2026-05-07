@@ -172,7 +172,9 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      exclamationmark_0: -4359158167049451620
+      exclamationmark_1: -8195119462726396252
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
