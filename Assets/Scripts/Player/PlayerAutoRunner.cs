@@ -19,7 +19,8 @@ public class PlayerAutoRunner : MonoBehaviour
     public const string ANIM_STAIRCLIMB = "StairClimb";
     public const string ANIM_ROCKET = "Rocket";
     public const string ANIM_GAMEOVER = "GameOver";
-    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash, _rocketHash, _gameOverHash;
+    public const string ANIM_MEET = "Meet"; //0507 추가(엔딩)
+    private int _walkHash, _idleHash, _climbHash, _jumpHash, _fallHash, _stairclimbHash, _rocketHash, _gameOverHash, _meetHash; //0507_meetHash 추가
     private Action _onGameOverAnimationFinished;
 
     [Header("Speed By Height")]
@@ -226,6 +227,7 @@ public class PlayerAutoRunner : MonoBehaviour
         _stairclimbHash = Animator.StringToHash(ANIM_STAIRCLIMB);
         _rocketHash = Animator.StringToHash(ANIM_ROCKET);
         _gameOverHash = Animator.StringToHash(ANIM_GAMEOVER);
+        _meetHash = Animator.StringToHash(ANIM_MEET); //0507 추가
         stateMachine = new PlayerStateMachine();
     }
 
@@ -323,6 +325,7 @@ public class PlayerAutoRunner : MonoBehaviour
     public int StairClimbHash => _stairclimbHash;
     public int RocketHash => _rocketHash;
     public int GameOverHash => _gameOverHash;
+    public int MeetHash => _meetHash; //0507추가
     public Animator Animator => anim;
     #region 사다리 로직
     public bool DetectClimbableAhead(int dirSign, out Collider2D col, out float centerX, out float targetCenterY)
