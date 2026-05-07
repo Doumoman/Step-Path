@@ -41,7 +41,6 @@ public class GameManager : Singleton<GameManager>
     public bool IsGameOver => isGameOver;
     
     // ─── ENDING (클리어 조건) ─── 0423 추가
-    private float goalDistance = 2f;
     private bool isCleared = false;
     public bool IsCleared => isCleared;
 
@@ -198,19 +197,18 @@ public class GameManager : Singleton<GameManager>
     public void AddScore(int amount)
     {
         currentScore += amount;
-        CheckClearCondition(currentScore); //0423 추가 - 거리 누적할 때 자동 체크
     }
-    // 0423 추가
-    private void CheckClearCondition(float distance)
-    {
-        if (isCleared || isGameOver) return;
 
-        if (distance >= goalDistance)
-        {
-            isCleared = true;
-            SaveScore();
-            OnGameClear?.Invoke();
-        }
+    public void TriggerGameClear()
+    {
+        if (isCleared || isGameOver)
+            return;
+
+        isCleared = true;
+
+        SaveScore();
+
+        OnGameClear?.Invoke();
     }
 }
 

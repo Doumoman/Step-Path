@@ -16,6 +16,9 @@ public class TilemapPatternSpawner : MonoBehaviour
     public int randomSeed = 0;
     System.Random _rng;
     readonly Dictionary<int, int> _chunkPatternIndex = new();
+    [Header("Spawn Limit Height")]
+    [SerializeField] private bool useSpawnMaxY = true;
+    [SerializeField] private float spawnMaxY = 96f;
 
     [Header("패턴 스폰")]
     public TilemapPatternAsset[] patterns;      // 여러 패턴을 넣어둔다.
@@ -357,6 +360,10 @@ public class TilemapPatternSpawner : MonoBehaviour
         if (!fixedPattern) return;
 
         Vector3Int offset = ChunkYToCellOffset(chunkY, fixedPattern);
+
+        if (useSpawnMaxY && IsChunkAtOrAboveMaxY(offset, fixedPattern))
+            return;
+
         Spawn(fixedPattern, offset);
         _loadedChunkYs.Add(chunkY);
     }
@@ -400,10 +407,13 @@ public class TilemapPatternSpawner : MonoBehaviour
         if (!pattern) return;
 
         Vector3Int offset = ChunkYToCellOffset(chunkY, pattern);
+
+        if (useSpawnMaxY && IsChunkAtOrAboveMaxY(offset, pattern))
+            return;
+
         Spawn(pattern, offset);
         _loadedChunkYs.Add(chunkY);
     }
-
     void UnloadChunkY(int chunkY)
     {
         ClearChunkTilesY(chunkY);
@@ -447,7 +457,21 @@ public class TilemapPatternSpawner : MonoBehaviour
             0
         ) + globalCellOffset;
     }
+    bool IsChunkAtOrAboveMaxY(Vector3Int offset, TilemapPatternAsset pattern)
+    {
+        if (!_grid || !pattern)
+            return false;
 
+        Vector3Int cellMin = offset;
+        Vector3Int cellMax = offset + new Vector3Int(pattern.size.x, pattern.size.y, 0);
+
+        Vector3 worldMin = _grid.CellToWorld(cellMin);
+        Vector3 worldMax = _grid.CellToWorld(cellMax);
+
+        float chunkBottomY = Mathf.Min(worldMin.y, worldMax.y);
+
+        return chunkBottomY >= spawnMaxY;
+    }
     void ClearChunkTilesY(int chunkY)
     {
         var basePattern = ChunkBasePattern;

@@ -1,302 +1,382 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class EndingManager : MonoBehaviour
 {
     // ───────────────────────────────
+    //   엔딩 조건
+    // ───────────────────────────────
+    [Header("엔딩 조건")]
+    [SerializeField] private float endingGoalScore = 100f;
+
+    private bool endingTriggered = false;
+
+    // ───────────────────────────────
     //   연출용 오브젝트
     // ───────────────────────────────
     [Header("연출용 오브젝트")]
-    public GameObject vine;                 // 덩굴 (300m 지점 왼쪽에 배치, 비활성화 상태)
-    public GameObject silhouette;           // 주인 실루엣 (301m 타일 위에 배치, 비활성화 상태)
-    public GameObject endingTilemapPrefab;  // 301m 긴 타일맵 프리팹
-    public GameObject exclamationMark;      // 느낌표 (Player 자식, 비활성화)
+    public GameObject vine;                 // 덩굴 오브젝트
+    public GameObject silhouette;           // 주인 실루엣
+    public GameObject exclamationMark;      // 느낌표, Player 자식 권장
 
+    // ───────────────────────────────
+    //   플레이어
+    // ───────────────────────────────
     [Header("플레이어")]
-    public PlayerAutoRunner player;         // 포리 (PlayerAutoRunner 컴포넌트 직접 연결)
+    public PlayerAutoRunner player;
 
     // ───────────────────────────────
-    //   301m 타일맵 생성 위치
-    //   덩굴 꼭대기 위쪽에 배치될 위치
+    //   게임 UI
     // ───────────────────────────────
-    [Header("301m 타일맵 설정")]
-    public Vector3 endingTileSpawnPos;     // Inspector에서 직접 설정
+    [Header("게임 UI")]
+    [SerializeField] private GameObject gameplayUICanvas;
+    [SerializeField] private GameObject slotUICanvas;
 
     // ───────────────────────────────
-    //   이동 목표 지점
-    //   덩굴 아래/위, 주인 위치는 오브젝트 Transform에서 가져오지만
-    //   세밀한 보정이 필요하면 여기서 오프셋 조절
+    //   엔딩 고정 좌표
+    // ───────────────────────────────
+    [Header("엔딩 고정 좌표")]
+    [SerializeField] private float endingLockedY = 96.44f;
+    [SerializeField] private float vineX = -1f;
+    [SerializeField] private float vineTopY = 97.44f;
+    [SerializeField] private float meetTargetX = 1.25f;
+    // ───────────────────────────────
+    //   이동 설정
     // ───────────────────────────────
     [Header("이동 설정")]
-    public float vineClimbOffsetY = 5f;     // 덩굴 아래에서 위까지의 높이 (월드 유닛)
-    public float walkSpeed = 2f;            // 주인에게 걸어가는 속도 (월드 유닛/초)
-    public float climbSpeed = 1.5f;         // 덩굴 올라가는 속도 (월드 유닛/초)
+    public float walkSpeed = 2f;
+    public float climbSpeed = 1.5f;
 
     // ───────────────────────────────
-    //   UI
+    //   엔딩 UI
     // ───────────────────────────────
-    [Header("UI")]
-    public CanvasGroup endingIllust;        // 엔딩 일러스트 (소녀+포리)
-    public CanvasGroup fadePanel;           // 검정 페이드 패널
-    public CanvasGroup thankYouText;        // "플레이해주셔서 감사합니다!"
-    
+    [Header("엔딩 UI")]
+    public CanvasGroup endingIllust;
+    public CanvasGroup fadePanel;
+
     [Header("크레딧 슬라이드")]
-    public Image[] creditSlides;              // 6개의 크레딧 이미지
-    public float slideDisplayTime = 1f;       // 각 슬라이드 표시 시간
-    public float slideTransitionTime = 0.5f;  // 전환(슬라이드) 시간
-    
+    public Image[] creditSlides;
+    public float slideDisplayTime = 1f;
+    public float slideTransitionTime = 0.5f;
 
+    [Header("추가 엔딩 시퀀스")]
+    [SerializeField] private GameObject endingSequenceFirstSprite;
+    [SerializeField] private Transform endingTapeRoot;
+    [SerializeField] private GameObject[] endingTapeSprites;
+
+    [SerializeField] private float firstSpriteFadeDuration = 1f;
+    [SerializeField] private float spriteFadeDuration = 0.5f;
+
+    [SerializeField] private float tapeSpriteSpacingY = 7.1f;
+    [SerializeField] private int tapeStackDirectionY = -1;
+    [SerializeField] private int tapeMoveDirectionY = 1;
+
+    [SerializeField] private float tapeMoveAmountY = 7.1f;
+    [SerializeField] private float tapeMoveDuration = 1f;
+    [SerializeField] private float tapeHoldDuration = 3f;
+    [SerializeField] private float tapeFadeDuration = 0.5f;
+
+    [SerializeField] private AnimationCurve tapeMoveCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     // ───────────────────────────────
     //   연출 타이밍 설정
     // ───────────────────────────────
     [Header("연출 설정")]
     public float illustFadeDuration = 2f;
     public float illustHoldDuration = 4f;
-    public float thankYouFadeDuration = 2f;
-
-    [Header("사운드")]
-    public AudioClip BGM_Ending;
-
 
     // ───────────────────────────────
     //   GameManager 이벤트 연결
-    //   OnGameClear 발동 시 자동으로 엔딩 시작  → StartEnding 자동 호출
     // ───────────────────────────────
-    void OnEnable()
+    private void OnEnable()
     {
-        GameManager.Instance.OnGameClear += StartEnding;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameClear += StartEnding;
+        }
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        GameManager.Instance.OnGameClear -= StartEnding;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameClear -= StartEnding;
+        }
     }
 
+    private void Update()
+    {
+        if (endingTriggered)
+            return;
+
+        if (GameManager.Instance == null)
+            return;
+
+        if (GameManager.Instance.IsGameOver || GameManager.Instance.IsCleared)
+            return;
+
+        if (GameManager.Instance.GetScore() >= endingGoalScore)
+        {
+            endingTriggered = true;
+            GameManager.Instance.TriggerGameClear();
+        }
+    }
 
     // ───────────────────────────────
     //   엔딩 시작 진입점
     // ───────────────────────────────
     public void StartEnding()
     {
-        Debug.Log("포리 위치: " + player.transform.position);
+        if (player == null)
+        {
+            Debug.LogWarning("EndingManager: player 참조가 없습니다.");
+            return;
+        }
+
+        Debug.Log("엔딩 시작 / 포리 위치: " + player.transform.position);
+
+        StopAllCoroutines();
         StartCoroutine(EndingSequenceRoutine());
     }
-
 
     // ───────────────────────────────
     //   엔딩 시퀀스 전체 흐름
     // ───────────────────────────────
-    IEnumerator EndingSequenceRoutine()
+    private IEnumerator EndingSequenceRoutine()
     {
         // ══════════════════════════════
-        //  1단계: 조작 중지 + 환경 정리
+        //  1단계: 플레이어 상태 정지 + 환경 정리
         // ══════════════════════════════
 
-        // 포리의 자동 달리기 & 상태머신 비활성화
-        // enabled = false로 Update 루프 자체를 멈춤
-        player.enabled = false;
+        player.EnterEndingState();
 
-        // 포리의 Rigidbody2D 속도도 제거 (있을 경우)
-        var rb = player.GetComponent<Rigidbody2D>();
+        if (gameplayUICanvas != null)
+        {
+            gameplayUICanvas.SetActive(false);
+            slotUICanvas.SetActive(false);
+        }
+
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
             rb.bodyType = RigidbodyType2D.Kinematic;
         }
 
-        // 몬스터 스포너 중지 (더 이상 몬스터 생성 안 함)
-        var spawner = FindObjectOfType<MonsterGridSpawner>();
-        if (spawner != null) spawner.enabled = false;
+        MonsterGridSpawner spawner = FindObjectOfType<MonsterGridSpawner>();
+        if (spawner != null)
+        {
+            spawner.enabled = false;
+        }
 
-        // BGM 전환 
-        SoundManager.Instance.PlayBgm("Ending");
-
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayBgm("Ending");
+        }
 
         // ══════════════════════════════
-        //  2단계: 덩굴 활성화 + 포리가 덩굴로 이동
+        //  2단계: 플레이어 Y를 96.44로 강제 고정
         // ══════════════════════════════
 
-        // 300m 지점 왼쪽에 덩굴 표시
-        vine.SetActive(true);
+        Vector3 startPos = player.transform.position;
+        startPos.y = endingLockedY;
+        player.transform.position = startPos;
 
-        // 포리 방향을 왼쪽(덩굴 쪽)으로 전환
-        player.dir = -1;
-        player.Sprite.flipX = false;
+        player.vyPixels = 0f;
+        player.pixelAccum = Vector2.zero;
+        player.onGround = false;
 
-        // 걷기 애니메이션 재생
+        // ══════════════════════════════
+        //  3단계: 덩굴 활성화 + x = -1, y = 96.44로 이동
+        // ══════════════════════════════
+
+        if (vine != null)
+        {
+            vine.SetActive(true);
+        }
+
+        player.SetFacing(-1);
         player.PlayAnim(player.WalkHash);
 
-        // 덩굴 아래쪽까지 걸어감
-        player.PlayAnim(player.WalkHash);
-        Vector3 vineBottom = vine.transform.position;
-        yield return StartCoroutine(MovePlayerTo(vineBottom, walkSpeed));
+        yield return StartCoroutine(
+            MovePlayerXToWithFixedY(vineX, endingLockedY, walkSpeed)
+        );
 
+        // 정확히 덩굴 아래 위치로 고정
+        Vector3 vineBottom = player.transform.position;
+        vineBottom.x = vineX;
+        vineBottom.y = endingLockedY;
+        player.transform.position = vineBottom;
 
         // ══════════════════════════════
-        //  3단계: 301m 타일맵 생성 + 주인 배치
+        //  4단계: Climb 애니메이션 + y = 97.44까지 상승
         // ══════════════════════════════
 
-        // 완전한 형태의 긴 타일맵을 덩굴 위에 생성
-        Instantiate(endingTilemapPrefab, endingTileSpawnPos, Quaternion.identity);
-
-        // 주인 실루엣 활성화
-        silhouette.SetActive(true);
-        
-        // ══════════════════════════════
-        //  4단계: 덩굴 타고 올라감
-        // ══════════════════════════════
-
-        // 올라가기 애니메이션으로 전환
         player.PlayAnim(player.ClimbHash);
 
-        // 덩굴 꼭대기까지 위로 이동
-        Vector3 vineTop = vineBottom + Vector3.up * vineClimbOffsetY;
-        yield return StartCoroutine(MovePlayerTo(vineTop, climbSpeed));
-        
+        yield return StartCoroutine(
+            MovePlayerYToWithFixedX(vineX, vineTopY, climbSpeed)
+        );
+
         // ══════════════════════════════
-        //  5단계: 오른쪽 바라보기 + Idle(흔들기) + 느낌표
+        //  5단계: 실루엣 활성화
         // ══════════════════════════════
- 
-        // 오른쪽(주인 쪽) 바라보기
-        player.dir = 1;
-        player.Sprite.flipX = true;
- 
-        // Idle 스프라이트 애니메이션 재생 (몸 흔들기)
+
+        if (silhouette != null)
+        {
+            silhouette.SetActive(true);
+        }
+
+        // ══════════════════════════════
+        //  6단계: 오른쪽 바라보기 + Idle + 느낌표
+        // ══════════════════════════════
+
+        player.SetFacing(1);
         player.PlayAnim(player.IdleHash);
- 
-        // 느낌표 등장
-        exclamationMark.SetActive(true);
- 
-        // 1초 유지
+
+        if (exclamationMark != null)
+        {
+            exclamationMark.SetActive(true);
+        }
+
         yield return new WaitForSeconds(1f);
- 
-        // 느낌표 사라짐
-        exclamationMark.SetActive(false);
-        
+
+        if (exclamationMark != null)
+        {
+            exclamationMark.SetActive(false);
+        }
+
         // ══════════════════════════════
-        //  6단계: 주인에게 달려감 (Jump 스프라이트 애니메이션)
+        //  7단계: 실루엣으로 이동
         // ══════════════════════════════
- 
-        // Jump 스프라이트 애니메이션 재생 (달리기 동작)
+
         player.PlayAnim(player.JumpHash);
- 
-        // 주인 위치까지 이동
-        Vector3 masterPos = silhouette.transform.position;
-        yield return StartCoroutine(MovePlayerTo(masterPos, walkSpeed));
 
+        yield return StartCoroutine(
+            MovePlayerXToWithFixedY(meetTargetX, vineTopY, walkSpeed)
+        );
 
         // ══════════════════════════════
-        //  7단계: 만남 연출 (Scale 축소 + Meet 스프라이트 애니메이션)
+        //  8단계: 만남 연출
         // ══════════════════════════════
 
-        // Scale 0.6으로 축소
-        player.transform.localScale = new Vector3(0.6f, 0.6f, player.transform.localScale.z);
- 
-        // Meet 스프라이트 애니메이션 재생 (만남 + 꼬리 흔들기)
+        player.SetFacing(-1);
+        player.transform.localScale = new Vector3(
+            0.2f,
+            0.2f,
+            player.transform.localScale.z
+        );
+
         player.PlayAnim(player.MeetHash);
- 
-        // 꼬리 흔들기 재생 시간 대기
+
         yield return new WaitForSeconds(2f);
-        
-        // 마지막 스프라이트 유지한 채 1초 추가 대기
         yield return new WaitForSeconds(1f);
 
-
-
         // ══════════════════════════════
-        //  8단계: 페이드아웃 → 엔딩 일러스트
+        //  9단계: 페이드아웃 → 엔딩 일러스트
         // ══════════════════════════════
 
-        // 화면을 검정으로 덮음
+        // 추가 엔딩 시퀀스 실행
+        yield return StartCoroutine(PlayAdditionalEndingSequence());
+
+// 이후 기존 페이드아웃
         yield return StartCoroutine(Fade(fadePanel, 0f, 1f, 1f));
 
-        // 검정 화면인 동안 게임 오브젝트 숨김
-        vine.SetActive(false);
-        silhouette.SetActive(false);
-        player.gameObject.SetActive(false);
-
-        // 일러스트를 투명 상태로 활성화
-        endingIllust.gameObject.SetActive(true);
-        endingIllust.alpha = 0f;
-
-        // 검정 화면 걷어냄
-        yield return StartCoroutine(Fade(fadePanel, 1f, 0f, 1f));
-
-        // 일러스트를 서서히 보여줌
-        yield return StartCoroutine(Fade(endingIllust, 0f, 1f, illustFadeDuration));
-
-        // 일러스트 감상 시간
-        yield return new WaitForSeconds(illustHoldDuration);
-
-
-        // ══════════════════════════════
-        //  9단계: 크레딧 스크롤
-        // ══════════════════════════════
-
-        // 일러스트 페이드아웃
-        yield return StartCoroutine(Fade(endingIllust, 1f, 0f, 1f));
-
-        // 크레딧 슬라이드쇼 재생
-        yield return StartCoroutine(PlayCreditSlides());
-        
-
-        // ══════════════════════════════
-        //  10단계: 마무리
-        // ══════════════════════════════
-
-        // 최종 페이드아웃
-        yield return StartCoroutine(Fade(fadePanel, 0f, 1f, 2f));
-
-        // 타이틀 씬으로 (씬 이름에 맞게 수정)
-        // SceneManager.LoadScene("TitleScene");
+        yield return new WaitForSeconds(10f);
+        SceneManager.LoadScene("Main");
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayBgm("Main");
+        }
     }
 
-
     // ───────────────────────────────
-    //   포리 이동 함수
-    //   PlayerAutoRunner의 픽셀 스냅 방식과 동일하게
-    //   Transform.position을 직접 이동
-    //   MoveTowards로 목표 지점까지 부드럽게 이동
+    //   X축 이동 + Y축 완전 고정
     // ───────────────────────────────
-    IEnumerator MovePlayerTo(Vector3 target, float speed)
+    private IEnumerator MovePlayerXToWithFixedY(float targetX, float fixedY, float speed)
     {
-        // 픽셀 단위 스냅을 위한 값
-        float step = player.unitPerPixel;
-
-        while (Vector3.Distance(player.transform.position, target) > step)
+        while (Mathf.Abs(player.transform.position.x - targetX) > 0.001f)
         {
-            // 목표를 향해 일정 속도로 이동
+            Vector3 pos = player.transform.position;
+
+            pos.x = Mathf.MoveTowards(
+                pos.x,
+                targetX,
+                speed * Time.deltaTime
+            );
+
+            // Y는 무조건 고정
+            pos.y = fixedY;
+
+            player.transform.position = pos;
+
+            yield return null;
+        }
+
+        Vector3 finalPos = player.transform.position;
+        finalPos.x = targetX;
+        finalPos.y = fixedY;
+        player.transform.position = finalPos;
+    }
+    // ───────────────────────────────
+    //   Y축 이동 + X축 완전 고정
+    // ───────────────────────────────
+    private IEnumerator MovePlayerYToWithFixedX(float fixedX, float targetY, float speed)
+    {
+        while (Mathf.Abs(player.transform.position.y - targetY) > 0.001f)
+        {
+            Vector3 pos = player.transform.position;
+
+            // X는 무조건 고정
+            pos.x = fixedX;
+
+            pos.y = Mathf.MoveTowards(
+                pos.y,
+                targetY,
+                speed * Time.deltaTime
+            );
+
+            player.transform.position = pos;
+
+            yield return null;
+        }
+
+        Vector3 finalPos = player.transform.position;
+        finalPos.x = fixedX;
+        finalPos.y = targetY;
+        player.transform.position = finalPos;
+    }
+
+    // ───────────────────────────────
+    //   일반 목표 위치 이동
+    // ───────────────────────────────
+    private IEnumerator MovePlayerTo(Vector3 target, float speed)
+    {
+        while (Vector3.Distance(player.transform.position, target) > 0.001f)
+        {
             player.transform.position = Vector3.MoveTowards(
                 player.transform.position,
                 target,
                 speed * Time.deltaTime
             );
 
-            // 픽셀 스냅 (기존 게임과 동일한 느낌 유지)
-            Vector3 pos = player.transform.position;
-            pos.x = Mathf.Round(pos.x / step) * step;
-            pos.y = Mathf.Round(pos.y / step) * step;
-            player.transform.position = pos;
-
             yield return null;
         }
 
-        // 최종 위치 정확히 맞춤
         player.transform.position = target;
     }
 
-
     // ───────────────────────────────
-    //   공용 페이드 함수
-    //   CanvasGroup alpha를 from → to로 duration초에 걸쳐 변경
+    //   CanvasGroup 페이드
     // ───────────────────────────────
-    IEnumerator Fade(CanvasGroup cg, float from, float to, float duration)
+    private IEnumerator Fade(CanvasGroup cg, float from, float to, float duration)
     {
-        if (cg == null) yield break;
+        if (cg == null)
+            yield break;
 
         cg.gameObject.SetActive(true);
+
         float elapsed = 0f;
 
         while (elapsed < duration)
@@ -309,52 +389,209 @@ public class EndingManager : MonoBehaviour
         cg.alpha = to;
     }
 
-
     // ───────────────────────────────
-    //   크레딧 스크롤 함수
+    //   크레딧 슬라이드
     // ───────────────────────────────
-    
-    IEnumerator PlayCreditSlides()
+    private IEnumerator PlayCreditSlides()
     {
-        // 모든 슬라이드 초기화
-        foreach (var slide in creditSlides)
+        if (creditSlides == null || creditSlides.Length == 0)
+            yield break;
+
+        foreach (Image slide in creditSlides)
         {
+            if (slide == null)
+                continue;
+
             slide.gameObject.SetActive(false);
             slide.color = new Color(1f, 1f, 1f, 0f);
         }
 
         for (int i = 0; i < creditSlides.Length; i++)
         {
-            creditSlides[i].gameObject.SetActive(true);
+            Image slide = creditSlides[i];
 
-            // 페이드인
+            if (slide == null)
+                continue;
+
+            slide.gameObject.SetActive(true);
+
             float elapsed = 0f;
+
             while (elapsed < slideTransitionTime)
             {
                 elapsed += Time.deltaTime;
                 float a = Mathf.Lerp(0f, 1f, elapsed / slideTransitionTime);
-                creditSlides[i].color = new Color(1f, 1f, 1f, a);
+                slide.color = new Color(1f, 1f, 1f, a);
                 yield return null;
             }
-            creditSlides[i].color = new Color(1f, 1f, 1f, 1f);
 
-            // 표시 유지
+            slide.color = new Color(1f, 1f, 1f, 1f);
+
             yield return new WaitForSeconds(slideDisplayTime);
 
-            // 마지막이 아니면 페이드아웃
             if (i < creditSlides.Length - 1)
             {
                 elapsed = 0f;
+
                 while (elapsed < slideTransitionTime)
                 {
                     elapsed += Time.deltaTime;
                     float a = Mathf.Lerp(1f, 0f, elapsed / slideTransitionTime);
-                    creditSlides[i].color = new Color(1f, 1f, 1f, a);
+                    slide.color = new Color(1f, 1f, 1f, a);
                     yield return null;
                 }
-                creditSlides[i].color = new Color(1f, 1f, 1f, 0f);
-                creditSlides[i].gameObject.SetActive(false);
+
+                slide.color = new Color(1f, 1f, 1f, 0f);
+                slide.gameObject.SetActive(false);
             }
         }
     }
+   private IEnumerator PlayAdditionalEndingSequence()
+{
+    // 1. 첫 번째 배경/연출 스프라이트 페이드인
+    if (endingSequenceFirstSprite != null)
+    {
+        endingSequenceFirstSprite.SetActive(true);
+        SetObjectAlpha(endingSequenceFirstSprite, 0f);
+
+        yield return StartCoroutine(
+            FadeObjectAlpha(endingSequenceFirstSprite, 0f, 1f, firstSpriteFadeDuration)
+        );
+    }
+    PrepareEndingTapeSprites();
+    yield return new WaitForSeconds(5f);
+    if (endingSequenceFirstSprite != null)
+    {
+        yield return StartCoroutine(
+            FadeObjectAlpha(endingSequenceFirstSprite, 1f, 0f, firstSpriteFadeDuration)
+        );
+        endingSequenceFirstSprite.SetActive(false);
+    }
+    if (endingTapeRoot != null && endingTapeSprites != null && endingTapeSprites.Length > 0)
+    {
+
+        yield return StartCoroutine(PlayEndingTapeSequence());
+    }
+}
+private void PrepareEndingTapeSprites()
+{
+    if (endingTapeRoot == null || endingTapeSprites == null)
+        return;
+
+    endingTapeRoot.gameObject.SetActive(true);
+
+    for (int i = 0; i < endingTapeSprites.Length; i++)
+    {
+        GameObject obj = endingTapeSprites[i];
+
+        if (obj == null)
+            continue;
+
+        obj.SetActive(true);
+        SetObjectAlpha(obj, 1f);
+
+        obj.transform.SetParent(endingTapeRoot, false);
+
+        Vector3 localPos = Vector3.zero;
+        localPos.x = 0f;
+        localPos.y = i * tapeSpriteSpacingY * tapeStackDirectionY;
+        localPos.z = 0f;
+
+        obj.transform.localPosition = localPos;
+    }
+}
+private void SetObjectAlpha(GameObject obj, float alpha)
+{
+    if (obj == null)
+        return;
+
+    CanvasGroup canvasGroup = obj.GetComponent<CanvasGroup>();
+    if (canvasGroup != null)
+    {
+        canvasGroup.alpha = alpha;
+    }
+
+    Image image = obj.GetComponent<Image>();
+    if (image != null)
+    {
+        Color c = image.color;
+        c.a = alpha;
+        image.color = c;
+    }
+
+    SpriteRenderer spriteRenderer = obj.GetComponent<SpriteRenderer>();
+    if (spriteRenderer != null)
+    {
+        Color c = spriteRenderer.color;
+        c.a = alpha;
+        spriteRenderer.color = c;
+    }
+}
+private IEnumerator FadeObjectAlpha(GameObject obj, float from, float to, float duration)
+{
+    if (obj == null)
+        yield break;
+
+    obj.SetActive(true);
+
+    float elapsed = 0f;
+
+    while (elapsed < duration)
+    {
+        elapsed += Time.deltaTime;
+
+        float t = Mathf.Clamp01(elapsed / duration);
+        float alpha = Mathf.Lerp(from, to, t);
+
+        SetObjectAlpha(obj, alpha);
+
+        yield return null;
+    }
+
+    SetObjectAlpha(obj, to);
+}
+private IEnumerator PlayEndingTapeSequence()
+{
+    if (endingTapeRoot == null || endingTapeSprites == null || endingTapeSprites.Length == 0)
+        yield break;
+
+    Vector3 rootStartPos = endingTapeRoot.position;
+
+    // Element 0 먼저 보여주고 정지
+    endingTapeRoot.position = rootStartPos;
+    yield return new WaitForSeconds(tapeHoldDuration);
+
+    // Element 1, 2, 3... 순서대로 보여주기
+    for (int i = 1; i < endingTapeSprites.Length; i++)
+    {
+        Vector3 from = endingTapeRoot.position;
+
+        Vector3 to = rootStartPos
+            + Vector3.up * (tapeMoveAmountY * tapeMoveDirectionY * i);
+
+        yield return StartCoroutine(
+            MoveTapeRoot(from, to, tapeMoveDuration)
+        );
+
+        yield return new WaitForSeconds(tapeHoldDuration);
+    }
+}
+private IEnumerator MoveTapeRoot(Vector3 from, Vector3 to, float duration)
+{
+    float elapsed = 0f;
+
+    while (elapsed < duration)
+    {
+        elapsed += Time.deltaTime;
+
+        float t = Mathf.Clamp01(elapsed / duration);
+        float easedT = tapeMoveCurve.Evaluate(t);
+
+        endingTapeRoot.position = Vector3.Lerp(from, to, easedT);
+
+        yield return null;
+    }
+
+    endingTapeRoot.position = to;
+}
 }

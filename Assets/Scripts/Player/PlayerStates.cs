@@ -626,3 +626,47 @@ public class PlayerGameOverState : IPlayerState
         // 보통 게임오버는 Exit 안 함
     }
 }
+public class PlayerEndingState : IPlayerState
+{
+    private readonly PlayerAutoRunner p;
+    private readonly PlayerStateMachine fsm;
+
+    public PlayerEndingState(PlayerAutoRunner player, PlayerStateMachine machine)
+    {
+        p = player;
+        fsm = machine;
+    }
+
+    public void Enter()
+    {
+        // 기존 이동 관련 값 초기화
+        p.vyPixels = 0f;
+        p.pixelAccum = Vector2.zero;
+        p.onGround = false;
+        p.lastHorizontalBlocked = false;
+
+        // 예약된 상호작용 제거
+        p.pendingClimb = false;
+        p.pendingMushroom = false;
+        p.pendingStairs = false;
+        p.pendingRocket = false;
+        p.pendingRocketCol = null;
+
+        // 애니메이션은 멈추지 않음
+        p.PauseAnim(false);
+
+        // 기본은 Idle
+        p.PlayAnim(p.IdleHash);
+    }
+
+    public void Tick()
+    {
+        // 의도적으로 아무것도 안 함.
+        // 이동, 낙하, 충돌, 자동달리기, 로켓, 사다리 처리 전부 중단.
+        // 엔딩 중 위치 이동은 EndingManager가 transform.position으로 직접 담당.
+    }
+
+    public void Exit()
+    {
+    }
+}

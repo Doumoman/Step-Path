@@ -9,6 +9,10 @@ public class MonsterGridSpawner : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private GameObject[] monsterPrefabs;
 
+    [Header("Spawn Limit Height")]
+    [SerializeField] private bool useSpawnMaxY = true;
+    [SerializeField] private float spawnMaxY = 96f;
+
     [Header("Optional Block Check")]
     [SerializeField] private Tilemap groundTilemap; // 발판/벽 체크용 (없으면 비워둬도 됨)
 
@@ -108,6 +112,12 @@ public class MonsterGridSpawner : MonoBehaviour
         if (_bestPlayerY < spawnUnlockY)
             return;
 
+        // rowY는 그리드 셀 좌표이므로 실제 월드 Y로 변환해서 검사
+        Vector3 rowWorldPos = grid.GetCellCenterWorld(new Vector3Int(playerCell.x, rowY, 0));
+
+        if (useSpawnMaxY && rowWorldPos.y >= spawnMaxY)
+            return;
+
         float currentChance = GetCurrentSpawnChance();
 
         if (Random.value > currentChance)
@@ -144,6 +154,11 @@ public class MonsterGridSpawner : MonoBehaviour
         int spawnX = Random.Range(minX, maxX + 1);
         Vector3Int spawnCell = new Vector3Int(spawnX, rowY, 0) + (Vector3Int)spawnOffset;
 
+        Vector3 spawnWorldPos = grid.GetCellCenterWorld(spawnCell);
+
+        if (useSpawnMaxY && spawnWorldPos.y >= spawnMaxY)
+            return;
+            
         if (!CanSpawnAt(spawnCell))
             return;
 

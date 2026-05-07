@@ -258,6 +258,15 @@ public class PlayerAutoRunner : MonoBehaviour
         if (sr && !overrideFlip)
             sr.flipX = (dir > 0);
     }
+    public void SetFacing(int dirSign)
+    {
+        dir = dirSign >= 0 ? 1 : -1;
+
+        if (sr != null)
+        {
+            sr.flipX = dir > 0;
+        }
+    }
     public void ChangeState(IPlayerState newState)
     {
         stateMachine.ChangeState(newState);
@@ -267,6 +276,10 @@ public class PlayerAutoRunner : MonoBehaviour
         {
             CameraMover.Instance.OnPlayerStateChanged(newState);
         }
+    }
+    public void EnterEndingState()
+    {
+        ChangeState(new PlayerEndingState(this, stateMachine));
     }
     public void SetGameOver(Action onAnimationFinished = null)
     {
