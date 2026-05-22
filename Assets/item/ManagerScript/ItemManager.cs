@@ -22,13 +22,16 @@ public class ItemManager : MonoBehaviour
     [SerializeField] Tilemap groundtilemap;
     [SerializeField] Button rerollbutton;
     [SerializeField] itemSound soundData;
-    [SerializeField] public ButtonHandler buttonhandler;
+    [SerializeField] public ButtonHandler[] dropButtonHandlers;
     [SerializeField] public Transform itemContainer;
     [SerializeField] public Transform imageContainer;
     [SerializeField] public Transform Ground_item;
     [SerializeField] public TileBase groundTile;
     [SerializeField] public GameObject player;
     [SerializeField] public Image targetimage;
+    [SerializeField] private UIsPause pausePopup;
+    [Header("아이템 UI 루트")]
+    [SerializeField] private CanvasGroup itemUICanvasGroup;
     public List<GameObject> itemPrefabs;
     public List<GameObject> itemimages;
     public List<GameObject> Crafteditems;
@@ -50,7 +53,7 @@ public class ItemManager : MonoBehaviour
         gridData.currentGrid = grid;
         gridData.ground = groundtilemap;
         gridData.gTile = groundTile;
-        gridData.buttonHandler = buttonhandler;
+        gridData.dropButtonHandlers = dropButtonHandlers;
 
     }
 
@@ -127,6 +130,45 @@ public class ItemManager : MonoBehaviour
         SpawnRandomItemImage();
         SoundManager.Instance.PlayItemSound("Slot_Replace");
         StartCoroutine(Rerolltime(3f));
+    }
+    public void OpenPauseByDrop()
+    {
+        // 현재 드래그 중인 아이템을 원래 슬롯으로 복귀
+        ReturnCurrentItemToSlot();
+
+        // 아이템 입력만 잠금
+        SetItemInputLocked(true);
+
+        if (pausePopup != null)
+        {
+            pausePopup.OpenPause();
+        }
+        else
+        {
+            Debug.LogWarning("pausePopup이 연결되지 않았습니다.");
+        }
+    }
+
+    public void ReturnCurrentItemToSlot()
+    {
+        if (currentctx == null) return;
+
+        currentctx.sm.ChangeState(new BackgroundState(currentctx, currentctx.sm, currentctx.pd));
+
+        if (currentctx.image != null && currentctx.itemContainerfolder != null)
+        {
+            currentctx.image.transform.SetParent(currentctx.itemContainerfolder.transform, false);
+        }
+    }
+    public void SetItemInputLocked(bool locked)
+    {
+        gridData.itemInputLocked = locked;
+
+        if (itemUICanvasGroup != null)
+        {
+            itemUICanvasGroup.interactable = !locked;
+            itemUICanvasGroup.blocksRaycasts = !locked;
+        }
     }
 
     IEnumerator Rerolltime(float rerollcost)

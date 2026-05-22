@@ -4,6 +4,9 @@ using UnityEngine.SceneManagement;
 
 public class UIsSceneMain : MonoBehaviour
 {
+    [Header("Scene")]
+    private string loadingSceneName = "LoadingScene";
+    private string gameplaySceneName = "STEPPATH";
     public float soundEffectDelayTime = 0.5f; // 효과음 후 씬 전환까지 대기 시간
     public GameObject settingsPopup; // 설정 팝업
 
@@ -13,7 +16,7 @@ public class UIsSceneMain : MonoBehaviour
     public void OnClickPlayButton()
     {
         Debug.Log("Play 버튼 클릭됨");
-        StartCoroutine(LoadSceneInGame());
+        StartCoroutine(StartGameRoutine());
     }
 
     public void OpenSettings()
@@ -31,11 +34,16 @@ public class UIsSceneMain : MonoBehaviour
     // =====================
     // 씬 전환
     // =====================
-    private IEnumerator LoadSceneInGame()
+    private IEnumerator StartGameRoutine()
     {
+        Time.timeScale = 1f;
+
         SoundManager.Instance.EffectSoundOn(SoundManager.SFXType.Start_Game);
-        yield return new WaitForSeconds(soundEffectDelayTime);
-        SceneManager.LoadScene("STEPPATH");
+
+        yield return new WaitForSecondsRealtime(soundEffectDelayTime);
+
+        // 이전 플레이 기록 초기화 + 로딩씬 경유 + 게임씬 진입
+        GameManager.Instance.RestartFromClean(gameplaySceneName, loadingSceneName);
     }
 
     // =====================

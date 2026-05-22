@@ -267,7 +267,7 @@ public class EndingManager : MonoBehaviour
             0.2f,
             player.transform.localScale.z
         );
-
+        silhouette.SetActive(false);
         player.PlayAnim(player.MeetHash);
 
         yield return new WaitForSeconds(2f);

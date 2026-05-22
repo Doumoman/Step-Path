@@ -1,39 +1,45 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class PlacementSystem : MonoBehaviour
 {
-    [Header("ÇÊ¼ö")]
+    [Header("í•„ìˆ˜")]
     public Grid grid;
     public Camera worldCamera;
     public BuildBlocker blocker;
 
-    [Header("¼±ÅÃ")]
-    public Transform placedRoot; // ¼³Ä¡µÈ ¿ÀºêÁ§Æ®¸¦ Á¤¸®ÇØ¼­ ³ÖÀ» ºÎ¸ğ
+    [Header("ì„ íƒ")]
+    public Transform placedRoot; // ì„¤ì¹˜ëœ ì˜¤ë¸Œì íŠ¸ë¥¼ ì •ë¦¬í•´ì„œ ë„£ì„ ë¶€ëª¨
 
-    // UI°¡ µå·¡±× ³¡¿¡¼­ È£Ãâ
-    public bool TryPlace(GameObject placeablePrefab, Vector3 screenPosition, out GameObject instance)
+    [Header("UI ì°¨ë‹¨ íŒì •")]
+    [SerializeField] private string placementUiTag = "PlacementUI";
+
+    public bool TryPlace(GameObject placeablePrefab, PointerEventData eventData, out GameObject instance)
     {
         instance = null;
 
-        // UI À§¿¡¼­ µå¶øµÇ¸é ¹«½Ã
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        if (placeablePrefab == null) return false;
+        if (grid == null) return false;
+        if (worldCamera == null) return false;
+
+        // ì§„ì§œ ë²„íŠ¼/íŒì—… ê°™ì€ UI ìœ„ì— ë“œëí•œ ê²½ìš°ë§Œ ë°°ì¹˜ ê¸ˆì§€
+        if (IsPointerOverBlockingUI(eventData))
             return false;
 
-        // È­¸éÁÂÇ¥ ¡æ ¿ùµå ¡æ ¼¿
+        Vector3 screenPosition = eventData.position;
+
         var worldPos = worldCamera.ScreenToWorldPoint(screenPosition);
         worldPos.z = 0f;
+
         var cell = grid.WorldToCell(worldPos);
 
-        // ÇÁ¸®ÆÕÀÇ ¼¿ Å©±â
         var placeable = placeablePrefab.GetComponent<Placeable>();
         var size = placeable ? placeable.size : new Vector2Int(1, 1);
 
-        // ±İÁö Ã¼Å©
         if (blocker != null && blocker.IsBlocked(cell, size))
             return false;
 
-        // ½ºÆù
         var spawnPos = grid.GetCellCenterWorld(cell);
         instance = Instantiate(placeablePrefab, spawnPos, Quaternion.identity, placedRoot ? placedRoot : null);
 
@@ -43,8 +49,33 @@ public class PlacementSystem : MonoBehaviour
         if (placeable && !string.IsNullOrEmpty(placeable.placedLayerName))
             instance.layer = LayerMask.NameToLayer(placeable.placedLayerName);
 
-        // Á¡À¯ Ç¥½Ã
         blocker?.MarkOccupied(cell, size);
         return true;
+    }
+
+    private bool IsPointerOverBlockingUI(PointerEventData eventData)
+    {
+        if (EventSystem.current == null) return false;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (var result in results)
+        {
+            GameObject go = result.gameObject;
+            if (go == null) continue;
+
+            // ë°°ì¹˜ìš© ì•„ì´í…œ UIëŠ” ë¬´ì‹œ
+            if (go.CompareTag(placementUiTag))
+                continue;
+
+            if (go.GetComponentInParent<DraggableUIItem>() != null)
+                continue;
+
+            // ê·¸ ì™¸ Button, Popup, Panel, Slider ë“±ì€ ë°°ì¹˜ ì°¨ë‹¨ UIë¡œ ë´„
+            return true;
+        }
+
+        return false;
     }
 }

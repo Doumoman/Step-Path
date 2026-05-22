@@ -8,6 +8,7 @@ public class UIsPause : MonoBehaviour
     [SerializeField] private Button HomeButton;
     [SerializeField] private Button RestartButton;
     [SerializeField] private Button ResumeButton;
+    [SerializeField] private ItemManager itemManager;
 
     private bool _isLoading;
 
@@ -33,15 +34,37 @@ public class UIsPause : MonoBehaviour
         }
     }
 
+    public void OpenPause()
+    {
+        if (_isLoading) return;
+
+        if (itemManager != null)
+            itemManager.SetItemInputLocked(true);
+
+        gameObject.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
     public void OnClickClose()
     {
         Time.timeScale = 1f;
+
+        if (itemManager != null)
+            itemManager.SetItemInputLocked(false);
+
         gameObject.SetActive(false);
     }
+
     public void Resume()
     {
+
         if (_isLoading) return;
+
         Time.timeScale = 1f;
+
+        if (itemManager != null)
+            itemManager.SetItemInputLocked(false);
+
         gameObject.SetActive(false);
     }
 
@@ -51,8 +74,11 @@ public class UIsPause : MonoBehaviour
         _isLoading = true;
 
         Time.timeScale = 1f;
-        gameObject.SetActive(false);
 
+        if (itemManager != null)
+            itemManager.SetItemInputLocked(false);
+
+        gameObject.SetActive(false);
         SceneManager.LoadScene("Main");
     }
 
@@ -62,6 +88,10 @@ public class UIsPause : MonoBehaviour
         _isLoading = true;
 
         Time.timeScale = 1f;
+
+        if (itemManager != null)
+            itemManager.SetItemInputLocked(false);
+
         gameObject.SetActive(false);
 
         string gameplayScene = SceneManager.GetActiveScene().name;
@@ -74,13 +104,5 @@ public class UIsPause : MonoBehaviour
         {
             SceneManager.LoadScene(gameplayScene);
         }
-    }
-
-    public void OpenPause()
-    {
-        if (_isLoading) return;
-
-        gameObject.SetActive(true);
-        Time.timeScale = 0f;
     }
 }

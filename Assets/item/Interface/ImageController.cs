@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ImageController : MonoBehaviour
@@ -47,6 +48,13 @@ public class ImageController : MonoBehaviour
     {
         if (!_initialized) return;
         root.Update();
+    }
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (!_initialized) return;
+        if (ctx == null) return;
+
+        ctx.StartDragging();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

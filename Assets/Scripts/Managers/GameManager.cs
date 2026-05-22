@@ -98,7 +98,7 @@ public class GameManager : Singleton<GameManager>
         SceneManager.LoadScene(hubSceneName);
 
         // 씬 전환 1초 대기 (오브젝트 파괴/초기화 정리)
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2f);
 
         // 실제 게임플레이 씬 진입
         SceneManager.LoadScene(gameplaySceneName);

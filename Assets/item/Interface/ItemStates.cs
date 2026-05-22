@@ -33,6 +33,7 @@ public sealed class BackgroundState : IItemState
 
     public void Update()
     {
+        
         if (Input.GetMouseButtonDown(0))
         {
             if(ctx.Onbutton == false)
@@ -43,6 +44,7 @@ public sealed class BackgroundState : IItemState
             else return;
             
         }
+        
     }
 
     public void Exit()
@@ -83,6 +85,9 @@ public sealed class DraggingState : IItemState
 
     public void Update()
     {
+        if (ctx.grid.itemInputLocked)
+            return;
+
         if (groundcheck)
         {
             x = 2; y = 1;
@@ -100,13 +105,12 @@ public sealed class DraggingState : IItemState
         {
    
             OffPoint(ctx);
+
+            if (TryHandleDropButton(ctx))
+                return;
+
             Movectx(ctx);
 
-            if (ctx.grid.buttonHandler.isHovering)
-            {
-                prefabCreate.Rerolltheitem();
-                return;
-            }
 
             if (IsPlaceable && CraftCheck)
             {
@@ -139,7 +143,33 @@ public sealed class DraggingState : IItemState
             }    
             return;
         }
-        
+        bool TryHandleDropButton(ItemDataHub ctx)
+        {
+            if (ctx.grid.dropButtonHandlers == null) return false;
+
+            foreach (ButtonHandler handler in ctx.grid.dropButtonHandlers)
+            {
+                if (handler == null) continue;
+                if (!handler.IsMouseOver()) continue;
+
+                switch (handler.buttonType)
+                {
+                    case DragDropButtonType.Reroll:
+                        prefabCreate.Rerolltheitem();
+                        return true;
+
+                    case DragDropButtonType.Pause:
+                        // 아이템은 소비하지 않고 원래 슬롯으로 복귀
+                        machine.ChangeState(new BackgroundState(ctx, machine, prefabCreate));
+                        ctx.image.transform.SetParent(ctx.itemContainerfolder.transform, false);
+
+                        handler.InvokeDropAction();
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     public void Exit()

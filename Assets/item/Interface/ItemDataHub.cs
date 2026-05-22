@@ -70,5 +70,8 @@ public sealed class ItemDataHub
         originalColor = im.color;
 
     }
-
+    public void StartDragging()
+    {
+        sm.ChangeState(new DraggingState(this, sm, pd));
+    }
 }
