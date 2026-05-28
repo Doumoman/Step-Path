@@ -52,6 +52,7 @@ public class UIsGameOver : MonoBehaviour
         // 현재 게임 씬 이름
         string gameplayScene = SceneManager.GetActiveScene().name;
 
+        SoundManager.Instance.PlayMain();
         // "Main"으로 나갔다가 다시 게임씬으로
         GameManager.Instance.RestartFromClean(gameplaySceneName: gameplayScene, hubSceneName: "LoadingScene");
     }

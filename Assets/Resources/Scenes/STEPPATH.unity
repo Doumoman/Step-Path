@@ -1767,8 +1767,10 @@ MonoBehaviour:
   betweenPrefab23: {fileID: 2270891646263653174, guid: 3312cd5617767e945b2cab92cc249131, type: 3}
   betweenSize23: 4.08
   backgroundPrefab3: {fileID: 160008897359041501, guid: 2a8b3d37e3f21a54ead009f5095ff65d, type: 3}
-  stage2StartPlayerY: 30
-  stage3StartPlayerY: 70
+  stage2StartPlayerY: 20
+  stage3StartPlayerY: 50
+  stage2BGMStartPlayerY: 40
+  stage3BGMStartPlayerY: 75
   firstSpawnBottomY: 0.6
   stepY: 11.2
   keepCount: 2

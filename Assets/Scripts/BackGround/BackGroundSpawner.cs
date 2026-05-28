@@ -20,8 +20,15 @@ public class BackGroundSpawner : MonoBehaviour
     [Header("Stage Switch (Player Height)")]
     [SerializeField] private float stage2StartPlayerY = 20f;
     [SerializeField] private float stage3StartPlayerY = 40f;
+
+    [Header("Stage Switch BGM (Player Height)")]
+    [SerializeField] private float stage2BGMStartPlayerY = 40f;
+    [SerializeField] private float stage3BGMStartPlayerY = 75f;
     public float Stage2StartPlayerY => stage2StartPlayerY;
     public float Stage3StartPlayerY => stage3StartPlayerY;
+
+    public float Stage2BGMStartPlayerY => stage2BGMStartPlayerY;
+    public float Stage3BGMStartPlayerY => stage3BGMStartPlayerY;
 
     [Header("Spawn Settings")]
     [Tooltip("첫 배경의 하단(bounds.min.y)이 위치할 월드 Y")]
@@ -55,6 +62,9 @@ public class BackGroundSpawner : MonoBehaviour
     private bool _stage2Triggered;
     private bool _stage3Triggered;
 
+    private bool _stage2bgmTriggered;
+    private bool _stage3bgmTriggered;
+
     private float _nextSpawnBottomY;
 
     // 활성 객체들
@@ -85,16 +95,26 @@ public class BackGroundSpawner : MonoBehaviour
         {
             _stage2Triggered = true;
             SpawnBetweenAtNext(betweenPrefab12, betweenSize12);
-            SoundManager.Instance.PlayBgm("Play2");
             _stage = Stage.S2;
+        }
+
+        if (!_stage2bgmTriggered && player.position.y >= stage2BGMStartPlayerY)
+        {
+            _stage2bgmTriggered = true;
+            SoundManager.Instance.PlayBgm("Play2");
         }
 
         if (!_stage3Triggered && player.position.y >= stage3StartPlayerY)
         {
             _stage3Triggered = true;
             SpawnBetweenAtNext(betweenPrefab23, betweenSize23);
-            SoundManager.Instance.PlayBgm("Play3");
             _stage = Stage.S3;
+        }
+
+        if (!_stage3bgmTriggered && player.position.y >= stage3BGMStartPlayerY)
+        {
+            _stage3bgmTriggered = true;
+            SoundManager.Instance.PlayBgm("Play3");
         }
 
         EnsureKeepCountAhead();

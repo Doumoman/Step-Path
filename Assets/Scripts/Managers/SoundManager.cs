@@ -111,7 +111,13 @@ public class SoundManager : Singleton<SoundManager>
         bgmClips["Play3"] = bgmInGame3;
         bgmClips["Ending"] = bgmEnding;
     }
-
+    public void PlayMain()
+    {
+        if (bgmMain != null)
+        {
+            StartCoroutine(FadeInBGM(bgmMain, 1f));
+        }
+    }
     // =====================
     // SFX 로드
     // =====================
