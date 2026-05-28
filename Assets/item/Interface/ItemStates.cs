@@ -668,7 +668,7 @@ public sealed class PlacedState : IItemState
 
     public IEnumerator DestroyCloud(ItemDataHub ctx)
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(15f);
         if (ctx.data.forcloudsoundcheck)
         {
             SoundManager.Instance.PlayItemSound("Cloud_Fade");

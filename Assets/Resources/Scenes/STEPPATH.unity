@@ -5553,8 +5553,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitsPerMeter: 1
-  useBaseOffset: 1
-  baseY: 0
+  useBaseOffset: 0
+  baseY: -4
 --- !u!1 &1559471691
 GameObject:
   m_ObjectHideFlags: 0

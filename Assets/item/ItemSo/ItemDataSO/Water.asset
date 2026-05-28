@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: water
   rerollCost: 3
-  itemFrequency: 45
+  itemFrequency: 40
   eachLogic: {fileID: 11400000, guid: 51f369a35819ddb488f60ef4f7ff5804, type: 2}
   itemDelegate: {fileID: 0}
   isoriginal: 1
