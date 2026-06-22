@@ -4071,7 +4071,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraTransform: {fileID: 365749268}
   offset: {x: 0, y: -2.9, z: 0}
-  heightStallLimitSec: 300
+  heightStallLimitSec: 30
   heightEpsilon: 0.1
   stallGauge: {fileID: 1235969601}
   gaugeSmoothSpeed: 3
@@ -4364,7 +4364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: heightStepUnits
-      value: 25
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: stairsRiseUnits
@@ -4440,7 +4440,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: runSpeedPixelsPerSec
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: enterXTolerancePixels
@@ -4448,7 +4448,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: speedAddPerStepPixels
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3252666093318397209, guid: a4325e099a88aee418fccae7e1867392, type: 3}
       propertyPath: bigJumpHorizSpeedScale

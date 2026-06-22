@@ -25,14 +25,30 @@ public class PlayerAutoRunner : MonoBehaviour
 
     [Header("Speed By Height")]
     [SerializeField] private bool useHeightSpeed = true;
+
+    [Tooltip("높이 계산 기준 Y. 보통 시작 지점을 0으로 보고 싶으면 시작 위치 Y를 넣거나 자동 세팅")]
     [SerializeField] private float baseHeightY = 0f;
 
-    [SerializeField, Min(0.01f)] private float heightStepUnits = 5f;
+    [Tooltip("시작할 때 현재 Y를 baseHeightY로 자동 설정")]
+    [SerializeField] private bool useStartYAsBaseHeight = true;
 
-    [SerializeField] private float speedAddPerStepPixels = 2f;
+    [Tooltip("몇 유닛마다 다음 속도 구간으로 넘어갈지. 100m / 6구간이면 약 16.67")]
+    [SerializeField, Min(0.01f)] private float speedSectionHeightUnits = 16.67f;
 
-    [SerializeField] private float minRunSpeedPixels = 10f;
-    [SerializeField] private float maxRunSpeedPixels = 20f;
+    [Tooltip("구간별 속도 증가량. 0~16, 16~32, 32~48, 48~64, 64~80, 80~100 순서")]
+    [SerializeField]
+    private float[] speedAddBySectionPixels = new float[6]
+    {
+    0f,   // 1구간
+    1.2f,   // 2구간
+    1f,   // 3구간
+    0.8f,   // 4구간
+    0.5f,  // 5구간
+    0.5f   // 6구간
+    };
+
+    [SerializeField] private float minRunSpeedPixels = 5f;
+    [SerializeField] private float maxRunSpeedPixels = 15f;
 
     private float _baseRunSpeedPixels;
     [Header("Pixel")]
@@ -216,6 +232,9 @@ public class PlayerAutoRunner : MonoBehaviour
     {
         unitPerPixel = 1f / Mathf.Max(1, pixelsPerUnit);
         _baseRunSpeedPixels = runSpeedPixelsPerSec;
+
+        if (useStartYAsBaseHeight)
+            baseHeightY = transform.position.y;
         if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
         if (!anim) anim = GetComponent<Animator>();
 
@@ -246,12 +265,28 @@ public class PlayerAutoRunner : MonoBehaviour
         stateMachine.Update();
         if (useHeightSpeed)
         {
-            float h = transform.position.y - baseHeightY;
-            int step = Mathf.Max(0, Mathf.FloorToInt(h / Mathf.Max(0.0001f, heightStepUnits)));
-
-            float speed = _baseRunSpeedPixels + step * speedAddPerStepPixels;
-            runSpeedPixelsPerSec = Mathf.Clamp(speed, minRunSpeedPixels, maxRunSpeedPixels);
+            ApplySectionSpeedByHeight();
         }
+    }
+    private void ApplySectionSpeedByHeight()
+    {
+        if (speedAddBySectionPixels == null || speedAddBySectionPixels.Length == 0)
+            return;
+
+        float height = transform.position.y - baseHeightY;
+        height = Mathf.Max(0f, height);
+
+        float sectionHeight = Mathf.Max(0.0001f, speedSectionHeightUnits);
+
+        int sectionIndex = Mathf.FloorToInt(height / sectionHeight);
+
+        // 6구간 넘어가면 마지막 구간 속도 유지
+        sectionIndex = Mathf.Clamp(sectionIndex, 0, speedAddBySectionPixels.Length - 1);
+
+        float addSpeed = speedAddBySectionPixels[sectionIndex];
+
+        float targetSpeed = _baseRunSpeedPixels + addSpeed;
+        runSpeedPixelsPerSec = Mathf.Clamp(targetSpeed, minRunSpeedPixels, maxRunSpeedPixels);
     }
     void LateUpdate()
     {
@@ -631,6 +666,44 @@ public class PlayerAutoRunner : MonoBehaviour
         jumpHorizSpeedPixelsPerSec = runSpeedPixelsPerSec * horizScale;
 
         mushroomCD = cdFrames;
+    }
+
+    public bool DetectMushroomKindNearX(float targetX, out MushroomKind kind)
+    {
+        kind = MushroomKind.Normal;
+
+        float halfX = CastSize.x * 0.5f;
+
+        Vector2 center = new Vector2(targetX, transform.position.y);
+
+        Vector2 size = new Vector2(
+            Mathf.Max(mushroomProbe, halfX * 0.75f),
+            CastSize.y - castSkin * 2f
+        );
+
+        // 큰 버섯 먼저 확인
+        if (bigMushroomMask != 0)
+        {
+            Collider2D big = Physics2D.OverlapBox(center, size, 0f, bigMushroomMask);
+            if (big != null)
+            {
+                kind = MushroomKind.Big;
+                return true;
+            }
+        }
+
+        // 일반 버섯 확인
+        if (mushroomMask != 0)
+        {
+            Collider2D normal = Physics2D.OverlapBox(center, size, 0f, mushroomMask);
+            if (normal != null)
+            {
+                kind = MushroomKind.Normal;
+                return true;
+            }
+        }
+
+        return false;
     }
     #endregion
 

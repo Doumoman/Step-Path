@@ -140,13 +140,24 @@ public class PlayerRunState : IPlayerState
         // 버섯 점프 실행 조건: 목표X에 도달/통과
         if (p.pendingMushroom)
         {
-            bool reached = Mathf.Abs(x - p.pendingMushroomTargetX) <= tol;
+            bool reached = (p.dir > 0)
+                ? x >= p.pendingMushroomTargetX - tol
+                : x <= p.pendingMushroomTargetX + tol;
 
             if (reached && p.onGround && p.mushroomCD == 0)
             {
                 p.pendingMushroom = false;
 
-                p.StartMushroomJump(p.dir, p.pendingMushroomKind);
+                // 기본값은 처음 감지했던 버섯 종류
+                var finalKind = p.pendingMushroomKind;
+
+                // 점프 직전에 현재 targetX 근처 버섯 종류를 다시 확인
+                if (p.DetectMushroomKindNearX(p.pendingMushroomTargetX, out var currentKind))
+                {
+                    finalKind = currentKind;
+                }
+
+                p.StartMushroomJump(p.dir, finalKind);
                 p.ChangeState(new PlayerJumpState(p, fsm));
                 return;
             }
@@ -398,17 +409,25 @@ public class PlayerStairClimbState : IPlayerState
 {
     private readonly PlayerAutoRunner p;
     private readonly PlayerStateMachine fsm;
+
     private bool prevFlipX;
+    private bool backingDown;
+
     public PlayerStairClimbState(PlayerAutoRunner player, PlayerStateMachine machine)
     {
-        p = player; fsm = machine;
+        p = player;
+        fsm = machine;
     }
 
     public void Enter()
     {
         p.vyPixels = 0f;
+        p.onGround = false;
+        backingDown = false;
+
         p.PauseAnim(false);
-        p.PlayAnim(p.StairClimbHash); // 계단 전용 애니 없으면 걷기로
+        p.PlayAnim(p.StairClimbHash);
+
         var sr = p.Sprite;
         if (sr)
         {
@@ -422,10 +441,18 @@ public class PlayerStairClimbState : IPlayerState
     {
         float dt = Time.deltaTime;
 
-        // 계단 진행: x를 앞으로 움직이고, y는 선형식으로 맞춘다
-        float dx = p.runSpeedPixelsPerSec * p.unitPerPixel * p.stairMoveDir * dt;
+        // 올라가는 중에만 벽 감지
+        if (!backingDown && p.DetectWallAhead(p.stairMoveDir))
+        {
+            backingDown = true;
+            p.pixelAccum = Vector2.zero;
+        }
 
-        // 수평 이동은 기존 캐스트로 막힘 처리(벽/천장 등)
+        // 올라갈 땐 기존 방향, 벽 만나면 반대 방향으로 내려오기
+        int moveDir = backingDown ? -p.stairMoveDir : p.stairMoveDir;
+
+        float dx = p.runSpeedPixelsPerSec * p.unitPerPixel * moveDir * dt;
+
         float dummyLockedY = p.lockedY;
         p.MoveHorizontalWithCast(dx, ref dummyLockedY);
 
@@ -434,65 +461,105 @@ public class PlayerStairClimbState : IPlayerState
         float maxX = Mathf.Max(p.stairStart.x, p.stairEnd.x);
         float cx = Mathf.Clamp(x, minX, maxX);
 
-        float denom = (p.stairEnd.x - p.stairStart.x);
-        float t = (Mathf.Abs(denom) < 0.0001f) ? 0f : (cx - p.stairStart.x) / denom;
+        float denom = p.stairEnd.x - p.stairStart.x;
+        float t = Mathf.Abs(denom) < 0.0001f ? 0f : (cx - p.stairStart.x) / denom;
         t = Mathf.Clamp01(t);
 
-        float yLine = Mathf.Lerp(p.stairStart.y, p.stairEnd.y, t);
+        float rawRise = p.stairEnd.y - p.stairStart.y;
 
-        //“원본 선분의 총 상승량”
-        float rawRise = (p.stairEnd.y - p.stairStart.y);
-
-        //“원하는 총 상승량” (항상 +stairsRiseUnits 만큼 올라가게)
-        //    rawRise가 0이면(수평) 방어.
         float scale = 1f;
         if (Mathf.Abs(rawRise) > 0.0001f)
         {
-            // end에서 정확히 start + stairsRiseUnits 되도록 스케일
             scale = p.stairsRiseUnits / rawRise;
         }
-        // 진행감만 조절하고 싶으면(선택) t를 가공 (형태만 바뀌고 최종상승량은 고정)
-        float te = (p.stairsShapeEase == 1f) ? t : Mathf.Pow(t, 1f / p.stairsShapeEase);
-        // y를 “정규화 스케일”로 변환 (끝에서는 정확히 +stairsRiseUnits)
-        float yScaled = p.stairStart.y + (Mathf.Lerp(p.stairStart.y, p.stairEnd.y, te) - p.stairStart.y) * scale;
+
+        float te = p.stairsShapeEase == 1f
+            ? t
+            : Mathf.Pow(t, 1f / p.stairsShapeEase);
+
+        float yScaled =
+            p.stairStart.y +
+            (Mathf.Lerp(p.stairStart.y, p.stairEnd.y, te) - p.stairStart.y) * scale;
 
         float halfH = p.CastSize.y * 0.5f;
         float targetCenterY = yScaled + halfH;
 
-        // y 스냅(픽셀 스냅 적용)
         var pos = p.transform.position;
         pos.y = Mathf.Round(targetCenterY / p.unitPerPixel) * p.unitPerPixel;
         p.transform.position = pos;
 
-        // 끝 도달 체크
         float tol = p.EnterXTolUnits;
-        bool finished =
-            (p.stairMoveDir > 0) ? (p.transform.position.x >= p.stairEnd.x - tol)
-                                 : (p.transform.position.x <= p.stairEnd.x + tol);
 
-        if (finished)
+        if (!backingDown)
         {
-            // 계단 끝에서 바닥 스냅 후 Run 복귀
-            p.StartStairsCooldown();
+            bool finished =
+                p.stairMoveDir > 0
+                    ? p.transform.position.x >= p.stairEnd.x - tol
+                    : p.transform.position.x <= p.stairEnd.x + tol;
 
-            if (p.SampleGroundY(p.transform.position, out float gy))
+            if (finished)
             {
-                p.lockedY = gy;
-                p.onGround = true;
-                p.vyPixels = 0f;
-                p.SnapYToLocked();
-
-                p.reverseCD = p.reverseCooldownFrames; // 끝에서 즉시 반전 방지(원하면 제거)
-                p.ChangeState(new PlayerRunState(p, fsm));
+                FinishStairs();
             }
-            else
+        }
+        else
+        {
+            bool returnedToStart =
+                p.stairMoveDir > 0
+                    ? p.transform.position.x <= p.stairStart.x + tol
+                    : p.transform.position.x >= p.stairStart.x - tol;
+
+            if (returnedToStart)
             {
-                p.ChangeState(new PlayerFallState(p, fsm));
+                CancelStairsAndReturn();
             }
         }
     }
 
-    public void Exit() 
+    private void FinishStairs()
+    {
+        p.StartStairsCooldown();
+
+        if (p.SampleGroundY(p.transform.position, out float gy))
+        {
+            p.lockedY = gy;
+            p.onGround = true;
+            p.vyPixels = 0f;
+            p.SnapYToLocked();
+
+            p.reverseCD = p.reverseCooldownFrames;
+            p.ChangeState(new PlayerRunState(p, fsm));
+        }
+        else
+        {
+            p.ChangeState(new PlayerFallState(p, fsm));
+        }
+    }
+
+    private void CancelStairsAndReturn()
+    {
+        p.StartStairsCooldown();
+
+        if (p.SampleGroundY(p.transform.position, out float gy))
+        {
+            p.lockedY = gy;
+            p.onGround = true;
+            p.vyPixels = 0f;
+            p.SnapYToLocked();
+
+            // 여기서 방향 반전하지 않음.
+            // 방향을 바꾸면 다음 계단 감지가 꼬일 수 있음.
+            p.reverseCD = p.reverseCooldownFrames;
+
+            p.ChangeState(new PlayerRunState(p, fsm));
+        }
+        else
+        {
+            p.ChangeState(new PlayerFallState(p, fsm));
+        }
+    }
+
+    public void Exit()
     {
         var sr = p.Sprite;
         if (sr)

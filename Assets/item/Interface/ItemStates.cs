@@ -668,15 +668,64 @@ public sealed class PlacedState : IItemState
 
     public IEnumerator DestroyCloud(ItemDataHub ctx)
     {
-        yield return new WaitForSeconds(15f);
-        if (ctx.data.forcloudsoundcheck)
+        float lifeTime = 15f;
+        float fadeTime = 5f;
+        float normalTime = lifeTime - fadeTime;
+
+        // 10초 동안은 그대로 유지
+        yield return new WaitForSeconds(normalTime);
+
+        SpriteRenderer sr = ctx.sr;
+
+        // SpriteRenderer가 없으면 기존처럼 바로 남은 시간 기다렸다가 삭제
+        if (sr == null)
         {
-            SoundManager.Instance.PlayItemSound("Cloud_Fade");
-            ctx.data.forcloudsoundcheck = false;
+            yield return new WaitForSeconds(fadeTime);
+
+            if (ctx.data.forcloudsoundcheck)
+            {
+                SoundManager.Instance.PlayItemSound("Cloud_Fade");
+                ctx.data.forcloudsoundcheck = false;
+            }
+
+            ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
+            yield break;
         }
-        
+
+        Color baseColor = sr.color;
+        float timer = 0f;
+
+        // 점멸 속도. 값이 클수록 빠르게 깜빡임
+        float blinkSpeed = 12f;
+
+        bool soundPlayed = false;
+
+        while (timer < fadeTime)
+        {
+            timer += Time.deltaTime;
+
+            float t = Mathf.Clamp01(timer / fadeTime);
+
+            // 전체적으로 서서히 투명해지는 알파
+            float fadeAlpha = Mathf.Lerp(baseColor.a, 0f, t);
+
+            // 깜빡임 강도
+            // 0.35 ~ 1 사이로 흔들리게 해서 완전히 사라졌다 나타나는 느낌은 줄임
+            float blink = Mathf.Lerp(0.35f, 1f, Mathf.PingPong(timer * blinkSpeed, 1f));
+
+            Color c = baseColor;
+            c.a = fadeAlpha * blink;
+            sr.color = c;
+
+            yield return null;
+        }
+
+        // 마지막엔 완전히 투명하게
+        Color finalColor = baseColor;
+        finalColor.a = 0f;
+        sr.color = finalColor;
+        SoundManager.Instance.PlayItemSound("Cloud_Fade");
         ctx.sm.ChangeState(new DestroyedState(ctx, ctx.sm, ctx.pd));
-        
     }
 
     bool OutOfCamera(ItemDataHub ctx)

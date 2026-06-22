@@ -220,8 +220,15 @@ MonoBehaviour:
   overrideFlip: 0
   useHeightSpeed: 1
   baseHeightY: 0
-  heightStepUnits: 5
-  speedAddPerStepPixels: 2
+  useStartYAsBaseHeight: 1
+  speedSectionHeightUnits: 16.67
+  speedAddBySectionPixels:
+  - 0
+  - 1.5
+  - 1
+  - 0.8
+  - 0.6
+  - 0.5
   minRunSpeedPixels: 10
   maxRunSpeedPixels: 20
   pixelsPerUnit: 16
@@ -249,7 +256,7 @@ MonoBehaviour:
     m_Bits: 256
   wallProbe: 0.1
   reverseAlsoInAir: 1
-  reverseCooldownFrames: 6
+  reverseCooldownFrames: 60
   bodyCol: {fileID: 0}
   useColliderBoundsForCasts: 1
   castSkin: 0.01
