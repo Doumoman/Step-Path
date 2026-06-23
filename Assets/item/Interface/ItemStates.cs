@@ -198,7 +198,13 @@ public sealed class DraggingState : IItemState
 
         // [X축 계산] 짝수면 '선(CellToWorld)', 홀수면 '중앙(GetCellCenterWorld)'
         if (isEvenWidth)
-            finalWorldPos.x = ctx.map.CellToWorld(cellPos).x;
+        {
+            // 실제 배치(Movectx)는 ground류일 때 짝수 칸을 홀수로 스냅(x++)하므로
+            // 프리뷰도 동일하게 스냅해 오른쪽(짝수 칸) 케이스에서 한 칸 왼쪽으로 어긋나지 않게 한다.
+            Vector3Int xCell = cellPos;
+            if (groundcheck && xCell.x % 2 == 0) xCell.x++;
+            finalWorldPos.x = ctx.map.CellToWorld(xCell).x;
+        }
         else
             finalWorldPos.x = ctx.map.GetCellCenterWorld(cellPos).x;
 
@@ -332,6 +338,8 @@ public sealed class DraggingState : IItemState
         Collider2D hitGroundCenter = Physics2D.OverlapBox(cellCenterPositemG, boxSize, 0f, lowerLayerMask);
         Collider2D forGgroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, forGLayerMask);
         Collider2D hititem = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, higherLayerMask);
+        // 편향(-0.125) 없이 '자기 칸 중앙'만 보는 점유 검사 (가장 오른쪽 빈칸 오탐 구분용)
+        Collider2D selfGroundCenter = Physics2D.OverlapBox(cellCenterPositem, boxSize, 0f, lowerLayerMask);
 
         
 
@@ -366,6 +374,20 @@ public sealed class DraggingState : IItemState
 
         if (groundcheck)
         {
+            // wood/cloud는 2칸 폭이라 hitGroundCenter 박스를 왼쪽으로 0.125 옮겨 아이템 중앙에 맞춰둠.
+            // 그 부작용으로 '가장 오른쪽 빈칸'(왼쪽에 ground가 붙은 칸)에서 왼쪽 이웃 ground가 잡혀 배치가 막힘.
+            // 자기 칸 중앙이 비어 있으면(=왼쪽 이웃만 잡힌 것) 그 경우만 예외로 허용한다.
+            if ((ctx.image.Data.itemName == "wood" || ctx.image.Data.itemName == "cloud")
+                && hitGroundCenter != null
+                && selfGroundCenter == null
+                && forGgroundCenter == null
+                && cellPos.y % 4 == 0)
+            {
+                IsPlaceable = true;
+                CraftCheck = false;
+                return;
+            }
+
             if (name == "wood" && ctx.image.Data.itemName == "wood") // 기본 땅의 경우
             {
                 if (forGgroundCenter == null && hitGroundCenter == null && cellPos.y % 4 == 0)
