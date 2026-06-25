@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba9f5a35dfea56f40b703146725bb40e, type: 3}
+  m_Name: ItemSoundConfig
+  m_EditorClassIdentifier: 
+  entries:
+  - clipName: Tile_Place
+    volume: 1
+  - clipName: Tile_Place_Fail
+    volume: 0.511
+  - clipName: Stair_Complete
+    volume: 0.623
+  - clipName: Water_Pour
+    volume: 1
+  - clipName: Tile_Place_Fail
+    volume: 1
+  - clipName: Mushroom_Grow
+    volume: 0.57
+  - clipName: Cloud_Fade
+    volume: 1
+  - clipName: Slot_Replace
+    volume: 0.839

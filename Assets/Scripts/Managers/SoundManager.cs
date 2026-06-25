@@ -43,6 +43,8 @@ public class SoundManager : Singleton<SoundManager>
     private Dictionary<SFXType, AudioClip> sfxClips = new Dictionary<SFXType, AudioClip>();
     private Dictionary<string, List<AudioClip>> playerSFX = new Dictionary<string, List<AudioClip>>();
     private Dictionary<string, AudioClip> itemSFX = new Dictionary<string, AudioClip>();
+    // 개발자 전용 아이템 사운드 음량 보정 테이블 (에디터에서만 조정)
+    private ItemSoundConfig itemSoundConfig;
     // =====================
     // Awake: 초기화
     // =====================
@@ -183,6 +185,11 @@ public class SoundManager : Singleton<SoundManager>
         {
             Debug.LogWarning("[SoundManager] item 폴더에 사운드 없음!");
         }
+
+        // 개발자 음량 보정 SO 로드 (없으면 모든 사운드 원본 음량으로 재생)
+        itemSoundConfig = Resources.Load<ItemSoundConfig>("Sound/ItemSoundConfig");
+        if (itemSoundConfig == null)
+            Debug.LogWarning("[SoundManager] ItemSoundConfig 없음 → 아이템 사운드 음량 보정 미적용(원본 재생)");
     }
 
     // =====================
@@ -251,9 +258,10 @@ public class SoundManager : Singleton<SoundManager>
             return;
         }
 
-        // 볼륨 설정 후 재생 (기존 작동 방식과 완벽히 동일)
+        // 개발자 보정 음량(SO에서 조회, 미등록 시 1f) × 플레이어 마스터 볼륨
+        float devGain = (itemSoundConfig != null) ? itemSoundConfig.GetVolume(clipName) : 1f;
         audioSourceSFX.volume = currentSFXVolume;
-        audioSourceSFX.PlayOneShot(itemSFX[clipName]);
+        audioSourceSFX.PlayOneShot(itemSFX[clipName], devGain);
     }
 
     // =====================
